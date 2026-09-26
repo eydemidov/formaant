@@ -6,7 +6,7 @@ import { useAnalysisWorker } from './hooks/useAnalysisWorker';
 import { useIsMobile } from './hooks/useIsMobile';
 import { useTheme } from './hooks/useTheme';
 import { BottomSheet } from './components/BottomSheet';
-import { defaultAnalysisSettings, defaultFilterSettings, createEmptyTextGrid } from './audio/defaults';
+import { createEmptyTextGrid } from './audio/defaults';
 import { AudioEditorHistory, ReplaceRangeCommand } from './audio/editor';
 import { applyBiquadFilter } from './audio/filters';
 import { computeRhythmMetrics } from './audio/rhythm';
@@ -84,6 +84,7 @@ import type {
   TimeSelection,
 } from './types';
 import { fitToWindow, panViewRange, selectionToView, zoomAroundPoint } from './utils/view';
+import { loadAppPreferences, saveAppPreferences } from './utils/preferences';
 import { findNearestZeroCrossing } from "./utils/zeroCrossing";
 
 function createAudioBufferFromSamples(samples: Float32Array, sampleRate: number): AudioBuffer {
@@ -93,6 +94,7 @@ function createAudioBufferFromSamples(samples: Float32Array, sampleRate: number)
 }
 
 export default function App() {
+  const [initialPreferences] = useState(loadAppPreferences);
   const isMobile = useIsMobile();
   const { setting: themeSetting, setTheme: setThemeSetting } = useTheme();
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
@@ -103,13 +105,13 @@ export default function App() {
   const [currentTime, setCurrentTime] = useState(0);
   const currentTimeRef = useRef(0);
   currentTimeRef.current = currentTime;
-  const [showPitch, setShowPitch] = useState(true);
-  const [showFormants, setShowFormants] = useState(true);
-  const [showIntensity, setShowIntensity] = useState(true);
-  const [showIpa, setShowIpa] = useState(true);
-  const [showIpaFormants, setShowIpaFormants] = useState(true);
-  const [showCochleagram, setShowCochleagram] = useState(false);
-  const [showPulses, setShowPulses] = useState(false);
+  const [showPitch, setShowPitch] = useState(initialPreferences.overlays.pitch);
+  const [showFormants, setShowFormants] = useState(initialPreferences.overlays.formants);
+  const [showIntensity, setShowIntensity] = useState(initialPreferences.overlays.intensity);
+  const [showIpa, setShowIpa] = useState(initialPreferences.overlays.ipa);
+  const [showIpaFormants, setShowIpaFormants] = useState(initialPreferences.overlays.ipaFormants);
+  const [showCochleagram, setShowCochleagram] = useState(initialPreferences.overlays.cochleagram);
+  const [showPulses, setShowPulses] = useState(initialPreferences.overlays.pulses);
   const [showManipulation, setShowManipulation] = useState(false);
   const [showPitchTier, setShowPitchTier] = useState(false);
   const [showFormantGrid, setShowFormantGrid] = useState(false);
@@ -126,8 +128,8 @@ export default function App() {
   const [showWhisper, setShowWhisper] = useState(false);
   const [showVoiceReport, setShowVoiceReport] = useState(false);
   const [experimentConfig, setExperimentConfig] = useState<{ config: any; audioMap: Record<string, string> } | null>(null);
-  const [settings, setSettings] = useState<AnalysisSettings>(defaultAnalysisSettings);
-  const [filterSettings, setFilterSettings] = useState<FilterSettings>(defaultFilterSettings);
+  const [settings, setSettings] = useState<AnalysisSettings>(initialPreferences.settings);
+  const [filterSettings, setFilterSettings] = useState<FilterSettings>(initialPreferences.filterSettings);
   const [textGrid, setTextGrid] = useState<TextGrid>(createEmptyTextGrid(1));
   const [vocabularies, setVocabularies] = useState<ControlledVocabulary[]>([]);
   const [vocabBindings, setVocabBindings] = useState<TierVocabularyBinding[]>([]);
@@ -138,6 +140,22 @@ export default function App() {
   const [sampleRate, setSampleRate] = useState(44100);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
+
+  useEffect(() => {
+    saveAppPreferences({
+      settings,
+      filterSettings,
+      overlays: {
+        pitch: showPitch,
+        formants: showFormants,
+        intensity: showIntensity,
+        ipa: showIpa,
+        ipaFormants: showIpaFormants,
+        cochleagram: showCochleagram,
+        pulses: showPulses,
+      },
+    });
+  }, [settings, filterSettings, showPitch, showFormants, showIntensity, showIpa, showIpaFormants, showCochleagram, showPulses]);
 
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
