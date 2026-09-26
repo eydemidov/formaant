@@ -1,4 +1,4 @@
-export type VowelProfile = 'modern-rp-male' | 'modern-rp-female' | 'american-male' | 'american-female' | 'mandarin-male' | 'mandarin-female' | 'french-male' | 'french-female';
+export type VowelProfile = 'modern-rp-male' | 'modern-rp-female' | 'american-male' | 'american-female' | 'mandarin-male' | 'mandarin-female' | 'french-male' | 'french-female' | 'japanese-male' | 'japanese-female';
 
 export interface ProfileVowel {
   symbol: string;
@@ -135,6 +135,20 @@ export const vowelProfiles: Record<VowelProfile, ProfileVowel[]> = {
     { symbol: 'ɔ', f1: 456, f2: 1203, description: 'open o' },
     { symbol: 'o', f1: 397, f2: 1041, description: 'closed o' },
     { symbol: 'u', f1: 371, f2: 1105, description: 'ou' },
+  ],
+  'japanese-male': [
+    { symbol: 'i', f1: 301, f1Min: 271, f1Max: 385, f2: 2154, f2Min: 1901, f2Max: 2390, description: 'close front' },
+    { symbol: 'e', f1: 443, f1Min: 388, f1Max: 523, f2: 1947, f2Min: 1741, f2Max: 2109, description: 'mid front' },
+    { symbol: 'a', f1: 687, f1Min: 587, f1Max: 817, f2: 1283, f2Min: 1195, f2Max: 1421, description: 'open central' },
+    { symbol: 'o', f1: 462, f1Min: 418, f1Max: 569, f2: 949, f2Min: 875, f2Max: 1067, description: 'mid back rounded' },
+    { symbol: 'u', f1: 348, f1Min: 319, f1Max: 415, f2: 1435, f2Min: 1302, f2Max: 1486, description: 'high central Japanese /u/' },
+  ],
+  'japanese-female': [
+    { symbol: 'i', f1: 346, f1Min: 259, f1Max: 406, f2: 2639, f2Min: 2383, f2Max: 2978, description: 'close front' },
+    { symbol: 'e', f1: 516, f1Min: 422, f1Max: 640, f2: 2302, f2Min: 2144, f2Max: 2613, description: 'mid front' },
+    { symbol: 'a', f1: 801, f1Min: 686, f1Max: 868, f2: 1530, f2Min: 1373, f2Max: 1637, description: 'open central' },
+    { symbol: 'o', f1: 526, f1Min: 433, f1Max: 653, f2: 1127, f2Min: 988, f2Max: 1319, description: 'mid back rounded' },
+    { symbol: 'u', f1: 434, f1Min: 353, f1Max: 529, f2: 1645, f2Min: 1437, f2Max: 1806, description: 'high central Japanese /u/' },
   ],
 };
 

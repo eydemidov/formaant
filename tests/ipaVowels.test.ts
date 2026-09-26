@@ -5,7 +5,7 @@ import { vowelProfiles } from '../src/audio/vowelProfiles';
 describe('IPA Vowel Classification', () => {
   it('keeps each active profile target inside its stated range', () => {
     for (const [profile, references] of Object.entries(vowelProfiles)) {
-      expect(references).toHaveLength(profile.startsWith('modern-rp-') ? 11 : 10);
+      expect(references).toHaveLength(profile.startsWith('modern-rp-') ? 11 : profile.startsWith('japanese-') ? 5 : 10);
       expect(references.every((reference) => !/onset|glide/.test(reference.description))).toBe(true);
       for (const reference of references) {
         if (reference.f1Min != null) expect(reference.f1).toBeGreaterThanOrEqual(reference.f1Min);
@@ -68,6 +68,19 @@ describe('IPA Vowel Classification', () => {
         expect(reference.f2Max).toBeUndefined();
       }
     }
+  });
+
+  it('uses the supplied Japanese targets and five-percent range allowance', () => {
+    for (const profile of ['japanese-male', 'japanese-female'] as const) {
+      for (const reference of vowelProfiles[profile]) {
+        expect(classifyVowel(reference.f1, reference.f2, profile)).toMatchObject({
+          symbol: reference.symbol,
+          confidence: 1,
+        });
+      }
+    }
+    expect(classifyVowel(258, 2154, 'japanese-male').symbol).toBe('i');
+    expect(classifyVowel(257, 2154, 'japanese-male').symbol).toBe('?');
   });
 
   it('classifies close front vowel [i]', () => {

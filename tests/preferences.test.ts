@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { defaultAnalysisSettings, defaultFilterSettings } from '../src/audio/defaults';
+import { vowelProfiles } from '../src/audio/vowelProfiles';
 import { parseAppPreferences } from '../src/utils/preferences';
 
 describe('app preferences', () => {
@@ -27,12 +28,9 @@ describe('app preferences', () => {
     expect(preferences.overlays.ipaFormants).toBe(false);
     expect(preferences.overlays.formants).toBe(true);
     expect(preferences.vowelProfile).toBe('modern-rp-female');
-    expect(parseAppPreferences(JSON.stringify({ vowelProfile: 'american-male' })).vowelProfile).toBe('american-male');
-    expect(parseAppPreferences(JSON.stringify({ vowelProfile: 'american-female' })).vowelProfile).toBe('american-female');
-    expect(parseAppPreferences(JSON.stringify({ vowelProfile: 'mandarin-male' })).vowelProfile).toBe('mandarin-male');
-    expect(parseAppPreferences(JSON.stringify({ vowelProfile: 'mandarin-female' })).vowelProfile).toBe('mandarin-female');
-    expect(parseAppPreferences(JSON.stringify({ vowelProfile: 'french-male' })).vowelProfile).toBe('french-male');
-    expect(parseAppPreferences(JSON.stringify({ vowelProfile: 'french-female' })).vowelProfile).toBe('french-female');
+    for (const vowelProfile of Object.keys(vowelProfiles)) {
+      expect(parseAppPreferences(JSON.stringify({ vowelProfile })).vowelProfile).toBe(vowelProfile);
+    }
   });
 
   it('ignores malformed values', () => {
@@ -46,5 +44,6 @@ describe('app preferences', () => {
     expect(preferences.settings.spectrogram).toEqual(defaultAnalysisSettings.spectrogram);
     expect(preferences.overlays.ipa).toBe(true);
     expect(preferences.vowelProfile).toBe('modern-rp-male');
+    expect(parseAppPreferences(JSON.stringify({ vowelProfile: 'toString' })).vowelProfile).toBe('modern-rp-male');
   });
 });

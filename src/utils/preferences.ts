@@ -1,5 +1,5 @@
 import { defaultAnalysisSettings, defaultFilterSettings } from '../audio/defaults';
-import type { VowelProfile } from '../audio/vowelProfiles';
+import { vowelProfiles, type VowelProfile } from '../audio/vowelProfiles';
 import type { AnalysisSettings, FilterSettings } from '../types';
 
 const STORAGE_KEY = 'web-praat-preferences';
@@ -36,6 +36,10 @@ const defaults: AppPreferences = {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isVowelProfile(value: unknown): value is VowelProfile {
+  return typeof value === 'string' && Object.prototype.hasOwnProperty.call(vowelProfiles, value);
 }
 
 function mergeSection<T extends object>(fallback: T, saved: unknown): T {
@@ -78,15 +82,7 @@ export function parseAppPreferences(raw: string | null): AppPreferences {
     return {
       settings: { spectrogram, pitch, formant },
       filterSettings,
-      vowelProfile: saved.vowelProfile === 'modern-rp-female' ||
-        saved.vowelProfile === 'american-male' ||
-        saved.vowelProfile === 'american-female' ||
-        saved.vowelProfile === 'mandarin-male' ||
-        saved.vowelProfile === 'mandarin-female' ||
-        saved.vowelProfile === 'french-male' ||
-        saved.vowelProfile === 'french-female'
-        ? saved.vowelProfile
-        : defaults.vowelProfile,
+      vowelProfile: isVowelProfile(saved.vowelProfile) ? saved.vowelProfile : defaults.vowelProfile,
       overlays: mergeSection(defaults.overlays, saved.overlays),
     };
   } catch {
