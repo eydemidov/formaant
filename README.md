@@ -73,18 +73,21 @@ Formants are simply a way to turn pronunciation into **visual feedback**.
 - Compare pronunciation with a selected target profile
 - Repeat and adjust pronunciation based on the visual feedback
 
-## Available voice profiles and their sources
+## Voice profiles
 
-Each profile uses **F1 and F2** to place vowels on a chart. Values are in hertz (Hz), with separate women’s and men’s profiles. They represent measured groups of speakers, so an individual voice may fall elsewhere. The profiles cover single vowels; diphthongs are not included.
+Reference vowel profiles (male and female F1/F2) are available for:
 
-| Profile | What’s included | Source |
-|---|---|---|
-| **British English (RP)** | 11 vowels from seven women and seven men reading BBC news. Means and ranges are based on individual speaker measurements. | [Bjelaković (2017)](https://www.cambridge.org/core/journals/english-language-and-linguistics/article/abs/vowels-of-contemporary-rp-vowel-formant-measurements-for-bbc-newsreaders1/3109BF90B3630215DAABD95111C3DD9C) |
-| **American English** | 10 vowels from 48 women and 45 men in a Midwestern US speech study. Values use measurements taken halfway through each vowel. | [Hillenbrand and colleagues (1995)](https://pubmed.ncbi.nlm.nih.gov/7759650/) · [measurement data](https://github.com/santiagobarreda/hillenbrand_et_al_1995) |
-| **Mandarin Chinese** | 10 vowels from 212 women and 126 men training as broadcasters. The source provides averages but no minimum or maximum values. | [Meng, Chen, and Li (2006)](https://aclanthology.org/Y06-1037.pdf) |
-| **French** | 10 oral vowels from 15 women and 15 men in broadcast speech. The profile uses published averages; minimum and maximum values are unavailable. | [Gendrot and Adda-Decker (2005)](https://www.isca-archive.org/interspeech_2005/gendrot05_interspeech.pdf) |
-| **Japanese (Tokyo area)** | Five short vowels from eight women and eight men. Averages come from the paper; ranges were calculated across individual speaker averages in its open dataset. | [Yazawa and Kondo (2019)](https://www.internationalphoneticassociation.org/icphs-proceedings/ICPhS2019/papers/ICPhS_720.pdf) · [measurement data](https://zenodo.org/records/15227304) |
-| **Serbian (Novi Sad)** | Seven chart entries from 10 women and 10 men: **i, e, eː, a, o, oː, u**. Short and long **i, a, u** were averaged into one entry each; short and long **e, o** remain separate because their measured positions differ more. The `ː` mark means “long.” | [Marković and Sredojević (2021)](https://doi.org/10.18485/ms_zmsfil.2021.64.2.3) |
+- [**British English (RP)**](https://www.cambridge.org/core/journals/english-language-and-linguistics/article/abs/vowels-of-contemporary-rp-vowel-formant-measurements-for-bbc-newsreaders1/3109BF90B3630215DAABD95111C3DD9C)
+- [**American English**](https://pubmed.ncbi.nlm.nih.gov/7759650/)
+- [**Mandarin Chinese**](https://aclanthology.org/Y06-1037.pdf)
+- [**French**](https://www.isca-archive.org/interspeech_2005/gendrot05_interspeech.pdf)
+- [**Japanese**](https://www.internationalphoneticassociation.org/icphs-proceedings/ICPhS2019/papers/ICPhS_720.pdf)
+- [**Serbian**](https://doi.org/10.18485/ms_zmsfil.2021.64.2.3)
+
+### Coming soon (maybe):
+
+- Diphtongs for English
+- Pitch training for Mandarin
 
 ## Accuracy
 
