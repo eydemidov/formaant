@@ -32,7 +32,8 @@ function transitionCost(prev: number, current: number, weight: number): number {
 function medianFilter(values: Array<number | null>, kernelSize: number): Array<number | null> {
   if (kernelSize <= 1) return values;
   const half = Math.floor(kernelSize / 2);
-  return values.map((_, index) => {
+  return values.map((value, index) => {
+    if (value === null) return null;
     const window: number[] = [];
     for (let offset = -half; offset <= half; offset++) {
       const value = values[index + offset];
@@ -85,56 +86,60 @@ function trackSingleFormant(
   expectedHz: number,
   options: TrackingOptions
 ): Array<number | null> {
-  if (frames.length === 0) return [];
+  const track = new Array<number | null>(frames.length).fill(null);
+  let segmentStart = 0;
 
-  const states: number[][] = frames.map((frame) => frame.candidates);
-  const costs: number[][] = states.map((state) => new Array(state.length).fill(Number.POSITIVE_INFINITY));
-  const backPointers: number[][] = states.map((state) => new Array(state.length).fill(-1));
+  while (segmentStart < frames.length) {
+    if (frames[segmentStart].candidates.length === 0) {
+      segmentStart++;
+      continue;
+    }
+    let segmentEnd = segmentStart + 1;
+    while (segmentEnd < frames.length && frames[segmentEnd].candidates.length > 0) {
+      segmentEnd++;
+    }
 
-  // Initialize first frame
-  for (let i = 0; i < states[0]?.length; i++) {
-    costs[0][i] = Math.abs(states[0][i] - expectedHz) / expectedHz;
-  }
+    const states = frames.slice(segmentStart, segmentEnd).map((frame) => frame.candidates);
+    const costs = states.map((state) => new Array(state.length).fill(Number.POSITIVE_INFINITY));
+    const backPointers = states.map((state) => new Array(state.length).fill(-1));
 
-  // Forward pass: compute optimal paths
-  for (let frameIndex = 1; frameIndex < states.length; frameIndex++) {
-    for (let candidateIndex = 0; candidateIndex < states[frameIndex].length; candidateIndex++) {
-      const candidate = states[frameIndex][candidateIndex];
-      // Emission cost: how far from expected frequency
-      const emission = Math.abs(candidate - expectedHz) / Math.max(expectedHz, 1) * 0.3;
-      for (let prevIndex = 0; prevIndex < states[frameIndex - 1].length; prevIndex++) {
-        const prev = states[frameIndex - 1][prevIndex];
-        const trans = transitionCost(prev, candidate, options.transitionCostWeight);
-        const cost = costs[frameIndex - 1][prevIndex] + emission + trans;
-        if (cost < costs[frameIndex][candidateIndex]) {
-          costs[frameIndex][candidateIndex] = cost;
-          backPointers[frameIndex][candidateIndex] = prevIndex;
+    for (let index = 0; index < states[0].length; index++) {
+      costs[0][index] = Math.abs(states[0][index] - expectedHz) / expectedHz;
+    }
+
+    for (let frameIndex = 1; frameIndex < states.length; frameIndex++) {
+      for (let candidateIndex = 0; candidateIndex < states[frameIndex].length; candidateIndex++) {
+        const candidate = states[frameIndex][candidateIndex];
+        const emission = Math.abs(candidate - expectedHz) / Math.max(expectedHz, 1) * 0.3;
+        for (let prevIndex = 0; prevIndex < states[frameIndex - 1].length; prevIndex++) {
+          const prev = states[frameIndex - 1][prevIndex];
+          const trans = transitionCost(prev, candidate, options.transitionCostWeight);
+          const cost = costs[frameIndex - 1][prevIndex] + emission + trans;
+          if (cost < costs[frameIndex][candidateIndex]) {
+            costs[frameIndex][candidateIndex] = cost;
+            backPointers[frameIndex][candidateIndex] = prevIndex;
+          }
         }
       }
     }
-  }
 
-  // Backtrace: find best path
-  const track = new Array<number | null>(frames.length).fill(null);
-  if (states.some((state) => state.length === 0)) return track;
-
-  let bestIndex = 0;
-  let bestCost = Number.POSITIVE_INFINITY;
-  const finalFrameCosts = costs[costs.length - 1];
-  for (let i = 0; i < finalFrameCosts.length; i++) {
-    if (finalFrameCosts[i] < bestCost) {
-      bestCost = finalFrameCosts[i];
-      bestIndex = i;
+    let bestIndex = 0;
+    let bestCost = Number.POSITIVE_INFINITY;
+    const finalFrameCosts = costs[costs.length - 1];
+    for (let index = 0; index < finalFrameCosts.length; index++) {
+      if (finalFrameCosts[index] < bestCost) {
+        bestCost = finalFrameCosts[index];
+        bestIndex = index;
+      }
     }
+
+    for (let frameIndex = states.length - 1; frameIndex >= 0; frameIndex--) {
+      track[segmentStart + frameIndex] = states[frameIndex][bestIndex] ?? null;
+      bestIndex = backPointers[frameIndex][bestIndex];
+    }
+    segmentStart = segmentEnd;
   }
 
-  for (let frameIndex = frames.length - 1; frameIndex >= 0; frameIndex--) {
-    track[frameIndex] = states[frameIndex][bestIndex] ?? null;
-    bestIndex = backPointers[frameIndex][bestIndex];
-    if (bestIndex < 0 && frameIndex > 0) break;
-  }
-
-  // Post-processing: median filter → Gaussian smooth
   const filtered = medianFilter(track, options.medianFilterSize);
   return gaussianSmooth(filtered, options.smoothingWindow);
 }

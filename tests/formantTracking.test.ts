@@ -33,6 +33,25 @@ describe('formant tracking', () => {
     tracked.forEach((track) => expect(track.length).toBe(0));
   });
 
+  it('keeps formants before and after frames without candidates', () => {
+    const frames = [
+      { time: 0, candidates: [] },
+      { time: 0.01, candidates: [500, 1500, 2500] },
+      { time: 0.02, candidates: [510, 1510, 2510] },
+      { time: 0.03, candidates: [] },
+      { time: 0.04, candidates: [520, 1520, 2520] },
+    ];
+    const tracked = trackFormants(frames, 3);
+
+    for (const track of tracked) {
+      expect(track[0]).toBeNull();
+      expect(track[1]).not.toBeNull();
+      expect(track[2]).not.toBeNull();
+      expect(track[3]).toBeNull();
+      expect(track[4]).not.toBeNull();
+    }
+  });
+
   it('produces smoother output with higher smoothing window', () => {
     // Create a track with one outlier
     const frames = Array.from({ length: 7 }, (_, i) => ({
