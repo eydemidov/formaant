@@ -93,6 +93,8 @@ export function VowelSpace({ analysis, selection, currentTime, profile, onProfil
           <option value="french-female">French female</option>
           <option value="japanese-male">Japanese male</option>
           <option value="japanese-female">Japanese female</option>
+          <option value="serbian-male">Serbian male</option>
+          <option value="serbian-female">Serbian female</option>
         </select>
       </div>
       <svg width={width} height={height} className="vowel-space-svg">

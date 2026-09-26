@@ -1,4 +1,4 @@
-export type VowelProfile = 'modern-rp-male' | 'modern-rp-female' | 'american-male' | 'american-female' | 'mandarin-male' | 'mandarin-female' | 'french-male' | 'french-female' | 'japanese-male' | 'japanese-female';
+export type VowelProfile = 'modern-rp-male' | 'modern-rp-female' | 'american-male' | 'american-female' | 'mandarin-male' | 'mandarin-female' | 'french-male' | 'french-female' | 'japanese-male' | 'japanese-female' | 'serbian-male' | 'serbian-female';
 
 export interface ProfileVowel {
   symbol: string;
@@ -149,6 +149,24 @@ export const vowelProfiles: Record<VowelProfile, ProfileVowel[]> = {
     { symbol: 'a', f1: 801, f1Min: 686, f1Max: 868, f2: 1530, f2Min: 1373, f2Max: 1637, description: 'open central' },
     { symbol: 'o', f1: 526, f1Min: 433, f1Max: 653, f2: 1127, f2Min: 988, f2Max: 1319, description: 'mid back rounded' },
     { symbol: 'u', f1: 434, f1Min: 353, f1Max: 529, f2: 1645, f2Min: 1437, f2Max: 1806, description: 'high central Japanese /u/' },
+  ],
+  'serbian-male': [
+    { symbol: 'i', f1: 321, f1Min: 236, f1Max: 434, f2: 2125, f2Min: 1757, f2Max: 2609, description: 'close front' },
+    { symbol: 'e', f1: 581, f1Min: 484, f1Max: 742, f2: 1604, f2Min: 1405, f2Max: 1866, description: 'short mid front' },
+    { symbol: 'eː', f1: 482, f1Min: 381, f1Max: 593, f2: 1902, f2Min: 1679, f2Max: 2254, description: 'long mid front' },
+    { symbol: 'a', f1: 688, f1Min: 547, f1Max: 892, f2: 1236, f2Min: 1032, f2Max: 1472, description: 'open central' },
+    { symbol: 'o', f1: 528, f1Min: 449, f1Max: 626, f2: 959, f2Min: 836, f2Max: 1084, description: 'short mid back rounded' },
+    { symbol: 'oː', f1: 467, f1Min: 401, f1Max: 623, f2: 833, f2Min: 695, f2Max: 926, description: 'long mid back rounded' },
+    { symbol: 'u', f1: 347, f1Min: 265, f1Max: 499, f2: 757, f2Min: 603, f2Max: 1027, description: 'close back rounded' },
+  ],
+  'serbian-female': [
+    { symbol: 'i', f1: 358, f1Min: 246, f1Max: 487, f2: 2622, f2Min: 2148, f2Max: 3059, description: 'close front' },
+    { symbol: 'e', f1: 728, f1Min: 585, f1Max: 911, f2: 1929, f2Min: 1572, f2Max: 2119, description: 'short mid front' },
+    { symbol: 'eː', f1: 523, f1Min: 428, f1Max: 656, f2: 2316, f2Min: 2011, f2Max: 2783, description: 'long mid front' },
+    { symbol: 'a', f1: 898, f1Min: 468, f1Max: 1126, f2: 1431, f2Min: 1040, f2Max: 1729, description: 'open central' },
+    { symbol: 'o', f1: 622, f1Min: 430, f1Max: 730, f2: 1097, f2Min: 902, f2Max: 1270, description: 'short mid back rounded' },
+    { symbol: 'oː', f1: 491, f1Min: 396, f1Max: 596, f2: 896, f2Min: 697, f2Max: 1052, description: 'long mid back rounded' },
+    { symbol: 'u', f1: 378, f1Min: 271, f1Max: 505, f2: 801, f2Min: 540, f2Max: 1193, description: 'close back rounded' },
   ],
 };
 
