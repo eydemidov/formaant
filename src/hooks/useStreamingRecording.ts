@@ -46,7 +46,11 @@ export function useStreamingRecording(settings: AnalysisSettings) {
       new URL('../workers/analysis.worker.ts', import.meta.url),
       { type: 'module' }
     );
-    worker.onmessage = (e: MessageEvent<{ id: number; result: AnalysisResult }>) => {
+    worker.onmessage = (e: MessageEvent<
+      | { type: 'progress'; id: number; value: number }
+      | { type: 'result'; id: number; result: AnalysisResult }
+    >) => {
+      if (e.data.type !== 'result') return;
       pendingRef.current = false;
       const { result } = e.data;
       const samples = recorderRef.current.getAllSamples();
