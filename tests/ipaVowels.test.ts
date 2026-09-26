@@ -80,6 +80,31 @@ describe('generateIpaAnnotations', () => {
     expect(annotations.length).toBe(2);
   });
 
+  it('averages formants across the frames represented by each vowel label', () => {
+    const times = [0, 0.02, 0.04, 0.1, 0.12, 0.14];
+    const f1 = [260, 270, 280, 720, 730, 740];
+    const f2 = [2280, 2290, 2300, 1080, 1090, 1100];
+
+    const annotations = generateIpaAnnotations(times, f1, f2, undefined, { minTimeGap: 0.08 });
+
+    expect(annotations).toHaveLength(2);
+    expect(annotations[0]).toMatchObject({ symbol: 'i', averageF1: 270, averageF2: 2290 });
+    expect(annotations[1]).toMatchObject({ symbol: 'ɑ', averageF1: 730, averageF2: 1090 });
+  });
+
+  it('stops averaging at a frame without formants', () => {
+    const annotations = generateIpaAnnotations(
+      [0, 0.02, 0.04, 0.06],
+      [260, 280, null, 300],
+      [2280, 2300, null, 2320],
+      undefined,
+      { minTimeGap: 0.08 }
+    );
+
+    expect(annotations).toHaveLength(1);
+    expect(annotations[0]).toMatchObject({ averageF1: 270, averageF2: 2290 });
+  });
+
   it('filters by intensity threshold', () => {
     const times = [0.0, 0.1, 0.2];
     const f1: (number | null)[] = [270, 730, 300];

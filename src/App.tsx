@@ -107,6 +107,7 @@ export default function App() {
   const [showFormants, setShowFormants] = useState(true);
   const [showIntensity, setShowIntensity] = useState(true);
   const [showIpa, setShowIpa] = useState(true);
+  const [showIpaFormants, setShowIpaFormants] = useState(true);
   const [showCochleagram, setShowCochleagram] = useState(false);
   const [showPulses, setShowPulses] = useState(false);
   const [showManipulation, setShowManipulation] = useState(false);
@@ -704,6 +705,7 @@ export default function App() {
     { id: 'view.toggle-intensity', label: 'Toggle Intensity', category: 'View', action: () => setShowIntensity((v) => !v) },
     { id: 'view.toggle-cochleagram', label: 'Toggle Cochleagram', category: 'View', action: () => setShowCochleagram((v) => !v) },
     { id: 'view.toggle-ipa', label: 'Toggle IPA', category: 'View', action: () => setShowIpa((v) => !v) },
+    { id: 'view.toggle-ipa-formants', label: 'Toggle Vowel F1/F2', category: 'View', action: () => setShowIpaFormants((v) => !v) },
     { id: 'view.theme-dark', label: 'Theme: Dark', category: 'View', action: () => setThemeSetting('dark') },
     { id: 'view.theme-light', label: 'Theme: Light', category: 'View', action: () => setThemeSetting('light') },
     { id: 'view.theme-hc-dark', label: 'Theme: HC Dark', category: 'View', action: () => setThemeSetting('hc-dark') },
@@ -888,10 +890,12 @@ export default function App() {
         onToggleFormants={() => setShowFormants((v) => !v)}
         onToggleIntensity={() => setShowIntensity((v) => !v)}
         onToggleIpa={() => setShowIpa((v) => !v)}
+        onToggleIpaFormants={() => setShowIpaFormants((v) => !v)}
         showPitch={showPitch}
         showFormants={showFormants}
         showIntensity={showIntensity}
         showIpa={showIpa}
+        showIpaFormants={showIpaFormants}
         showCochleagram={showCochleagram}
         onToggleCochleagram={() => setShowCochleagram((v) => !v)}
         onOpenManipulation={() => setShowManipulation(true)}
@@ -1011,12 +1015,14 @@ export default function App() {
         showFormants={showFormants}
         showIntensity={showIntensity}
         showIpa={showIpa}
+        showIpaFormants={showIpaFormants}
         showCochleagram={showCochleagram}
         showPulses={showPulses}
         onTogglePitch={() => setShowPitch((v) => !v)}
         onToggleFormants={() => setShowFormants((v) => !v)}
         onToggleIntensity={() => setShowIntensity((v) => !v)}
         onToggleIpa={() => setShowIpa((v) => !v)}
+        onToggleIpaFormants={() => setShowIpaFormants((v) => !v)}
         onToggleCochleagram={() => setShowCochleagram((v) => !v)}
         onTogglePulses={() => setShowPulses((v) => !v)}
       />
@@ -1060,6 +1066,7 @@ export default function App() {
                     showFormants={showFormants}
                     showIntensity={showIntensity}
                     showIpa={showIpa}
+                    showIpaFormants={showIpaFormants}
                     onWheelZoom={() => {}}
                     onPan={() => {}}
                     onZoomSelection={() => {}}
@@ -1130,6 +1137,7 @@ export default function App() {
                   showFormants={showFormants}
                   showIntensity={showIntensity}
                   showIpa={showIpa}
+                  showIpaFormants={showIpaFormants}
                   onWheelZoom={handleWheelZoom}
                   onPan={handlePan}
                   onZoomSelection={handleZoomSelection}
@@ -1226,6 +1234,11 @@ export default function App() {
                 <input type="checkbox" checked={showIpa} onChange={() => setShowIpa((v) => !v)} />
                 <span className="toggle-indicator ipa" />
                 IPA Vowels
+              </label>
+              <label className="toggle-label">
+                <input type="checkbox" checked={showIpaFormants} onChange={() => setShowIpaFormants((v) => !v)} />
+                <span className="toggle-indicator ipa" />
+                Vowel F1/F2
               </label>
               <label className="toggle-label">
                 <input type="checkbox" checked={showCochleagram} onChange={() => setShowCochleagram((v) => !v)} />

@@ -14,6 +14,7 @@ interface SpectrogramProps {
   showFormants: boolean;
   showIntensity: boolean;
   showIpa: boolean;
+  showIpaFormants: boolean;
   onWheelZoom: (pivotTime: number, zoomFactor: number) => void;
   onPan: (deltaTime: number) => void;
   onZoomSelection: (selection: TimeSelection) => void;
@@ -33,6 +34,7 @@ export const Spectrogram = React.memo(function Spectrogram({
   showFormants,
   showIntensity,
   showIpa,
+  showIpaFormants,
   onWheelZoom,
   onPan,
   onZoomSelection,
@@ -388,7 +390,7 @@ export const Spectrogram = React.memo(function Spectrogram({
         </button>
       )}
       {ipaAnnotations.length > 0 && (
-        <div className="ipa-tier">
+        <div className={`ipa-tier${showIpaFormants ? '' : ' ipa-tier-symbols-only'}`}>
           {ipaAnnotations.map((ann, i) => {
             if (ann.time < viewRange.start || ann.time > viewRange.end) return null;
             const pct = (ann.time - viewRange.start) / (viewRange.end - viewRange.start) * 100;
@@ -398,7 +400,12 @@ export const Spectrogram = React.memo(function Spectrogram({
                 className="ipa-label"
                 style={{ left: `${pct}%`, opacity: 0.5 + ann.confidence * 0.5 }}
               >
-                {ann.symbol}
+                <span className="ipa-symbol">{ann.symbol}</span>
+                {showIpaFormants && (
+                  <span className="ipa-formants">
+                    {Math.round(ann.averageF1)} | {Math.round(ann.averageF2)}
+                  </span>
+                )}
               </span>
             );
           })}

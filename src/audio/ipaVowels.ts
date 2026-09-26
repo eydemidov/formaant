@@ -54,6 +54,8 @@ export interface IpaAnnotation {
   symbol: string;
   f1: number;
   f2: number;
+  averageF1: number;
+  averageF2: number;
   confidence: number; // 0-1, based on distance to nearest reference
 }
 
@@ -122,6 +124,7 @@ export function generateIpaAnnotations(
 ): IpaAnnotation[] {
   const opts = { ...defaultOptions, ...options };
   const annotations: IpaAnnotation[] = [];
+  const annotationIndices: number[] = [];
   let lastAnnotationTime = -Infinity;
 
   for (let i = 0; i < times.length; i++) {
@@ -142,9 +145,33 @@ export function generateIpaAnnotations(
 
     const { symbol, confidence } = classifyVowel(f1Val, f2Val);
     if (confidence >= opts.minConfidence) {
-      annotations.push({ time: times[i], symbol, f1: f1Val, f2: f2Val, confidence });
+      annotations.push({ time: times[i], symbol, f1: f1Val, f2: f2Val, averageF1: f1Val, averageF2: f2Val, confidence });
+      annotationIndices.push(i);
       lastAnnotationTime = times[i];
     }
+  }
+
+  for (let annotationIndex = 0; annotationIndex < annotations.length; annotationIndex++) {
+    const annotation = annotations[annotationIndex];
+    const endIndex = annotationIndices[annotationIndex + 1] ?? times.length;
+    let totalF1 = 0;
+    let totalF2 = 0;
+    let count = 0;
+
+    for (let frameIndex = annotationIndices[annotationIndex]; frameIndex < endIndex; frameIndex++) {
+      const frameF1 = f1[frameIndex];
+      const frameF2 = f2[frameIndex];
+      if (frameF1 == null || frameF2 == null ||
+        frameF1 < 150 || frameF1 > 1000 || frameF2 < 500 || frameF2 > 3000 ||
+        (intensityValues?.[frameIndex] !== undefined && intensityValues[frameIndex] < opts.minIntensityDb) ||
+        classifyVowel(frameF1, frameF2).symbol !== annotation.symbol) break;
+      totalF1 += frameF1;
+      totalF2 += frameF2;
+      count++;
+    }
+
+    annotation.averageF1 = totalF1 / count;
+    annotation.averageF2 = totalF2 / count;
   }
 
   return annotations;
