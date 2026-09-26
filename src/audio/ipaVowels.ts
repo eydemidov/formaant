@@ -7,6 +7,7 @@
  */
 
 import { isWithinProfileRange, vowelProfiles, type ProfileVowel, type VowelProfile } from './vowelProfiles';
+import type { PitchData, SpectrogramData } from '../types';
 
 export interface VowelReference {
   symbol: string;
@@ -115,6 +116,76 @@ const defaultOptions: IpaAnnotationOptions = {
   minIntensityDb: -40,
 };
 
+export interface VowelEvidence {
+  pitch: PitchData;
+  spectrogram: SpectrogramData;
+}
+
+function nearestFrameIndex(times: number[], time: number, maxGap: number): number {
+  let low = 0;
+  let high = times.length;
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    if (times[middle] < time) low = middle + 1;
+    else high = middle;
+  }
+  const before = low - 1;
+  const nearest = before >= 0 && (low === times.length || time - times[before] <= times[low] - time)
+    ? before : low;
+  return nearest < times.length && Math.abs(times[nearest] - time) <= maxGap ? nearest : -1;
+}
+
+function voicedSpectralFrames(evidence: VowelEvidence): boolean[] {
+  const { spectrogram } = evidence;
+  if (spectrogram.freqStep <= 0) return [];
+  const startBin = Math.ceil(250 / spectrogram.freqStep);
+  const endBin = Math.floor(3000 / spectrogram.freqStep);
+  const peaks = spectrogram.magnitudes.map((frame) => {
+    let peak = 0;
+    for (let bin = startBin; bin <= Math.min(endBin, frame.length - 1); bin++) {
+      peak = Math.max(peak, frame[bin]);
+    }
+    return peak;
+  });
+  const sortedPeaks = peaks.filter((peak) => peak > 0).sort((left, right) => left - right);
+  if (sortedPeaks.length === 0) return [];
+  const referencePeak = sortedPeaks[Math.floor((sortedPeaks.length - 1) * 0.9)];
+  const strongThreshold = referencePeak * 0.12;
+
+  return spectrogram.magnitudes.map((frame) => {
+    const availableBins = Math.max(0, Math.min(endBin, frame.length - 1) - startBin + 1);
+    let strongBins = 0;
+    for (let bin = startBin; bin < startBin + availableBins; bin++) {
+      if (frame[bin] >= strongThreshold) strongBins++;
+    }
+    return availableBins > 0 && strongBins >= Math.max(3, Math.ceil(availableBins * 0.05));
+  });
+}
+
+function sustainedVowelFrames(times: number[], evidence: VowelEvidence): boolean[] {
+  const spectralFrames = voicedSpectralFrames(evidence);
+  const candidates = times.map((time) => {
+    const pitchIndex = nearestFrameIndex(evidence.pitch.times, time, 0.03);
+    const spectralIndex = nearestFrameIndex(
+      evidence.spectrogram.frameTimes, time, Math.max(0.03, evidence.spectrogram.timeStep)
+    );
+    return pitchIndex >= 0 && evidence.pitch.frequencies[pitchIndex] != null &&
+      spectralIndex >= 0 && spectralFrames[spectralIndex] === true;
+  });
+  const sustained = candidates.map(() => false);
+  for (let start = 0; start < candidates.length;) {
+    if (!candidates[start]) {
+      start++;
+      continue;
+    }
+    let end = start + 1;
+    while (end < candidates.length && candidates[end] && times[end] - times[end - 1] <= 0.03) end++;
+    if (end - start >= 3) sustained.fill(true, start, end);
+    start = end;
+  }
+  return sustained;
+}
+
 /**
  * Generate IPA vowel annotations from formant tracking data.
  * Only annotates frames where both F1 and F2 are present (voiced segments).
@@ -124,9 +195,11 @@ export function generateIpaAnnotations(
   f1: (number | null)[],
   f2: (number | null)[],
   intensityValues?: number[],
-  options?: Partial<IpaAnnotationOptions>
+  options?: Partial<IpaAnnotationOptions>,
+  evidence?: VowelEvidence
 ): IpaAnnotation[] {
   const opts = { ...defaultOptions, ...options };
+  const supportedFrames = evidence ? sustainedVowelFrames(times, evidence) : null;
   const annotations: IpaAnnotation[] = [];
   const annotationIndices: number[] = [];
   let lastAnnotationTime = -Infinity;
@@ -135,6 +208,7 @@ export function generateIpaAnnotations(
     const f1Val = f1[i];
     const f2Val = f2[i];
     if (f1Val === null || f2Val === null) continue;
+    if (supportedFrames && !supportedFrames[i]) continue;
 
     // Skip if below intensity threshold
     if (intensityValues && intensityValues[i] !== undefined && intensityValues[i] < opts.minIntensityDb) {
@@ -166,6 +240,7 @@ export function generateIpaAnnotations(
       const frameF1 = f1[frameIndex];
       const frameF2 = f2[frameIndex];
       if (frameF1 == null || frameF2 == null ||
+        (supportedFrames && !supportedFrames[frameIndex]) ||
         (!opts.profile && (frameF1 < 150 || frameF1 > 1000 || frameF2 < 500 || frameF2 > 3000)) ||
         (intensityValues?.[frameIndex] !== undefined && intensityValues[frameIndex] < opts.minIntensityDb) ||
         classifyVowel(frameF1, frameF2, opts.profile).symbol !== annotation.symbol) break;

@@ -176,4 +176,50 @@ describe('generateIpaAnnotations', () => {
     const annotations = generateIpaAnnotations(times, f1, f2);
     expect(annotations).toHaveLength(0);
   });
+
+  it('requires sustained voicing and strong low-frequency spectrum when evidence is provided', () => {
+    const times = [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08];
+    const vowelSpectrum = Float64Array.from({ length: 80 }, (_, bin) =>
+      bin >= 6 && bin <= 12 ? 0.5 : 0
+    );
+    const sparseSpectrum = Float64Array.from({ length: 80 }, (_, bin) => bin === 8 ? 0.5 : 0);
+    const evidence = {
+      pitch: { times, frequencies: [120, 120, 120, null, null, null, 120, 120, 120] },
+      spectrogram: {
+        frameTimes: times,
+        timeStep: 0.01,
+        freqStep: 50,
+        maxFreq: 4000,
+        magnitudes: [vowelSpectrum, vowelSpectrum, vowelSpectrum, vowelSpectrum,
+          vowelSpectrum, vowelSpectrum, sparseSpectrum, sparseSpectrum, sparseSpectrum],
+      },
+    };
+    const annotations = generateIpaAnnotations(
+      times, times.map(() => 270), times.map(() => 2290), undefined,
+      { minTimeGap: 0 }, evidence
+    );
+
+    expect(annotations.map((annotation) => annotation.time)).toEqual([0, 0.01, 0.02]);
+  });
+
+  it('rejects an isolated loud burst even with a pitch estimate', () => {
+    const times = [0, 0.01, 0.02];
+    const burst = Float64Array.from({ length: 80 }, (_, bin) =>
+      bin >= 6 && bin <= 12 ? 1 : 0
+    );
+    const silence = new Float64Array(80);
+    const annotations = generateIpaAnnotations(
+      times, [270, 270, 270], [2290, 2290, 2290], undefined,
+      { minTimeGap: 0 },
+      {
+        pitch: { times, frequencies: [120, 120, 120] },
+        spectrogram: {
+          frameTimes: times, timeStep: 0.01, freqStep: 50, maxFreq: 4000,
+          magnitudes: [silence, burst, silence],
+        },
+      }
+    );
+
+    expect(annotations).toHaveLength(0);
+  });
 });

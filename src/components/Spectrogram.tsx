@@ -363,7 +363,8 @@ export const Spectrogram = React.memo(function Spectrogram({
       analysis.formants.tracked[0] ?? [],
       analysis.formants.tracked[1] ?? [],
       analysis.intensity.values,
-      { minTimeGap: 0.08, minConfidence: 0.35, profile: vowelProfile }
+      { minTimeGap: 0.08, minConfidence: 0.35, profile: vowelProfile },
+      { pitch: analysis.pitch, spectrogram: analysis.spectrogram }
     );
   }, [showIpa, showFormants, analysis, vowelProfile]);
 
