@@ -80,7 +80,9 @@ export function parseAppPreferences(raw: string | null): AppPreferences {
       filterSettings,
       vowelProfile: saved.vowelProfile === 'modern-rp-female' ||
         saved.vowelProfile === 'american-male' ||
-        saved.vowelProfile === 'american-female'
+        saved.vowelProfile === 'american-female' ||
+        saved.vowelProfile === 'mandarin-male' ||
+        saved.vowelProfile === 'mandarin-female'
         ? saved.vowelProfile
         : defaults.vowelProfile,
       overlays: mergeSection(defaults.overlays, saved.overlays),

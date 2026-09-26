@@ -18,10 +18,10 @@ interface VowelPoint {
 
 export function VowelSpace({ analysis, selection, currentTime, profile, onProfileChange }: VowelSpaceProps) {
   const references = vowelProfiles[profile];
-  const f1Min = Math.floor(Math.min(...references.map((vowel) => vowel.f1Min * (1 - VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
-  const f1Max = Math.ceil(Math.max(...references.map((vowel) => vowel.f1Max * (1 + VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
-  const f2Min = Math.floor(Math.min(...references.map((vowel) => vowel.f2Min * (1 - VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
-  const f2Max = Math.ceil(Math.max(...references.map((vowel) => vowel.f2Max * (1 + VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
+  const f1Min = Math.floor(Math.min(...references.map((vowel) => (vowel.f1Min ?? vowel.f1) * (1 - VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
+  const f1Max = Math.ceil(Math.max(...references.map((vowel) => (vowel.f1Max ?? vowel.f1) * (1 + VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
+  const f2Min = Math.floor(Math.min(...references.map((vowel) => (vowel.f2Min ?? vowel.f2) * (1 - VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
+  const f2Max = Math.ceil(Math.max(...references.map((vowel) => (vowel.f2Max ?? vowel.f2) * (1 + VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
   const f1Ticks = Array.from(
     { length: Math.floor(f1Max / 200) - Math.ceil(f1Min / 200) + 1 },
     (_, index) => (Math.ceil(f1Min / 200) + index) * 200
@@ -87,6 +87,8 @@ export function VowelSpace({ analysis, selection, currentTime, profile, onProfil
           <option value="modern-rp-female">Modern RP female</option>
           <option value="american-male">American male</option>
           <option value="american-female">American female</option>
+          <option value="mandarin-male">Mandarin male</option>
+          <option value="mandarin-female">Mandarin female</option>
         </select>
       </div>
       <svg width={width} height={height} className="vowel-space-svg">

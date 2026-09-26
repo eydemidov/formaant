@@ -1,13 +1,13 @@
-export type VowelProfile = 'modern-rp-male' | 'modern-rp-female' | 'american-male' | 'american-female';
+export type VowelProfile = 'modern-rp-male' | 'modern-rp-female' | 'american-male' | 'american-female' | 'mandarin-male' | 'mandarin-female';
 
 export interface ProfileVowel {
   symbol: string;
   f1: number;
   f2: number;
-  f1Min: number;
-  f1Max: number;
-  f2Min: number;
-  f2Max: number;
+  f1Min: number | null;
+  f1Max: number | null;
+  f2Min: number | null;
+  f2Max: number | null;
   description: string;
 }
 
@@ -88,11 +88,35 @@ export const vowelProfiles: Record<VowelProfile, ProfileVowel[]> = {
     // { symbol: 'oʊ', f1: 603, f2: 1078, f1Min: 444, f1Max: 698, f2Min: 803, f2Max: 1412, description: 'GOAT / hoed onset' },
     // { symbol: 'oʊ', f1: 472, f2: 996, f1Min: 423, f1Max: 563, f2Min: 762, f2Max: 1264, description: 'GOAT / hoed glide' },
   ],
+  'mandarin-female': [
+    { symbol: 'i', f1: 311, f2: 2871, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'i; close front' },
+    { symbol: 'u', f1: 354, f2: 762, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'u; close back rounded' },
+    { symbol: 'y', f1: 305, f2: 2411, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'ü; close front rounded' },
+    { symbol: 'o', f1: 654, f2: 947, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'o; back rounded' },
+    { symbol: 'ɤ', f1: 622, f2: 1334, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'e; back unrounded' },
+    { symbol: 'a', f1: 952, f2: 1371, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'a; open' },
+    { symbol: 'ɿ', f1: 399, f2: 1762, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'ï; apical vowel' },
+    { symbol: 'ʅ', f1: 416, f2: 2092, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'î; retroflex apical vowel' },
+    { symbol: 'ə', f1: 656, f2: 1370, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'ë; mid central' },
+    { symbol: 'ɛ', f1: 856, f2: 2119, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'ê; open-mid front' },
+  ],
+  'mandarin-male': [
+    { symbol: 'i', f1: 279, f2: 2240, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'i; close front' },
+    { symbol: 'u', f1: 342, f2: 701, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'u; close back rounded' },
+    { symbol: 'y', f1: 280, f2: 1992, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'ü; close front rounded' },
+    { symbol: 'o', f1: 532, f2: 817, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'o; back rounded' },
+    { symbol: 'ɤ', f1: 501, f2: 1163, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'e; back unrounded' },
+    { symbol: 'a', f1: 795, f2: 1168, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'a; open' },
+    { symbol: 'ɿ', f1: 355, f2: 1410, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'ï; apical vowel' },
+    { symbol: 'ʅ', f1: 351, f2: 1719, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'î; retroflex apical vowel' },
+    { symbol: 'ə', f1: 525, f2: 1179, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'ë; mid central' },
+    { symbol: 'ɛ', f1: 705, f2: 1789, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'ê; open-mid front' },
+  ],
 };
 
 export function isWithinProfileRange(f1: number, f2: number, reference: ProfileVowel): boolean {
-  return f1 >= reference.f1Min * (1 - VOWEL_RANGE_ALLOWANCE) &&
-    f1 <= reference.f1Max * (1 + VOWEL_RANGE_ALLOWANCE) &&
-    f2 >= reference.f2Min * (1 - VOWEL_RANGE_ALLOWANCE) &&
-    f2 <= reference.f2Max * (1 + VOWEL_RANGE_ALLOWANCE);
+  return (reference.f1Min === null || f1 >= reference.f1Min * (1 - VOWEL_RANGE_ALLOWANCE)) &&
+    (reference.f1Max === null || f1 <= reference.f1Max * (1 + VOWEL_RANGE_ALLOWANCE)) &&
+    (reference.f2Min === null || f2 >= reference.f2Min * (1 - VOWEL_RANGE_ALLOWANCE)) &&
+    (reference.f2Max === null || f2 <= reference.f2Max * (1 + VOWEL_RANGE_ALLOWANCE));
 }

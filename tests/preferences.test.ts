@@ -29,6 +29,8 @@ describe('app preferences', () => {
     expect(preferences.vowelProfile).toBe('modern-rp-female');
     expect(parseAppPreferences(JSON.stringify({ vowelProfile: 'american-male' })).vowelProfile).toBe('american-male');
     expect(parseAppPreferences(JSON.stringify({ vowelProfile: 'american-female' })).vowelProfile).toBe('american-female');
+    expect(parseAppPreferences(JSON.stringify({ vowelProfile: 'mandarin-male' })).vowelProfile).toBe('mandarin-male');
+    expect(parseAppPreferences(JSON.stringify({ vowelProfile: 'mandarin-female' })).vowelProfile).toBe('mandarin-female');
   });
 
   it('ignores malformed values', () => {

@@ -5,13 +5,13 @@ import { vowelProfiles } from '../src/audio/vowelProfiles';
 describe('IPA Vowel Classification', () => {
   it('keeps each active profile target inside its stated range', () => {
     for (const [profile, references] of Object.entries(vowelProfiles)) {
-      expect(references).toHaveLength(profile.startsWith('american-') ? 10 : 11);
+      expect(references).toHaveLength(profile.startsWith('modern-rp-') ? 11 : 10);
       expect(references.every((reference) => !/onset|glide/.test(reference.description))).toBe(true);
       for (const reference of references) {
-        expect(reference.f1).toBeGreaterThanOrEqual(reference.f1Min);
-        expect(reference.f1).toBeLessThanOrEqual(reference.f1Max);
-        expect(reference.f2).toBeGreaterThanOrEqual(reference.f2Min);
-        expect(reference.f2).toBeLessThanOrEqual(reference.f2Max);
+        if (reference.f1Min !== null) expect(reference.f1).toBeGreaterThanOrEqual(reference.f1Min);
+        if (reference.f1Max !== null) expect(reference.f1).toBeLessThanOrEqual(reference.f1Max);
+        if (reference.f2Min !== null) expect(reference.f2).toBeGreaterThanOrEqual(reference.f2Min);
+        if (reference.f2Max !== null) expect(reference.f2).toBeLessThanOrEqual(reference.f2Max);
       }
     }
   });
@@ -37,6 +37,22 @@ describe('IPA Vowel Classification', () => {
     expect(classifyVowel(340, 2338, 'american-male').symbol).toBe('i');
     expect(classifyVowel(436, 2767, 'american-female').symbol).toBe('i');
     expect(classifyVowel(918, 1558, 'american-female').symbol).toBe('ɑ');
+  });
+
+  it('uses the supplied Mandarin targets without range limits', () => {
+    for (const profile of ['mandarin-male', 'mandarin-female'] as const) {
+      for (const reference of vowelProfiles[profile]) {
+        expect(classifyVowel(reference.f1, reference.f2, profile)).toMatchObject({
+          symbol: reference.symbol,
+          confidence: 1,
+        });
+        expect(reference.f1Min).toBeNull();
+        expect(reference.f1Max).toBeNull();
+        expect(reference.f2Min).toBeNull();
+        expect(reference.f2Max).toBeNull();
+      }
+    }
+    expect(classifyVowel(280, 2200, 'mandarin-male').symbol).toBe('i');
   });
 
   it('classifies close front vowel [i]', () => {
