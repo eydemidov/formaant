@@ -51,3 +51,8 @@ export function timeToX(time: number, width: number, range: ViewRange): number {
   const ratio = (time - range.start) / Math.max(range.end - range.start, 1e-6);
   return ratio * width;
 }
+
+export function pitchToY(frequency: number, height: number, minHz: number, maxHz: number): number {
+  const ratio = (frequency - minHz) / Math.max(maxHz - minHz, 1);
+  return height * (1 - Math.max(0, Math.min(1, ratio)));
+}

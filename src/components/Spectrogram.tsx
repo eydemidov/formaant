@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { getColormap } from '../utils/colormap';
 import type { AnalysisResult, TimeSelection, ViewRange } from '../types';
 import { useZoomPan } from '../hooks/useZoomPan';
-import { timeToX, xToTime } from '../utils/view';
+import { pitchToY, timeToX, xToTime } from '../utils/view';
 import { generateIpaAnnotations } from '../audio/ipaVowels';
 import type { VowelProfile } from '../audio/vowelProfiles';
 
@@ -153,8 +153,6 @@ export const Spectrogram = React.memo(function Spectrogram({
     }
 
     if (showPitch) {
-      ctx.strokeStyle = style.getPropertyValue('--accent').trim() || '#89b4fa';
-      ctx.lineWidth = 1.5;
       ctx.beginPath();
       let started = false;
       for (let i = 0; i < analysis.pitch.times.length; i++) {
@@ -165,7 +163,7 @@ export const Spectrogram = React.memo(function Spectrogram({
           continue;
         }
         const x = timeToX(time, width, viewRange);
-        const y = height - (frequency / maxDisplayFreq) * height;
+        const y = pitchToY(frequency, height, analysis.settings.pitch.minHz, analysis.settings.pitch.maxHz);
         if (!started) {
           ctx.moveTo(x, y);
           started = true;
@@ -173,7 +171,16 @@ export const Spectrogram = React.memo(function Spectrogram({
           ctx.lineTo(x, y);
         }
       }
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3.5;
       ctx.stroke();
+      ctx.strokeStyle = style.getPropertyValue('--accent').trim() || '#89b4fa';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.fillStyle = style.getPropertyValue('--text-overlay').trim() || '#ffffff';
+      ctx.textAlign = 'right';
+      ctx.fillText(`Pitch ${analysis.settings.pitch.maxHz} Hz`, width - 4, 9);
+      ctx.fillText(`${analysis.settings.pitch.minHz} Hz`, width - 4, height - 9);
     }
 
     if (showFormants) {

@@ -5,6 +5,7 @@
  */
 import type { AnalysisResult, ViewRange, TextGrid } from '../types';
 import { getColormap } from '../utils/colormap';
+import { pitchToY } from '../utils/view';
 
 export interface FigureExportOptions {
   width?: number;       // pixels (default 2400 for ~8 inches at 300 dpi)
@@ -101,7 +102,7 @@ export function exportFigurePng(
       return m;
     }, 1e-6);
 
-    const colorForValue = getColormap('viridis');
+    const colorForValue = getColormap(analysis.settings.spectrogram.colormap);
     const dynRange = analysis.settings.spectrogram.dynamicRangeDb;
 
     // Render pixel-by-pixel for high quality
@@ -141,19 +142,39 @@ export function exportFigurePng(
 
   // Pitch overlay
   if (showPitch) {
-    ctx.strokeStyle = '#2563eb';
-    ctx.lineWidth = 2;
     ctx.beginPath();
     let started = false;
     for (let i = 0; i < analysis.pitch.times.length; i++) {
       const f = analysis.pitch.frequencies[i];
       const t = analysis.pitch.times[i];
-      if (f === null || t < viewRange.start || t > viewRange.end) { started = false; continue; }
+      if (f === null || t < viewRange.start || t > viewRange.end) {
+        started = false;
+        continue;
+      }
       const x = (t - viewRange.start) / (viewRange.end - viewRange.start) * plotW;
-      const y = specH - (f / maxDisplayFreq) * specH;
-      if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+      const y = pitchToY(f, specH, analysis.settings.pitch.minHz, analysis.settings.pitch.maxHz);
+      if (!started) {
+        ctx.moveTo(x, y);
+        started = true;
+      } else {
+        ctx.lineTo(x, y);
+      }
     }
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 4;
     ctx.stroke();
+    ctx.strokeStyle = '#2563eb';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.save();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `${fontSize}px sans-serif`;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'top';
+    ctx.fillText(`Pitch ${analysis.settings.pitch.maxHz} Hz`, plotW - 4, 4);
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(`${analysis.settings.pitch.minHz} Hz`, plotW - 4, specH - 4);
+    ctx.restore();
   }
 
   // Formant overlay
