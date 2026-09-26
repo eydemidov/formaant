@@ -1,4 +1,4 @@
-# Web Praat
+# Formant
 
 A standalone browser app for language learning - specifically pronunciation and accent training.
 
