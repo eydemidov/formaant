@@ -1,13 +1,13 @@
-export type VowelProfile = 'modern-rp-male' | 'modern-rp-female' | 'american-male' | 'american-female' | 'mandarin-male' | 'mandarin-female';
+export type VowelProfile = 'modern-rp-male' | 'modern-rp-female' | 'american-male' | 'american-female' | 'mandarin-male' | 'mandarin-female' | 'french-male' | 'french-female';
 
 export interface ProfileVowel {
   symbol: string;
   f1: number;
   f2: number;
-  f1Min: number | null;
-  f1Max: number | null;
-  f2Min: number | null;
-  f2Max: number | null;
+  f1Min?: number | null;
+  f1Max?: number | null;
+  f2Min?: number | null;
+  f2Max?: number | null;
   description: string;
 }
 
@@ -112,11 +112,35 @@ export const vowelProfiles: Record<VowelProfile, ProfileVowel[]> = {
     { symbol: 'ə', f1: 525, f2: 1179, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'ë; mid central' },
     { symbol: 'ɛ', f1: 705, f2: 1789, f1Min: null, f1Max: null, f2Min: null, f2Max: null, description: 'ê; open-mid front' },
   ],
+  'french-female': [
+    { symbol: 'i', f1: 348, f2: 2365, description: 'i' },
+    { symbol: 'y', f1: 371, f2: 2063, description: 'u' },
+    { symbol: 'e', f1: 423, f2: 2176, description: 'é' },
+    { symbol: 'ɛ', f1: 526, f2: 2016, description: 'è' },
+    { symbol: 'a', f1: 685, f2: 1677, description: 'a' },
+    { symbol: 'œ', f1: 436, f2: 1643, description: 'œ' },
+    { symbol: 'ø', f1: 420, f2: 1693, description: 'eu' },
+    { symbol: 'ɔ', f1: 528, f2: 1347, description: 'open o' },
+    { symbol: 'o', f1: 438, f2: 1140, description: 'closed o' },
+    { symbol: 'u', f1: 404, f2: 1153, description: 'ou' },
+  ],
+  'french-male': [
+    { symbol: 'i', f1: 310, f2: 2005, description: 'i' },
+    { symbol: 'y', f1: 336, f2: 1803, description: 'u' },
+    { symbol: 'e', f1: 370, f2: 1850, description: 'é' },
+    { symbol: 'ɛ', f1: 438, f2: 1717, description: 'è' },
+    { symbol: 'a', f1: 557, f2: 1444, description: 'a' },
+    { symbol: 'œ', f1: 400, f2: 1445, description: 'œ' },
+    { symbol: 'ø', f1: 384, f2: 1474, description: 'eu' },
+    { symbol: 'ɔ', f1: 456, f2: 1203, description: 'open o' },
+    { symbol: 'o', f1: 397, f2: 1041, description: 'closed o' },
+    { symbol: 'u', f1: 371, f2: 1105, description: 'ou' },
+  ],
 };
 
 export function isWithinProfileRange(f1: number, f2: number, reference: ProfileVowel): boolean {
-  return (reference.f1Min === null || f1 >= reference.f1Min * (1 - VOWEL_RANGE_ALLOWANCE)) &&
-    (reference.f1Max === null || f1 <= reference.f1Max * (1 + VOWEL_RANGE_ALLOWANCE)) &&
-    (reference.f2Min === null || f2 >= reference.f2Min * (1 - VOWEL_RANGE_ALLOWANCE)) &&
-    (reference.f2Max === null || f2 <= reference.f2Max * (1 + VOWEL_RANGE_ALLOWANCE));
+  return (reference.f1Min == null || f1 >= reference.f1Min * (1 - VOWEL_RANGE_ALLOWANCE)) &&
+    (reference.f1Max == null || f1 <= reference.f1Max * (1 + VOWEL_RANGE_ALLOWANCE)) &&
+    (reference.f2Min == null || f2 >= reference.f2Min * (1 - VOWEL_RANGE_ALLOWANCE)) &&
+    (reference.f2Max == null || f2 <= reference.f2Max * (1 + VOWEL_RANGE_ALLOWANCE));
 }

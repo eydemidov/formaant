@@ -82,7 +82,9 @@ export function parseAppPreferences(raw: string | null): AppPreferences {
         saved.vowelProfile === 'american-male' ||
         saved.vowelProfile === 'american-female' ||
         saved.vowelProfile === 'mandarin-male' ||
-        saved.vowelProfile === 'mandarin-female'
+        saved.vowelProfile === 'mandarin-female' ||
+        saved.vowelProfile === 'french-male' ||
+        saved.vowelProfile === 'french-female'
         ? saved.vowelProfile
         : defaults.vowelProfile,
       overlays: mergeSection(defaults.overlays, saved.overlays),

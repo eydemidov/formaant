@@ -8,10 +8,10 @@ describe('IPA Vowel Classification', () => {
       expect(references).toHaveLength(profile.startsWith('modern-rp-') ? 11 : 10);
       expect(references.every((reference) => !/onset|glide/.test(reference.description))).toBe(true);
       for (const reference of references) {
-        if (reference.f1Min !== null) expect(reference.f1).toBeGreaterThanOrEqual(reference.f1Min);
-        if (reference.f1Max !== null) expect(reference.f1).toBeLessThanOrEqual(reference.f1Max);
-        if (reference.f2Min !== null) expect(reference.f2).toBeGreaterThanOrEqual(reference.f2Min);
-        if (reference.f2Max !== null) expect(reference.f2).toBeLessThanOrEqual(reference.f2Max);
+        if (reference.f1Min != null) expect(reference.f1).toBeGreaterThanOrEqual(reference.f1Min);
+        if (reference.f1Max != null) expect(reference.f1).toBeLessThanOrEqual(reference.f1Max);
+        if (reference.f2Min != null) expect(reference.f2).toBeGreaterThanOrEqual(reference.f2Min);
+        if (reference.f2Max != null) expect(reference.f2).toBeLessThanOrEqual(reference.f2Max);
       }
     }
   });
@@ -53,6 +53,21 @@ describe('IPA Vowel Classification', () => {
       }
     }
     expect(classifyVowel(280, 2200, 'mandarin-male').symbol).toBe('i');
+  });
+
+  it('uses the supplied French targets without range limits', () => {
+    for (const profile of ['french-male', 'french-female'] as const) {
+      for (const reference of vowelProfiles[profile]) {
+        expect(classifyVowel(reference.f1, reference.f2, profile)).toMatchObject({
+          symbol: reference.symbol,
+          confidence: 1,
+        });
+        expect(reference.f1Min).toBeUndefined();
+        expect(reference.f1Max).toBeUndefined();
+        expect(reference.f2Min).toBeUndefined();
+        expect(reference.f2Max).toBeUndefined();
+      }
+    }
   });
 
   it('classifies close front vowel [i]', () => {
