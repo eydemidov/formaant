@@ -3,9 +3,9 @@ import { classifyVowel, generateIpaAnnotations, vowelReferences } from '../src/a
 import { vowelProfiles } from '../src/audio/vowelProfiles';
 
 describe('IPA Vowel Classification', () => {
-  it('keeps the supplied Modern RP targets inside their stated ranges', () => {
-    for (const references of Object.values(vowelProfiles)) {
-      expect(references).toHaveLength(11);
+  it('keeps each active profile target inside its stated range', () => {
+    for (const [profile, references] of Object.entries(vowelProfiles)) {
+      expect(references).toHaveLength(profile.startsWith('american-') ? 10 : 11);
       expect(references.every((reference) => !/onset|glide/.test(reference.description))).toBe(true);
       for (const reference of references) {
         expect(reference.f1).toBeGreaterThanOrEqual(reference.f1Min);
@@ -27,6 +27,16 @@ describe('IPA Vowel Classification', () => {
     expect(classifyVowel(256, 2364, 'modern-rp-male').symbol).toBe('?');
     expect(classifyVowel(1005, 1663, 'modern-rp-female').symbol).toBe('a');
     expect(classifyVowel(1030, 1663, 'modern-rp-female').symbol).toBe('?');
+    expect(classifyVowel(280, 2338, 'american-male').symbol).toBe('i');
+    expect(classifyVowel(275, 2338, 'american-male').symbol).toBe('?');
+    expect(classifyVowel(1150, 1558, 'american-female').symbol).toBe('ɑ');
+    expect(classifyVowel(1180, 1558, 'american-female').symbol).toBe('?');
+  });
+
+  it('uses the supplied American male and female targets', () => {
+    expect(classifyVowel(340, 2338, 'american-male').symbol).toBe('i');
+    expect(classifyVowel(436, 2767, 'american-female').symbol).toBe('i');
+    expect(classifyVowel(918, 1558, 'american-female').symbol).toBe('ɑ');
   });
 
   it('classifies close front vowel [i]', () => {
@@ -83,6 +93,10 @@ describe('generateIpaAnnotations', () => {
       { profile: 'modern-rp-female' }
     );
     expect(annotations.map((annotation) => annotation.symbol)).toEqual(['a']);
+    expect(generateIpaAnnotations(
+      [0], [1150], [1558], undefined,
+      { profile: 'american-female' }
+    ).map((annotation) => annotation.symbol)).toEqual(['ɑ']);
   });
 
   it('generates annotations for voiced frames', () => {

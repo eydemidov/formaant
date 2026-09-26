@@ -1,4 +1,4 @@
-export type VowelProfile = 'modern-rp-male' | 'modern-rp-female';
+export type VowelProfile = 'modern-rp-male' | 'modern-rp-female' | 'american-male' | 'american-female';
 
 export interface ProfileVowel {
   symbol: string;
@@ -55,6 +55,38 @@ export const vowelProfiles: Record<VowelProfile, ProfileVowel[]> = {
     // { symbol: 'əʊ̈', f1: 348, f2: 1523, f1Min: 324, f1Max: 375, f2Min: 1301, f2Max: 1624, description: 'GOAT glide' },
     // { symbol: 'ɛɪ', f1: 492, f2: 1761, f1Min: 448, f1Max: 572, f2Min: 1591, f2Max: 1845, description: 'FACE onset' },
     // { symbol: 'ɛɪ', f1: 341, f2: 2206, f1Min: 305, f1Max: 383, f2Min: 1999, f2Max: 2515, description: 'FACE glide' },
+  ],
+  'american-male': [
+    { symbol: 'i', f1: 340, f2: 2338, f1Min: 293, f1Max: 432, f2Min: 2061, f2Max: 2640, description: 'FLEECE / heed' },
+    { symbol: 'ɪ', f1: 459, f2: 1941, f1Min: 393, f1Max: 547, f2Min: 1745, f2Max: 2383, description: 'KIT / hid' },
+    { symbol: 'ɛ', f1: 592, f2: 1774, f1Min: 523, f1Max: 691, f2Min: 1590, f2Max: 2225, description: 'DRESS / head' },
+    { symbol: 'æ', f1: 613, f2: 1863, f1Min: 545, f1Max: 720, f2Min: 1624, f2Max: 2324, description: 'TRAP / had' },
+    { symbol: 'ɑ', f1: 757, f2: 1326, f1Min: 645, f1Max: 954, f2Min: 1001, f2Max: 1565, description: 'LOT / hod (cot vowel)' },
+    { symbol: 'ɔ', f1: 670, f2: 1046, f1Min: 615, f1Max: 811, f2Min: 881, f2Max: 1195, description: 'THOUGHT / hawed' },
+    { symbol: 'ʌ', f1: 618, f2: 1243, f1Min: 554, f1Max: 691, f2Min: 1046, f2Max: 1446, description: 'STRUT / hud' },
+    { symbol: 'ɝ', f1: 460, f2: 1406, f1Min: 392, f1Max: 555, f2Min: 1199, f2Max: 1546, description: 'NURSE / heard' },
+    { symbol: 'ʊ', f1: 483, f2: 1208, f1Min: 434, f1Max: 548, f2Min: 980, f2Max: 1401, description: 'FOOT / hood' },
+    { symbol: 'u', f1: 375, f2: 971, f1Min: 309, f1Max: 443, f2Min: 746, f2Max: 1148, description: 'GOOSE / who’d' },
+    // { symbol: 'eɪ', f1: 479, f2: 2089, f1Min: 432, f1Max: 554, f2Min: 1900, f2Max: 2532, description: 'FACE / hayed onset' },
+    // { symbol: 'eɪ', f1: 400, f2: 2229, f1Min: 328, f1Max: 479, f2Min: 1991, f2Max: 2630, description: 'FACE / hayed glide' },
+    // { symbol: 'oʊ', f1: 511, f2: 936, f1Min: 447, f1Max: 568, f2Min: 788, f2Max: 1126, description: 'GOAT / hoed onset' },
+    // { symbol: 'oʊ', f1: 435, f2: 898, f1Min: 372, f1Max: 500, f2Min: 664, f2Max: 1186, description: 'GOAT / hoed glide' },
+  ],
+  'american-female': [
+    { symbol: 'i', f1: 436, f2: 2767, f1Min: 325, f1Max: 524, f2Min: 2364, f2Max: 3066, description: 'FLEECE / heed' },
+    { symbol: 'ɪ', f1: 521, f2: 2268, f1Min: 429, f1Max: 619, f2Min: 2085, f2Max: 2574, description: 'KIT / hid' },
+    { symbol: 'ɛ', f1: 728, f2: 2032, f1Min: 590, f1Max: 938, f2Min: 1789, f2Max: 2381, description: 'DRESS / head' },
+    { symbol: 'æ', f1: 756, f2: 2140, f1Min: 649, f1Max: 922, f2Min: 1897, f2Max: 2504, description: 'TRAP / had' },
+    { symbol: 'ɑ', f1: 918, f2: 1558, f1Min: 715, f1Max: 1117, f2Min: 1237, f2Max: 1864, description: 'LOT / hod (cot vowel)' },
+    { symbol: 'ɔ', f1: 816, f2: 1261, f1Min: 671, f1Max: 938, f2Min: 1047, f2Max: 1551, description: 'THOUGHT / hawed' },
+    { symbol: 'ʌ', f1: 752, f2: 1510, f1Min: 624, f1Max: 921, f2Min: 1137, f2Max: 1816, description: 'STRUT / hud' },
+    { symbol: 'ɝ', f1: 511, f2: 1595, f1Min: 446, f1Max: 617, f2Min: 1398, f2Max: 2005, description: 'NURSE / heard' },
+    { symbol: 'ʊ', f1: 562, f2: 1383, f1Min: 495, f1Max: 649, f2Min: 985, f2Max: 1674, description: 'FOOT / hood' },
+    { symbol: 'u', f1: 455, f2: 1090, f1Min: 341, f1Max: 538, f2Min: 785, f2Max: 1611, description: 'GOOSE / who’d' },
+    // { symbol: 'eɪ', f1: 534, f2: 2514, f1Min: 441, f1Max: 643, f2Min: 2232, f2Max: 2834, description: 'FACE / hayed onset' },
+    // { symbol: 'eɪ', f1: 447, f2: 2693, f1Min: 357, f1Max: 544, f2Min: 2347, f2Max: 3106, description: 'FACE / hayed glide' },
+    // { symbol: 'oʊ', f1: 603, f2: 1078, f1Min: 444, f1Max: 698, f2Min: 803, f2Max: 1412, description: 'GOAT / hoed onset' },
+    // { symbol: 'oʊ', f1: 472, f2: 996, f1Min: 423, f1Max: 563, f2Min: 762, f2Max: 1264, description: 'GOAT / hoed glide' },
   ],
 };
 

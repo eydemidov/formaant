@@ -78,7 +78,11 @@ export function parseAppPreferences(raw: string | null): AppPreferences {
     return {
       settings: { spectrogram, pitch, formant },
       filterSettings,
-      vowelProfile: saved.vowelProfile === 'modern-rp-female' ? 'modern-rp-female' : 'modern-rp-male',
+      vowelProfile: saved.vowelProfile === 'modern-rp-female' ||
+        saved.vowelProfile === 'american-male' ||
+        saved.vowelProfile === 'american-female'
+        ? saved.vowelProfile
+        : defaults.vowelProfile,
       overlays: mergeSection(defaults.overlays, saved.overlays),
     };
   } catch {
