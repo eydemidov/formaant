@@ -1,4 +1,5 @@
 import { defaultAnalysisSettings, defaultFilterSettings } from '../audio/defaults';
+import type { VowelProfile } from '../audio/vowelProfiles';
 import type { AnalysisSettings, FilterSettings } from '../types';
 
 const STORAGE_KEY = 'web-praat-preferences';
@@ -6,6 +7,7 @@ const STORAGE_KEY = 'web-praat-preferences';
 export interface AppPreferences {
   settings: AnalysisSettings;
   filterSettings: FilterSettings;
+  vowelProfile: VowelProfile;
   overlays: {
     pitch: boolean;
     formants: boolean;
@@ -20,6 +22,7 @@ export interface AppPreferences {
 const defaults: AppPreferences = {
   settings: defaultAnalysisSettings,
   filterSettings: defaultFilterSettings,
+  vowelProfile: 'modern-rp-male',
   overlays: {
     pitch: true,
     formants: true,
@@ -75,6 +78,7 @@ export function parseAppPreferences(raw: string | null): AppPreferences {
     return {
       settings: { spectrogram, pitch, formant },
       filterSettings,
+      vowelProfile: saved.vowelProfile === 'modern-rp-female' ? 'modern-rp-female' : 'modern-rp-male',
       overlays: mergeSection(defaults.overlays, saved.overlays),
     };
   } catch {

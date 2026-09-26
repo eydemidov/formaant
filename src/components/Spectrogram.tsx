@@ -4,6 +4,7 @@ import type { AnalysisResult, TimeSelection, ViewRange } from '../types';
 import { useZoomPan } from '../hooks/useZoomPan';
 import { timeToX, xToTime } from '../utils/view';
 import { generateIpaAnnotations } from '../audio/ipaVowels';
+import type { VowelProfile } from '../audio/vowelProfiles';
 
 interface SpectrogramProps {
   analysis: AnalysisResult | null;
@@ -15,6 +16,7 @@ interface SpectrogramProps {
   showIntensity: boolean;
   showIpa: boolean;
   showIpaFormants: boolean;
+  vowelProfile: VowelProfile;
   onWheelZoom: (pivotTime: number, zoomFactor: number) => void;
   onPan: (deltaTime: number) => void;
   onZoomSelection: (selection: TimeSelection) => void;
@@ -35,6 +37,7 @@ export const Spectrogram = React.memo(function Spectrogram({
   showIntensity,
   showIpa,
   showIpaFormants,
+  vowelProfile,
   onWheelZoom,
   onPan,
   onZoomSelection,
@@ -360,9 +363,9 @@ export const Spectrogram = React.memo(function Spectrogram({
       analysis.formants.tracked[0] ?? [],
       analysis.formants.tracked[1] ?? [],
       analysis.intensity.values,
-      { minTimeGap: 0.08, minConfidence: 0.35 }
+      { minTimeGap: 0.08, minConfidence: 0.35, profile: vowelProfile }
     );
-  }, [showIpa, showFormants, analysis]);
+  }, [showIpa, showFormants, analysis, vowelProfile]);
 
   return (
     <div

@@ -130,6 +130,7 @@ export default function App() {
   const [experimentConfig, setExperimentConfig] = useState<{ config: any; audioMap: Record<string, string> } | null>(null);
   const [settings, setSettings] = useState<AnalysisSettings>(initialPreferences.settings);
   const [filterSettings, setFilterSettings] = useState<FilterSettings>(initialPreferences.filterSettings);
+  const [vowelProfile, setVowelProfile] = useState(initialPreferences.vowelProfile);
   const [textGrid, setTextGrid] = useState<TextGrid>(createEmptyTextGrid(1));
   const [vocabularies, setVocabularies] = useState<ControlledVocabulary[]>([]);
   const [vocabBindings, setVocabBindings] = useState<TierVocabularyBinding[]>([]);
@@ -145,6 +146,7 @@ export default function App() {
     saveAppPreferences({
       settings,
       filterSettings,
+      vowelProfile,
       overlays: {
         pitch: showPitch,
         formants: showFormants,
@@ -155,7 +157,7 @@ export default function App() {
         pulses: showPulses,
       },
     });
-  }, [settings, filterSettings, showPitch, showFormants, showIntensity, showIpa, showIpaFormants, showCochleagram, showPulses]);
+  }, [settings, filterSettings, vowelProfile, showPitch, showFormants, showIntensity, showIpa, showIpaFormants, showCochleagram, showPulses]);
 
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
@@ -1085,6 +1087,7 @@ export default function App() {
                     showIntensity={showIntensity}
                     showIpa={showIpa}
                     showIpaFormants={showIpaFormants}
+                    vowelProfile={vowelProfile}
                     onWheelZoom={() => {}}
                     onPan={() => {}}
                     onZoomSelection={() => {}}
@@ -1156,6 +1159,7 @@ export default function App() {
                   showIntensity={showIntensity}
                   showIpa={showIpa}
                   showIpaFormants={showIpaFormants}
+                  vowelProfile={vowelProfile}
                   onWheelZoom={handleWheelZoom}
                   onPan={handlePan}
                   onZoomSelection={handleZoomSelection}
@@ -1222,7 +1226,7 @@ export default function App() {
                 </>
               ),
               script: <ScriptEditor samples={currentSamplesRef.current ?? undefined} sampleRate={sampleRate} />,
-              vowels: <VowelSpace analysis={analysis} selection={selection} currentTime={currentTime} />,
+              vowels: <VowelSpace analysis={analysis} selection={selection} currentTime={currentTime} profile={vowelProfile} onProfileChange={setVowelProfile} />,
             }}
           </RightSidebar>
         )}

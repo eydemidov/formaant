@@ -8,12 +8,14 @@ describe('app preferences', () => {
     expect(preferences.settings).toEqual(defaultAnalysisSettings);
     expect(preferences.filterSettings).toEqual(defaultFilterSettings);
     expect(preferences.overlays.ipaFormants).toBe(true);
+    expect(preferences.vowelProfile).toBe('modern-rp-male');
   });
 
   it('restores analysis, filter, and overlay preferences', () => {
     const preferences = parseAppPreferences(JSON.stringify({
       settings: { spectrogram: { colormap: 'magma' }, formant: { maxFrequency: 5000 } },
       filterSettings: { type: 'highpass', cutoffHz: 300 },
+      vowelProfile: 'modern-rp-female',
       overlays: { pitch: false, ipaFormants: false },
     }));
 
@@ -24,16 +26,19 @@ describe('app preferences', () => {
     expect(preferences.overlays.pitch).toBe(false);
     expect(preferences.overlays.ipaFormants).toBe(false);
     expect(preferences.overlays.formants).toBe(true);
+    expect(preferences.vowelProfile).toBe('modern-rp-female');
   });
 
   it('ignores malformed values', () => {
     expect(parseAppPreferences('{broken').settings).toEqual(defaultAnalysisSettings);
     const preferences = parseAppPreferences(JSON.stringify({
       settings: { spectrogram: { fftSize: 123, colormap: 'unknown', hopSize: 'fast' } },
+      vowelProfile: 'unknown',
       overlays: { ipa: 'false' },
     }));
 
     expect(preferences.settings.spectrogram).toEqual(defaultAnalysisSettings.spectrogram);
     expect(preferences.overlays.ipa).toBe(true);
+    expect(preferences.vowelProfile).toBe('modern-rp-male');
   });
 });

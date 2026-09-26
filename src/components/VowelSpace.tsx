@@ -1,10 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { vowelProfiles, VOWEL_RANGE_ALLOWANCE, type VowelProfile } from '../audio/vowelProfiles';
 import type { AnalysisResult, TimeSelection } from '../types';
 
 interface VowelSpaceProps {
   analysis: AnalysisResult | null;
   selection: TimeSelection | null;
   currentTime: number;
+  profile: VowelProfile;
+  onProfileChange: (profile: VowelProfile) => void;
 }
 
 interface VowelPoint {
@@ -13,26 +16,20 @@ interface VowelPoint {
   time: number;
 }
 
-// Standard IPA vowel reference points (F1, F2 in Hz)
-const IPA_VOWELS: { symbol: string; f1: number; f2: number }[] = [
-  { symbol: 'i', f1: 270, f2: 2300 },
-  { symbol: 'y', f1: 235, f2: 2100 },
-  { symbol: 'e', f1: 400, f2: 2000 },
-  { symbol: 'ø', f1: 370, f2: 1900 },
-  { symbol: 'ɛ', f1: 550, f2: 1800 },
-  { symbol: 'a', f1: 730, f2: 1100 },
-  { symbol: 'ɑ', f1: 700, f2: 1000 },
-  { symbol: 'ɔ', f1: 600, f2: 900 },
-  { symbol: 'o', f1: 450, f2: 800 },
-  { symbol: 'u', f1: 300, f2: 870 },
-  { symbol: 'ʊ', f1: 350, f2: 1000 },
-  { symbol: 'ɪ', f1: 400, f2: 2000 },
-  { symbol: 'æ', f1: 660, f2: 1700 },
-  { symbol: 'ʌ', f1: 600, f2: 1200 },
-  { symbol: 'ə', f1: 500, f2: 1500 },
-];
-
-export function VowelSpace({ analysis, selection, currentTime }: VowelSpaceProps) {
+export function VowelSpace({ analysis, selection, currentTime, profile, onProfileChange }: VowelSpaceProps) {
+  const references = vowelProfiles[profile];
+  const f1Min = Math.floor(Math.min(...references.map((vowel) => vowel.f1Min * (1 - VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
+  const f1Max = Math.ceil(Math.max(...references.map((vowel) => vowel.f1Max * (1 + VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
+  const f2Min = Math.floor(Math.min(...references.map((vowel) => vowel.f2Min * (1 - VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
+  const f2Max = Math.ceil(Math.max(...references.map((vowel) => vowel.f2Max * (1 + VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
+  const f1Ticks = Array.from(
+    { length: Math.floor(f1Max / 200) - Math.ceil(f1Min / 200) + 1 },
+    (_, index) => (Math.ceil(f1Min / 200) + index) * 200
+  );
+  const f2Ticks = Array.from(
+    { length: Math.floor(f2Max / 500) - Math.ceil(f2Min / 500) + 1 },
+    (_, index) => (Math.ceil(f2Min / 500) + index) * 500
+  );
   const points = useMemo(() => {
     if (!analysis) return [];
     const result: VowelPoint[] = [];
@@ -46,12 +43,12 @@ export function VowelSpace({ analysis, selection, currentTime }: VowelSpaceProps
       if (selection && (t < selection.start || t > selection.end)) continue;
       const f1 = f1Track[i];
       const f2 = f2Track[i];
-      if (f1 && f2 && f1 > 150 && f1 < 1000 && f2 > 500 && f2 < 3000) {
+      if (f1 != null && f2 != null && f1 >= f1Min && f1 <= f1Max && f2 >= f2Min && f2 <= f2Max) {
         result.push({ f1, f2, time: t });
       }
     }
     return result;
-  }, [analysis, selection]);
+  }, [analysis, selection, f1Min, f1Max, f2Min, f2Max]);
 
   // Find current point (nearest to cursor)
   const currentPoint = useMemo(() => {
@@ -72,15 +69,6 @@ export function VowelSpace({ analysis, selection, currentTime }: VowelSpaceProps
   const plotW = width - margin.left - margin.right;
   const plotH = height - margin.top - margin.bottom;
 
-  // Speaker type normalization ranges
-  const ranges = {
-    male:   { f1Min: 200, f1Max: 800, f2Min: 600, f2Max: 2500 },
-    female: { f1Min: 200, f1Max: 1000, f2Min: 700, f2Max: 3000 },
-    child:  { f1Min: 250, f1Max: 1100, f2Min: 800, f2Max: 3500 },
-  };
-  const [speakerType, setSpeakerType] = useState<'male' | 'female' | 'child'>('male');
-  const { f1Min, f1Max, f2Min, f2Max } = ranges[speakerType];
-
   // Axes: F2 (x, reversed: high left) and F1 (y: small at top, large at bottom — IPA convention)
   const toX = (f2: number) => margin.left + (1 - (f2 - f2Min) / (f2Max - f2Min)) * plotW;
   const toY = (f1: number) => margin.top + ((f1 - f1Min) / (f1Max - f1Min)) * plotH;
@@ -90,13 +78,13 @@ export function VowelSpace({ analysis, selection, currentTime }: VowelSpaceProps
       <div className="vowel-space-header">
         Vowel Space {selection ? '(selection)' : '(all)'}
         <select
-          value={speakerType}
-          onChange={(e) => setSpeakerType(e.target.value as 'male' | 'female' | 'child')}
+          value={profile}
+          onChange={(e) => onProfileChange(e.target.value as VowelProfile)}
           className="vowel-space-select"
+          aria-label="Vowel matching profile"
         >
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="child">Child</option>
+          <option value="modern-rp-male">Modern RP male</option>
+          <option value="modern-rp-female">Modern RP female</option>
         </select>
       </div>
       <svg width={width} height={height} className="vowel-space-svg">
@@ -104,16 +92,17 @@ export function VowelSpace({ analysis, selection, currentTime }: VowelSpaceProps
         <rect x={margin.left} y={margin.top} width={plotW} height={plotH} fill="var(--bg-base)" stroke="var(--border)" />
 
         {/* Grid lines */}
-        {[200, 400, 600, 800].map(f1 => (
+        {f1Ticks.map(f1 => (
           <line key={`f1-${f1}`} x1={margin.left} x2={margin.left + plotW} y1={toY(f1)} y2={toY(f1)} stroke="var(--border)" strokeDasharray="2,2" />
         ))}
-        {[1000, 1500, 2000, 2500].map(f2 => (
+        {f2Ticks.map(f2 => (
           <line key={`f2-${f2}`} x1={toX(f2)} x2={toX(f2)} y1={margin.top} y2={margin.top + plotH} stroke="var(--border)" strokeDasharray="2,2" />
         ))}
 
         {/* IPA reference points */}
-        {IPA_VOWELS.map((v) => (
-          <g key={v.symbol}>
+        {references.map((v) => (
+          <g key={`${v.symbol}-${v.description}`}>
+            <title>{v.description}</title>
             <text
               x={toX(v.f2)}
               y={toY(v.f1)}
@@ -172,14 +161,14 @@ export function VowelSpace({ analysis, selection, currentTime }: VowelSpaceProps
         </text>
 
         {/* F2 tick labels */}
-        {[2500, 2000, 1500, 1000].map(f2 => (
+        {f2Ticks.map(f2 => (
           <text key={f2} x={toX(f2)} y={margin.top + plotH + 12} textAnchor="middle" fontSize="9" fill="var(--text-dim)">
             {f2}
           </text>
         ))}
 
         {/* F1 tick labels */}
-        {[200, 400, 600, 800].map(f1 => (
+        {f1Ticks.map(f1 => (
           <text key={f1} x={margin.left - 4} y={toY(f1)} textAnchor="end" dominantBaseline="middle" fontSize="9" fill="var(--text-dim)">
             {f1}
           </text>

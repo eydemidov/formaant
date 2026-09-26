@@ -1,7 +1,34 @@
 import { describe, it, expect } from 'vitest';
 import { classifyVowel, generateIpaAnnotations, vowelReferences } from '../src/audio/ipaVowels';
+import { vowelProfiles } from '../src/audio/vowelProfiles';
 
 describe('IPA Vowel Classification', () => {
+  it('keeps the supplied Modern RP targets inside their stated ranges', () => {
+    for (const references of Object.values(vowelProfiles)) {
+      expect(references).toHaveLength(11);
+      expect(references.every((reference) => !/onset|glide/.test(reference.description))).toBe(true);
+      for (const reference of references) {
+        expect(reference.f1).toBeGreaterThanOrEqual(reference.f1Min);
+        expect(reference.f1).toBeLessThanOrEqual(reference.f1Max);
+        expect(reference.f2).toBeGreaterThanOrEqual(reference.f2Min);
+        expect(reference.f2).toBeLessThanOrEqual(reference.f2Max);
+      }
+    }
+  });
+
+  it('uses the selected Modern RP profile for matching', () => {
+    expect(classifyVowel(290, 2364, 'modern-rp-male').symbol).toBe('iː');
+    expect(classifyVowel(290, 2364, 'modern-rp-female').symbol).toBe('?');
+    expect(classifyVowel(845, 1663, 'modern-rp-female').symbol).toBe('a');
+  });
+
+  it('allows five percent beyond each profile range bound', () => {
+    expect(classifyVowel(262, 2364, 'modern-rp-male').symbol).toBe('iː');
+    expect(classifyVowel(256, 2364, 'modern-rp-male').symbol).toBe('?');
+    expect(classifyVowel(1005, 1663, 'modern-rp-female').symbol).toBe('a');
+    expect(classifyVowel(1030, 1663, 'modern-rp-female').symbol).toBe('?');
+  });
+
   it('classifies close front vowel [i]', () => {
     const result = classifyVowel(270, 2290);
     expect(result.symbol).toBe('i');
@@ -50,6 +77,14 @@ describe('IPA Vowel Classification', () => {
 });
 
 describe('generateIpaAnnotations', () => {
+  it('uses the selected profile when annotating frames', () => {
+    const annotations = generateIpaAnnotations(
+      [0, 0.1], [290, 1005], [2364, 1663], undefined,
+      { profile: 'modern-rp-female' }
+    );
+    expect(annotations.map((annotation) => annotation.symbol)).toEqual(['a']);
+  });
+
   it('generates annotations for voiced frames', () => {
     const times = [0.0, 0.1, 0.2, 0.3, 0.4];
     const f1: (number | null)[] = [270, null, 730, 500, 300];
