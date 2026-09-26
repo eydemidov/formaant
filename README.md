@@ -1,23 +1,77 @@
 # Web Praat
 
-This fork of Web Praat is geared towards language learning, with features focused on accent training.
+A standalone browser app for language learning - specifically pronunciation and accent training.
 
-A browser-based port of [Praat](https://www.fon.hum.uva.nl/praat/) for phonetics research, teaching, and interactive exploration. Zero installation — runs entirely in the browser.
+Originally based on [Web Praat](https://justinchuby.github.io/web-praat/), [Praat](https://www.fon.hum.uva.nl/praat/)'s browser port.
 
-<!--[![CI](https://github.com/justinchuby/web-praat/actions/workflows/ci.yml/badge.svg)](https://github.com/justinchuby/web-praat/actions/workflows/ci.yml)-->
-[![codecov](https://codecov.io/gh/justinchuby/web-praat/graph/badge.svg)](https://codecov.io/gh/justinchuby/web-praat)
+<!--<img width="2354" height="1212" alt="image" src="https://github.com/user-attachments/assets/14fa2de8-3f54-44ec-8b70-86c80b718e4b" />-->
 
-<img width="2354" height="1212" alt="image" src="https://github.com/user-attachments/assets/14fa2de8-3f54-44ec-8b70-86c80b718e4b" />
+## How to Train Your Pronunciation with Formants
 
-**[Original Web Praat demo →](https://justinchuby.github.io/web-praat/)**
+When you pronounce a vowel, the shape of your mouth changes the sound. These changes can be measured using **formants**.
 
-## Changes compared to the original
+The two most useful for pronunciation are **F1** and **F2**:
 
-- Fixed spectrogram blinking during recording and a formant-tracking gap that could disrupt vowel segmentation.
-- Added a toggle and average F1/F2 readings to IPA vowel annotations for each detected segment.
-- Added selectable vowel-matching profiles for Modern RP, American English, Mandarin Chinese, French, Japanese, and Serbian, with separate women’s and men’s data.
-- Matched vowels against each profile’s F1/F2 targets and available ranges, with a 5% range allowance; added voicing and spectral-energy checks to reduce consonant labels.
-- Made the vowel-space chart scale to the selected profile and saved analysis, filter, profile, and overlay settings locally across reloads.
+- **F1** roughly shows how open or closed the vowel is.
+- **F2** roughly shows how far forward or back the vowel is.
+
+Together, F1 and F2 can be plotted in a **vowel space**. This lets you compare your pronunciation with a target vowel and adjust your tongue position.
+
+### What about pitch?
+
+**F0** represents pitch.
+
+It is useful for practicing:
+
+- intonation
+- lexical tone
+- stress
+- sentence melody
+
+In short:
+
+**F1 → vowel height**  
+**F2 → vowel front/back position**  
+**F0 → pitch**
+
+You do not need to memorize the numbers. Record yourself, compare your result with the target, adjust your pronunciation, and try again.
+
+Formants are simply a way to turn pronunciation into **visual feedback**.
+
+### Useful links
+
+- [International Phonetic Alphabet (IPA)](https://en.wikipedia.org/wiki/International_Phonetic_Alphabet) - symbols used to represent speech sounds.
+- [IPA chart](https://en.wikipedia.org/wiki/International_Phonetic_Alphabet_chart) - overview of IPA vowels, consonants, stress, and tone symbols.
+- [Vowel diagram / vowel space](https://en.wikipedia.org/wiki/Vowel_diagram) — how vowels are organized by height and frontness/backness, including their relationship to F1 and F2.
+- [Formants](https://en.wikipedia.org/wiki/Formant) - what F1, F2, F3, etc. represent acoustically.
+- [Fundamental frequency (F0)](https://en.wikipedia.org/wiki/Fundamental_frequency) - the acoustic measurement closely related to perceived pitch.
+
+## Features
+
+### Pronunciation Analysis
+- Pitch (F0) tracking
+- Formant analysis (F1, F2, F3)
+- Wideband and narrowband spectrograms
+- Intensity visualization
+
+### Vowel Training
+- F1 × F2 vowel-space visualization
+- Vowel trajectories over time
+- IPA vowel labels
+- Selectable reference profiles for Modern RP, American English, Mandarin Chinese, French, Japanese, and Serbian
+- Separate reference data for women and men
+- Visual comparison between the learner’s vowels and target vowels
+
+### Recording & Playback
+- Record pronunciation directly in the app
+- Select and replay parts of a recording
+- Loop playback for repeated practice
+
+### Practice
+- Record a word, vowel, or sentence
+- Inspect pitch and vowel formants
+- Compare pronunciation with a selected target profile
+- Repeat and adjust pronunciation based on the visual feedback
 
 ## Available voice profiles and their sources
 
@@ -31,58 +85,6 @@ Each profile uses **F1 and F2** to place vowels on a chart. Values are in hertz 
 | **French** | 10 oral vowels from 15 women and 15 men in broadcast speech. The profile uses published averages; minimum and maximum values are unavailable. | [Gendrot and Adda-Decker (2005)](https://www.isca-archive.org/interspeech_2005/gendrot05_interspeech.pdf) |
 | **Japanese (Tokyo area)** | Five short vowels from eight women and eight men. Averages come from the paper; ranges were calculated across individual speaker averages in its open dataset. | [Yazawa and Kondo (2019)](https://www.internationalphoneticassociation.org/icphs-proceedings/ICPhS2019/papers/ICPhS_720.pdf) · [measurement data](https://zenodo.org/records/15227304) |
 | **Serbian (Novi Sad)** | Seven chart entries from 10 women and 10 men: **i, e, eː, a, o, oː, u**. Short and long **i, a, u** were averaged into one entry each; short and long **e, o** remain separate because their measured positions differ more. The `ː` mark means “long.” | [Marković and Sredojević (2021)](https://doi.org/10.18485/ms_zmsfil.2021.64.2.3) |
-
-## Why web-praat?
-
-- **Zero install** — open a browser, start analyzing
-- **Interactive** — real-time parameter sliders, vowel space visualization, live recording with spectrogram
-- **Teaching-focused** — students can see how LPC order / pitch range / voicing threshold affect results instantly
-- **Mobile-friendly** — works on phones and tablets with touch gestures
-- **Private** — audio never leaves your browser
-
-For production research pipelines, use [Praat](https://www.praat.org/) or [Parselmouth](https://parselmouth.readthedocs.io/).
-
-## Features
-
-### Acoustic Analysis
-- Wideband/narrowband spectrogram (6 window functions, 8 colormaps, WebGPU-accelerated FFT)
-- Pitch (F0) — normalized autocorrelation + Viterbi path tracking
-- Formants — Burg LPC, adjustable order 6–24
-- Intensity (dB SPL), Harmonicity (HNR), Voice Quality (jitter/shimmer)
-- MFCC, LTAS, Cochleagram, Excitation Pattern, Spectrum Slice
-- Point Process, Rhythm Metrics (PVI, %V, ΔC)
-
-### Annotation
-- Full TextGrid editor (IntervalTier + TextTier)
-- Praat long + short format import/export, ELAN (.eaf) import
-- Boundary manipulation, keyboard navigation, controlled vocabulary
-
-### Visualization
-- Pitch contour, formant tracks (F1–F3), intensity curve overlays
-- IPA vowel annotation tier
-- Vowel Space panel (F1×F2 scatter + trajectory, selectable voice profiles)
-- Publication-quality PNG figure export (2400×1200)
-- 4 themes (Catppuccin Mocha/Latte/Frappe/Macchiato)
-
-### Script Editor
-- Multi-tab CodeMirror 6 editor (Praat Script + JavaScript)
-- Praat Script interpreter (procedures, loops, string operations)
-- JavaScript API (`praat.toPitch`, `praat.toFormant`, etc.)
-- Batch processing — run scripts on multiple audio files, export CSV
-
-### Tools
-- Manipulation Editor (PSOLA), Pitch/Formant/Duration/Amplitude Tier editors
-- Vocal Tract Editor, Spectrum Editor
-- Noise reduction (Web Worker), Normalize, Reverse, Remove Silence
-- All effects undoable (⌘Z), Biquad/Butterworth filtering
-- Perception experiments (MFC), Speech Synthesizer, Pitch Sonification
-- Plugin system (5 built-in), Command Palette (⌘⇧P)
-
-### Recording & Playback
-- Live recording with real-time spectrogram (AudioWorklet + fallback)
-- iOS/Safari compatible
-- Selection loop playback
-- Long audio (>5 min) waveform-only mode with on-demand region analysis
 
 ## Accuracy
 
