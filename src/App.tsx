@@ -24,7 +24,6 @@ import { Waveform } from './components/Waveform';
 import { DropOverlay, DropFileType } from './components/DropOverlay';
 import { Minimap } from './components/Minimap';
 import { FilterPanel } from './components/FilterPanel';
-import { ListingPanel, type ListingData } from './components/ListingPanel';
 import { normalize as soundNormalize } from './audio/soundManipulation';
 import { removeSilence } from './audio/soundEnhance';
 import type {
@@ -35,7 +34,6 @@ import type {
 } from './types';
 import { fitToWindow, panViewRange, selectionToView, zoomAroundPoint } from './utils/view';
 import { loadAppPreferences, saveAppPreferences } from './utils/preferences';
-import { findNearestZeroCrossing } from "./utils/zeroCrossing";
 
 function createAudioBufferFromSamples(samples: Float32Array, sampleRate: number): AudioBuffer {
   const buffer = new AudioBuffer({ length: samples.length, sampleRate, numberOfChannels: 1 });
@@ -63,7 +61,6 @@ export default function App() {
   const [settings, setSettings] = useState<AnalysisSettings>(initialPreferences.settings);
   const [filterSettings, setFilterSettings] = useState<FilterSettings>(initialPreferences.filterSettings);
   const [vowelProfile, setVowelProfile] = useState(initialPreferences.vowelProfile);
-  const [listingData, setListingData] = useState<ListingData | null>(null);
   const [viewStart, setViewStart] = useState(0);
   const [viewEnd, setViewEnd] = useState(1);
   const [sampleRate, setSampleRate] = useState(44100);
@@ -672,76 +669,6 @@ export default function App() {
         themeSetting={themeSetting}
         onThemeChange={setThemeSetting}
         onOpenCommandPalette={() => setCommandPaletteOpen(true)}
-        onGetCursorPosition={() => {
-          window.alert(`Cursor position: ${currentTimeRef.current.toFixed(6)} s`);
-        }}
-        onGetSelectionBounds={() => {
-          if (selection) window.alert(`Selection: ${selection.start.toFixed(6)} \u2013 ${selection.end.toFixed(6)} s`);
-        }}
-        onGetPitchAtCursor={() => {
-          if (!analysis) return;
-          const t = currentTimeRef.current;
-          const p = analysis.pitch;
-          let bestIdx = 0;
-          let bestDist = Infinity;
-          for (let i = 0; i < p.times.length; i++) {
-            const d = Math.abs(p.times[i] - t);
-            if (d < bestDist) { bestDist = d; bestIdx = i; }
-          }
-          const val = p.frequencies[bestIdx];
-          window.alert(`Pitch at ${t.toFixed(4)} s: ${val != null && val > 0 ? val.toFixed(1) + ' Hz' : 'undefined'}`);
-        }}
-        onGetFormantAtCursor={() => {
-          if (!analysis) return;
-          const t = currentTimeRef.current;
-          const f = analysis.formants;
-          let bestIdx = 0;
-          let bestDist = Infinity;
-          for (let i = 0; i < f.times.length; i++) {
-            const d = Math.abs(f.times[i] - t);
-            if (d < bestDist) { bestDist = d; bestIdx = i; }
-          }
-          const f1 = f.f1[bestIdx], f2 = f.f2[bestIdx], f3 = f.f3[bestIdx];
-          window.alert(`Formants at ${t.toFixed(4)} s:\nF1: ${f1 != null && f1 > 0 ? f1.toFixed(0) + ' Hz' : '--'}\nF2: ${f2 != null && f2 > 0 ? f2.toFixed(0) + ' Hz' : '--'}\nF3: ${f3 != null && f3 > 0 ? f3.toFixed(0) + ' Hz' : '--'}`);
-        }}
-        onPitchListing={() => {
-          if (!analysis) return;
-          const p = analysis.pitch;
-          const rows = p.times.map((t: number, i: number) => [
-            t.toFixed(4),
-            p.frequencies[i] != null && (p.frequencies[i] as number) > 0 ? (p.frequencies[i] as number).toFixed(1) : '--'
-          ]);
-          setListingData({ title: 'Pitch listing', headers: ['Time (s)', 'F0 (Hz)'], rows });
-        }}
-        onFormantListing={() => {
-          if (!analysis) return;
-          const f = analysis.formants;
-          const rows = f.times.map((t: number, i: number) => {
-            const vals = [f.f1[i], f.f2[i], f.f3[i]].map(v => v != null && v > 0 ? v.toFixed(0) : '--');
-            return [t.toFixed(4), ...vals];
-          });
-          setListingData({ title: 'Formant listing', headers: ['Time (s)', 'F1 (Hz)', 'F2 (Hz)', 'F3 (Hz)'], rows });
-        }}
-        onSelectAll={() => {
-          if (!currentSamplesRef.current) return;
-          const dur = currentSamplesRef.current.length / sampleRate;
-          setSelection({ start: 0, end: dur });
-        }}
-        onMoveCursorToZeroCrossing={() => {
-          if (!currentSamplesRef.current) return;
-          const t = findNearestZeroCrossing(currentSamplesRef.current, sampleRate, currentTimeRef.current);
-          setCurrentTime(t);
-        }}
-        onMoveStartToZeroCrossing={() => {
-          if (!currentSamplesRef.current || !selection) return;
-          const t = findNearestZeroCrossing(currentSamplesRef.current, sampleRate, selection.start);
-          setSelection({ start: t, end: selection.end });
-        }}
-        onMoveEndToZeroCrossing={() => {
-          if (!currentSamplesRef.current || !selection) return;
-          const t = findNearestZeroCrossing(currentSamplesRef.current, sampleRate, selection.end);
-          setSelection({ start: selection.start, end: t });
-        }}
       />
 
       <CommandPalette commands={paletteCommands} open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} />
@@ -902,7 +829,6 @@ export default function App() {
           )}
         </div>
 
-        <ListingPanel data={listingData} onClose={() => setListingData(null)} />
 
         </main>
 
