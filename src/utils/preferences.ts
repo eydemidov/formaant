@@ -8,6 +8,7 @@ export interface AppPreferences {
   settings: AnalysisSettings;
   filterSettings: FilterSettings;
   vowelProfile: VowelProfile;
+  targetVowel: string;
   filterConsonants: boolean;
   overlays: {
     pitch: boolean;
@@ -22,6 +23,7 @@ const defaults: AppPreferences = {
   settings: defaultAnalysisSettings,
   filterSettings: defaultFilterSettings,
   vowelProfile: 'modern-rp-male',
+  targetVowel: vowelProfiles['modern-rp-male'][0].symbol,
   filterConsonants: true,
   overlays: {
     pitch: true,
@@ -77,10 +79,15 @@ export function parseAppPreferences(raw: string | null): AppPreferences {
       filterSettings.type = defaultFilterSettings.type;
     }
 
+    const vowelProfile = isVowelProfile(saved.vowelProfile) ? saved.vowelProfile : defaults.vowelProfile;
+
     return {
       settings: { spectrogram, pitch, formant },
       filterSettings,
-      vowelProfile: isVowelProfile(saved.vowelProfile) ? saved.vowelProfile : defaults.vowelProfile,
+      vowelProfile,
+      targetVowel: typeof saved.targetVowel === 'string' && vowelProfiles[vowelProfile].some((vowel) => vowel.symbol === saved.targetVowel)
+        ? saved.targetVowel
+        : vowelProfiles[vowelProfile][0].symbol,
       filterConsonants: typeof saved.filterConsonants === 'boolean' ? saved.filterConsonants : defaults.filterConsonants,
       overlays: mergeSection(defaults.overlays, saved.overlays),
     };

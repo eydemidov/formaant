@@ -21,6 +21,7 @@ import { Minimap } from './components/Minimap';
 import { FilterPanel } from './components/FilterPanel';
 import { normalize as soundNormalize } from './audio/soundManipulation';
 import { findHighEnergyRegions } from './audio/quickSelect';
+import { vowelProfiles, type VowelProfile } from './audio/vowelProfiles';
 import type {
   AnalysisResult,
   AnalysisSettings,
@@ -55,6 +56,7 @@ export default function App() {
   const [settings, setSettings] = useState<AnalysisSettings>(initialPreferences.settings);
   const [filterSettings, setFilterSettings] = useState<FilterSettings>(initialPreferences.filterSettings);
   const [vowelProfile, setVowelProfile] = useState(initialPreferences.vowelProfile);
+  const [targetVowel, setTargetVowel] = useState(initialPreferences.targetVowel);
   const [viewStart, setViewStart] = useState(0);
   const [viewEnd, setViewEnd] = useState(1);
   const [sampleRate, setSampleRate] = useState(44100);
@@ -65,6 +67,7 @@ export default function App() {
       settings,
       filterSettings,
       vowelProfile,
+      targetVowel,
       filterConsonants,
       overlays: {
         pitch: showPitch,
@@ -74,7 +77,14 @@ export default function App() {
         ipaFormants: showIpaFormants,
       },
     });
-  }, [settings, filterSettings, vowelProfile, filterConsonants, showPitch, showFormants, showIntensity, showIpa, showIpaFormants]);
+  }, [settings, filterSettings, vowelProfile, targetVowel, filterConsonants, showPitch, showFormants, showIntensity, showIpa, showIpaFormants]);
+
+  const handleVowelProfileChange = useCallback((nextProfile: VowelProfile) => {
+    setVowelProfile(nextProfile);
+    setTargetVowel((current) => vowelProfiles[nextProfile].some((vowel) => vowel.symbol === current)
+      ? current
+      : vowelProfiles[nextProfile][0].symbol);
+  }, []);
 
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
@@ -640,7 +650,7 @@ export default function App() {
                   <FilterPanel settings={filterSettings} onChange={setFilterSettings} onApply={handleApplyFilter} onReset={handleResetFilter} />
                 </>
               ),
-              vowels: <VowelSpace analysis={analysis} selection={selection} currentTime={currentTime} profile={vowelProfile} onProfileChange={setVowelProfile} />,
+              vowels: <VowelSpace analysis={analysis} selection={selection} currentTime={currentTime} profile={vowelProfile} onProfileChange={handleVowelProfileChange} targetVowel={targetVowel} onTargetVowelChange={setTargetVowel} />,
             }}
           </RightSidebar>
         )}
@@ -649,7 +659,7 @@ export default function App() {
       {isMobile && (
         <BottomSheet open={activePanel !== null} title={activePanel === 'vowels' ? 'Vowel Space' : 'Settings'} onClose={() => setActivePanel(null)}>
           {activePanel === 'vowels' ? (
-            <VowelSpace analysis={analysis} selection={selection} currentTime={currentTime} profile={vowelProfile} onProfileChange={setVowelProfile} />
+            <VowelSpace analysis={analysis} selection={selection} currentTime={currentTime} profile={vowelProfile} onProfileChange={handleVowelProfileChange} targetVowel={targetVowel} onTargetVowelChange={setTargetVowel} />
           ) : (
           <div className="bottom-sheet-content">
             <div className="sidebar-section">

@@ -1,6 +1,9 @@
 import { useMemo } from 'react';
+import { hzToBark } from '../audio/ipaMapper';
 import { vowelProfiles, VOWEL_RANGE_ALLOWANCE, type VowelProfile } from '../audio/vowelProfiles';
 import type { AnalysisResult, TimeSelection } from '../types';
+
+const CLOSE_TARGET_BARK = 1;
 
 interface VowelSpaceProps {
   analysis: AnalysisResult | null;
@@ -8,6 +11,8 @@ interface VowelSpaceProps {
   currentTime: number;
   profile: VowelProfile;
   onProfileChange: (profile: VowelProfile) => void;
+  targetVowel: string;
+  onTargetVowelChange: (symbol: string) => void;
 }
 
 interface VowelPoint {
@@ -16,9 +21,10 @@ interface VowelPoint {
   time: number;
 }
 
-export function VowelSpace({ analysis, selection, currentTime, profile, onProfileChange }: VowelSpaceProps) {
+export function VowelSpace({ analysis, selection, currentTime, profile, onProfileChange, targetVowel, onTargetVowelChange }: VowelSpaceProps) {
   const hasRange = selection !== null && selection.end > selection.start;
   const references = vowelProfiles[profile];
+  const target = references.find((vowel) => vowel.symbol === targetVowel) ?? references[0];
   const f1Min = Math.floor(Math.min(...references.map((vowel) => (vowel.f1Min ?? vowel.f1) * (1 - VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
   const f1Max = Math.ceil(Math.max(...references.map((vowel) => (vowel.f1Max ?? vowel.f1) * (1 + VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
   const f2Min = Math.floor(Math.min(...references.map((vowel) => (vowel.f2Min ?? vowel.f2) * (1 - VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
@@ -80,6 +86,10 @@ export function VowelSpace({ analysis, selection, currentTime, profile, onProfil
   }, [allPoints, currentTime]);
 
   const marker = hasRange ? selectionAverage : nearestPoint;
+  const comparisonRows = [
+    { label: 'F1', target: target.f1, measured: marker?.f1 },
+    { label: 'F2', target: target.f2, measured: marker?.f2 },
+  ];
 
   // Plot dimensions
   const width = 280;
@@ -203,17 +213,44 @@ export function VowelSpace({ analysis, selection, currentTime, profile, onProfil
         ))}
       </svg>
 
-      {/* Stats */}
-      {marker && (
-        <div className="vowel-space-stats">
-          F1: {marker.f1.toFixed(0)} Hz | F2: {marker.f2.toFixed(0)} Hz
-        </div>
-      )}
-      {points.length > 0 && (
-        <div className="vowel-space-stats">
-          {points.length} points
-        </div>
-      )}
+      <div className="vowel-target">
+        <label className="vowel-target-control">
+          Target vowel
+          <select aria-label="Target vowel" value={target.symbol} onChange={(event) => onTargetVowelChange(event.target.value)}>
+            {references.map((vowel) => (
+              <option key={vowel.symbol} value={vowel.symbol}>{vowel.symbol} — {vowel.description}</option>
+            ))}
+          </select>
+        </label>
+        <table className="vowel-target-table" aria-label="Target vowel comparison">
+          <thead>
+            <tr>
+              <th scope="col" aria-label="Formant" />
+              <th scope="col">Target</th>
+              <th scope="col">Selection</th>
+              <th scope="col">Difference</th>
+            </tr>
+          </thead>
+          <tbody>
+            {comparisonRows.map((row) => {
+              const isClose = row.measured !== undefined && Math.abs(hzToBark(row.measured) - hzToBark(row.target)) <= CLOSE_TARGET_BARK;
+              return (
+                <tr key={row.label}>
+                  <th scope="row">{row.label}</th>
+                  <td>{row.target} Hz</td>
+                  <td
+                    className={row.measured === undefined ? undefined : isClose ? 'vowel-target-close' : 'vowel-target-far'}
+                    aria-label={row.measured === undefined ? undefined : `${row.label} selection ${row.measured.toFixed(0)} Hz, ${isClose ? 'close to' : 'far from'} target`}
+                  >
+                    {row.measured === undefined ? '—' : `${row.measured.toFixed(0)} Hz`}
+                  </td>
+                  <td>{row.measured === undefined ? '—' : `${Math.abs(row.measured - row.target).toFixed(0)} Hz`}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

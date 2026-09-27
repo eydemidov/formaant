@@ -1187,10 +1187,72 @@ select:focus-visible {
   border-radius: 4px;
 }
 
-.vowel-space-stats {
+.vowel-target {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
   font-size: 11px;
   color: var(--text-dim);
-  font-family: monospace;
+}
+
+.vowel-target-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.vowel-target-control select {
+  min-width: 0;
+  max-width: 70%;
+  padding: 3px 5px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg-base);
+  color: var(--text);
+}
+
+.vowel-target-table {
+  width: 100%;
+  border-collapse: collapse;
+  font: 11px var(--font-mono);
+}
+
+.vowel-target-table th,
+.vowel-target-table td {
+  padding: 6px 3px;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.vowel-target-table th:first-child {
+  text-align: left;
+}
+
+.vowel-target-table thead th,
+.vowel-target-table tbody th {
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.vowel-target-table td {
+  color: var(--text);
+}
+
+.vowel-target-table .vowel-target-close {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.vowel-target-table .vowel-target-far {
+  color: var(--red);
+  font-weight: 700;
 }
 
 .settings-slider-field {

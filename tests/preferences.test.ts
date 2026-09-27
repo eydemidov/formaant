@@ -16,6 +16,7 @@ describe('app preferences', () => {
     expect(preferences.overlays.ipaFormants).toBe(true);
     expect(preferences.filterConsonants).toBe(true);
     expect(preferences.vowelProfile).toBe('modern-rp-male');
+    expect(preferences.targetVowel).toBe('iː');
   });
 
   it('restores analysis, filter, and overlay preferences', () => {
@@ -23,6 +24,7 @@ describe('app preferences', () => {
       settings: { spectrogram: { colormap: 'magma' }, formant: { maxFrequency: 5000 } },
       filterSettings: { type: 'highpass', cutoffHz: 300 },
       vowelProfile: 'modern-rp-female',
+      targetVowel: 'ʉː',
       filterConsonants: false,
       overlays: { pitch: false, ipaFormants: false },
     }));
@@ -35,6 +37,7 @@ describe('app preferences', () => {
     expect(preferences.overlays.ipaFormants).toBe(false);
     expect(preferences.overlays.formants).toBe(true);
     expect(preferences.vowelProfile).toBe('modern-rp-female');
+    expect(preferences.targetVowel).toBe('ʉː');
     expect(preferences.filterConsonants).toBe(false);
     for (const vowelProfile of Object.keys(vowelProfiles)) {
       expect(parseAppPreferences(JSON.stringify({ vowelProfile })).vowelProfile).toBe(vowelProfile);
@@ -53,7 +56,9 @@ describe('app preferences', () => {
     expect(preferences.settings.spectrogram).toEqual(defaultAnalysisSettings.spectrogram);
     expect(preferences.overlays.ipa).toBe(true);
     expect(preferences.vowelProfile).toBe('modern-rp-male');
+    expect(preferences.targetVowel).toBe('iː');
     expect(preferences.filterConsonants).toBe(true);
     expect(parseAppPreferences(JSON.stringify({ vowelProfile: 'toString' })).vowelProfile).toBe('modern-rp-male');
+    expect(parseAppPreferences(JSON.stringify({ vowelProfile: 'french-male', targetVowel: 'iː' })).targetVowel).toBe('i');
   });
 });
