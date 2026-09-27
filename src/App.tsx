@@ -8,7 +8,6 @@ import { BottomSheet } from './components/BottomSheet';
 import { applyBiquadFilter } from './audio/filters';
 import { loadAudioFile } from './audio/recorder';
 import { HelpDialog } from './components/HelpDialog';
-import { CommandPalette, Command } from './components/CommandPalette';
 import { RightSidebar } from './components/RightSidebar';
 import { SettingsPanel } from './components/SettingsPanel';
 import { Spectrogram } from './components/Spectrogram';
@@ -458,19 +457,7 @@ export default function App() {
 
   useKeyboardShortcuts(shortcutHandlers, true);
 
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'P' || e.key === 'p')) {
-        e.preventDefault();
-        setCommandPaletteOpen((v) => !v);
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, []);
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -484,12 +471,6 @@ export default function App() {
     return () => document.removeEventListener('keydown', handler);
   }, []);
 
-  const paletteCommands: Command[] = useMemo(() => [
-    { id: 'file.open-audio', label: 'Open Audio', category: 'File', action: () => audioFileInputRef.current?.click() },
-    { id: 'edit.normalize', label: 'Normalize', category: 'Edit', action: () => { if (currentSamplesRef.current) applyEffect(soundNormalize(currentSamplesRef.current)); } },
-    { id: 'recording.start-stop', label: 'Start/Stop Recording', category: 'Recording', shortcut: 'R', action: () => { isRecording ? handleStopRecord() : handleRecord(); } },
-  ], [isRecording, handleRecord, handleStopRecord, applyEffect]);
-
   return (
     <div className="app-layout">
       <DropOverlay visible={isDragOver} fileType={dragFileType} />
@@ -498,8 +479,6 @@ export default function App() {
         event.target.value = '';
         if (file) void handleLoadFile(file);
       }} />
-      <CommandPalette commands={paletteCommands} open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} />
-
       <Toolbar
         hasAudio={!!analysis}
         isPlaying={isPlaying}
@@ -510,7 +489,6 @@ export default function App() {
         onPlay={handlePlay}
         onPause={handlePause}
         onHelp={() => setHelpOpen(true)}
-        onOpenCommandPalette={() => setCommandPaletteOpen(true)}
         showPitch={showPitch}
         showFormants={showFormants}
         showIntensity={showIntensity}

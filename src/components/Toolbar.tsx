@@ -1,6 +1,6 @@
 import {
   Play, Pause, Square, Circle,
-  AudioLines, Waves, Activity, Languages, Hash, Filter, FolderOpen, CircleHelp, Search,
+  AudioLines, Waves, Activity, Languages, Hash, Filter, FolderOpen, CircleHelp,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
@@ -14,7 +14,6 @@ interface ToolbarProps {
   onPlay: () => void;
   onPause: () => void;
   onHelp: () => void;
-  onOpenCommandPalette: () => void;
   // Overlay toggles
   showPitch: boolean;
   showFormants: boolean;
@@ -62,7 +61,7 @@ function IconBtn({ icon: Icon, label, onClick, disabled, active, danger, color }
 export function Toolbar(props: ToolbarProps) {
   const {
     hasAudio, isPlaying, isRecording,
-    onOpenAudio, onRecord, onStopRecord, onPlay, onPause, onHelp, onOpenCommandPalette,
+    onOpenAudio, onRecord, onStopRecord, onPlay, onPause, onHelp,
     showPitch, showFormants, showIntensity, showIpa, showIpaFormants, filterConsonants,
     onTogglePitch, onToggleFormants, onToggleIntensity, onToggleIpa, onToggleIpaFormants, onToggleConsonantFilter,
   } = props;
@@ -98,7 +97,6 @@ export function Toolbar(props: ToolbarProps) {
       </div>
 
       <div className="toolbar-group toolbar-actions">
-        <IconBtn icon={Search} label="Command Palette (⌘⇧P)" onClick={onOpenCommandPalette} />
         <IconBtn icon={CircleHelp} label="Help" onClick={onHelp} />
       </div>
     </div>

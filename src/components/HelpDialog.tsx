@@ -7,7 +7,6 @@ const shortcuts = [
   { keys: '⌘/Ctrl + + / =', description: 'Zoom in' },
   { keys: '⌘/Ctrl + -', description: 'Zoom out' },
   { keys: '⌘/Ctrl + 0', description: 'Fit to window' },
-  { keys: '⌘/Ctrl + ⇧ + P', description: 'Command palette' },
   { keys: '?', description: 'Show this help' },
 ];
 
