@@ -7,6 +7,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { analyzeAudio } from '../../src/audio/analyzer';
+import { defaultAnalysisSettings } from '../../src/audio/defaults';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -238,7 +239,9 @@ describe('Advanced — speech/silence voicing detection', () => {
 
 describe('Advanced — jitter and shimmer measurement', () => {
   const { samples, sampleRate } = loadWav('fixtures/jittery_voice.wav');
-  const result = analyzeAudio(samples, sampleRate);
+  const result = analyzeAudio(samples, sampleRate, {
+    pitch: { ...defaultAnalysisSettings.pitch, maxHz: 600 },
+  });
   const expected = loadJson('fixtures/jittery_voice_expected.json');
 
   it('detects pitch at ~440 Hz', () => {

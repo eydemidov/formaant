@@ -8,6 +8,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { computePitch, computeFormants, computeIntensity } from '../../src/audio/analyzer';
+import { defaultAnalysisSettings } from '../../src/audio/defaults';
 
 const refPath = join(__dirname, 'reference', 'praat-reference.json');
 const reference = JSON.parse(readFileSync(refPath, 'utf-8'));
@@ -77,7 +78,9 @@ describe('Cross-validation: Pitch vs Praat', () => {
 
     it(`${key}: web-praat vs Praat (target ${params.f0} Hz, Praat=${praat_mean_f0} Hz)`, () => {
       const signal = voiceLike(params.f0, params.duration, params.sr);
-      const pitch = computePitch(signal, params.sr);
+      const pitch = computePitch(signal, params.sr, {
+        pitch: { ...defaultAnalysisSettings.pitch, maxHz: 600 },
+      });
       const voiced = pitch.frequencies.filter((f): f is number => f !== null && f > 0);
       expect(voiced.length).toBeGreaterThan(5);
       const meanF0 = voiced.reduce((a, b) => a + b, 0) / voiced.length;

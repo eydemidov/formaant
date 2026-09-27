@@ -13,6 +13,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { analyzeAudio } from '../../src/audio/analyzer';
+import { defaultAnalysisSettings } from '../../src/audio/defaults';
 
 // ─── WAV Loader ───────────────────────────────────────────────────────────────
 
@@ -60,7 +61,9 @@ function loadRef(relPath: string) {
 
 describe('Praat accuracy — sine 440Hz', () => {
   const { samples, sampleRate } = loadWav('fixtures/sine_440hz.wav');
-  const result = analyzeAudio(samples, sampleRate);
+  const result = analyzeAudio(samples, sampleRate, {
+    pitch: { ...defaultAnalysisSettings.pitch, maxHz: 600 },
+  });
   const pitchRef = loadRef('fixtures/sine_440hz_pitch.json');
 
   it('pitch within ±2 Hz of Praat', () => {
