@@ -9,6 +9,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { computePitch, computeFormants, computeIntensity } from '../../src/audio/analyzer';
+import { defaultAnalysisSettings } from '../../src/audio/defaults';
 import { computeHarmonicity } from '../../src/audio/harmonicity';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
@@ -161,11 +162,14 @@ describe('Validation: Pitch Detection', () => {
 
 describe('Validation: Formant Extraction', () => {
   const sr = 16000;
+  const referenceSettings = {
+    formant: { ...defaultAnalysisSettings.formant, maxFrequency: 5500, lpcOrder: 15, numberOfFormants: 5 },
+  };
 
   it('detects formants of /a/ vowel model (F1~700, F2~1200) within ±100 Hz', () => {
     // Simulate /a/ with impulse train + resonators
     const samples = formantSignal(120, [700, 1200, 2500], 0.3, sr);
-    const formants = computeFormants(samples, sr);
+    const formants = computeFormants(samples, sr, referenceSettings);
     // Check median F1 and F2
     const f1Values = formants.tracked[0]?.filter((f): f is number => f !== null && f > 0) ?? [];
     const f2Values = formants.tracked[1]?.filter((f): f is number => f !== null && f > 0) ?? [];
@@ -179,7 +183,7 @@ describe('Validation: Formant Extraction', () => {
 
   it('detects formants of /i/ vowel model (F1~270, F2~2300) within ±100 Hz', () => {
     const samples = formantSignal(120, [270, 2300, 3000], 0.3, sr);
-    const formants = computeFormants(samples, sr);
+    const formants = computeFormants(samples, sr, referenceSettings);
     const f1Values = formants.tracked[0]?.filter((f): f is number => f !== null && f > 0) ?? [];
     const f2Values = formants.tracked[1]?.filter((f): f is number => f !== null && f > 0) ?? [];
     expect(f1Values.length).toBeGreaterThan(3);
@@ -191,7 +195,7 @@ describe('Validation: Formant Extraction', () => {
 
   it('detects formants of /u/ vowel model (F1~300, F2~870) within ±100 Hz', () => {
     const samples = formantSignal(120, [300, 870, 2250], 0.3, sr);
-    const formants = computeFormants(samples, sr);
+    const formants = computeFormants(samples, sr, referenceSettings);
     const f1Values = formants.tracked[0]?.filter((f): f is number => f !== null && f > 0) ?? [];
     const f2Values = formants.tracked[1]?.filter((f): f is number => f !== null && f > 0) ?? [];
     expect(f1Values.length).toBeGreaterThan(3);

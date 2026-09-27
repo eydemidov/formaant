@@ -7,6 +7,11 @@ describe('app preferences', () => {
   it('uses defaults when nothing is saved', () => {
     const preferences = parseAppPreferences(null);
     expect(preferences.settings).toEqual(defaultAnalysisSettings);
+    expect(preferences.settings.formant).toMatchObject({
+      maxFrequency: 3000,
+      lpcOrder: 24,
+      numberOfFormants: 2,
+    });
     expect(preferences.filterSettings).toEqual(defaultFilterSettings);
     expect(preferences.overlays.ipaFormants).toBe(true);
     expect(preferences.filterConsonants).toBe(true);

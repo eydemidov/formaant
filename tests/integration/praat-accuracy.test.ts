@@ -122,7 +122,9 @@ describe('Praat accuracy — sine 440Hz', () => {
 
 describe('Praat accuracy — vowel /a/', () => {
   const { samples, sampleRate } = loadWav('fixtures/vowel_a.wav');
-  const result = analyzeAudio(samples, sampleRate);
+  const result = analyzeAudio(samples, sampleRate, {
+    formant: { ...defaultAnalysisSettings.formant, maxFrequency: 5500, lpcOrder: 15, numberOfFormants: 5 },
+  });
   const pitchRef = loadRef('fixtures/vowel_a_pitch.json');
 
   it('pitch within ±2 Hz of Praat', () => {
