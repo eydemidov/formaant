@@ -148,8 +148,8 @@ export function VowelSpace({ analysis, selection, currentTime, profile, onProfil
               textAnchor="middle"
               dominantBaseline="middle"
               fontSize="11"
-              fill="var(--text-dim)"
-              opacity={0.6}
+              fill={v.symbol === target?.symbol ? '#ffffff' : 'var(--text-dim)'}
+              opacity={v.symbol === target?.symbol ? 1 : 0.6}
             >
               {v.symbol}
             </text>

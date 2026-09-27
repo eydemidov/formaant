@@ -98,6 +98,8 @@ describe('vowel space trace and marker', () => {
     expect(markup).toContain('<td>394 Hz</td>');
     expect(markup).toContain('<td>1829 Hz</td>');
     expect(markup).toContain('value="ɪ" selected=""');
+    expect(markup).toMatch(/<text[^>]*fill="#ffffff"[^>]*>ɪ<\/text>/);
+    expect(markup.match(/fill="#ffffff"/g)).toHaveLength(1);
   });
 
   it('allows no target while keeping the selection readings visible', () => {
@@ -107,6 +109,7 @@ describe('vowel space trace and marker', () => {
     expect(markup).toContain('<td>500 Hz</td>');
     expect(markup).toContain('<td>1900 Hz</td>');
     expect(markup.match(/<td>—<\/td>/g)).toHaveLength(4);
+    expect(markup).not.toContain('fill="#ffffff"');
     expect(markup).not.toContain('vowel-target-close');
     expect(markup).not.toContain('vowel-target-far');
   });
