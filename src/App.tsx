@@ -549,6 +549,7 @@ export default function App() {
                     showIpaFormants={showIpaFormants}
                     filterConsonants={filterConsonants}
                     vowelProfile={vowelProfile}
+                    quickSelectEnabled={false}
                     onWheelZoom={() => {}}
                     onPan={() => {}}
                     onZoomSelection={() => {}}

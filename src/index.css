@@ -233,6 +233,26 @@ button, input, select {
   cursor: crosshair;
 }
 
+.spectrogram-quick-select {
+  position: absolute;
+  top: 0;
+  height: 15px;
+  z-index: 2;
+  padding: 0;
+  border: 0;
+  border-top: 2px solid rgba(0, 0, 0, 0.85);
+  border-left: 1px solid rgba(0, 0, 0, 0.7);
+  border-right: 1px solid rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.spectrogram-quick-select:hover,
+.spectrogram-quick-select:focus-visible,
+.spectrogram-quick-select.selected {
+  background: rgba(0, 0, 0, 0.55);
+}
+
 .spectrogram-crosshair {
   position: absolute;
   pointer-events: none;

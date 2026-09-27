@@ -4,6 +4,7 @@ import type { AnalysisResult, TimeSelection, ViewRange } from '../types';
 import { useZoomPan } from '../hooks/useZoomPan';
 import { pitchToY, timeToX, xToTime } from '../utils/view';
 import { generateIpaAnnotations } from '../audio/ipaVowels';
+import { findHighEnergyRegions } from '../audio/quickSelect';
 import type { VowelProfile } from '../audio/vowelProfiles';
 
 interface SpectrogramProps {
@@ -18,6 +19,7 @@ interface SpectrogramProps {
   showIpaFormants: boolean;
   filterConsonants: boolean;
   vowelProfile: VowelProfile;
+  quickSelectEnabled?: boolean;
   onWheelZoom: (pivotTime: number, zoomFactor: number) => void;
   onPan: (deltaTime: number) => void;
   onZoomSelection: (selection: TimeSelection) => void;
@@ -39,6 +41,7 @@ export const Spectrogram = React.memo(function Spectrogram({
   showIpaFormants,
   filterConsonants,
   vowelProfile,
+  quickSelectEnabled = true,
   onWheelZoom,
   onPan,
   onZoomSelection,
@@ -376,6 +379,11 @@ export const Spectrogram = React.memo(function Spectrogram({
     );
   }, [showIpa, showFormants, analysis, vowelProfile, filterConsonants]);
 
+  const quickSelectRegions = useMemo(() => {
+    if (!quickSelectEnabled || !analysis || analysis.spectrogram.magnitudes.length === 0) return [];
+    return findHighEnergyRegions(analysis.intensity, analysis.duration);
+  }, [analysis, quickSelectEnabled]);
+
   return (
     <div
       className="spectrogram-container"
@@ -396,6 +404,25 @@ export const Spectrogram = React.memo(function Spectrogram({
           dragModeRef.current = null;
         }}
       />
+      {quickSelectRegions.map((region, index) => {
+        if (region.end <= viewRange.start || region.start >= viewRange.end) return null;
+        const start = Math.max(region.start, viewRange.start);
+        const end = Math.min(region.end, viewRange.end);
+        const left = (start - viewRange.start) / (viewRange.end - viewRange.start) * 100;
+        const width = (end - start) / (viewRange.end - viewRange.start) * 100;
+        const selected = selection && Math.abs(selection.start - region.start) < 0.001 && Math.abs(selection.end - region.end) < 0.001;
+        return (
+          <button
+            key={index}
+            type="button"
+            className={`spectrogram-quick-select${selected ? ' selected' : ''}`}
+            style={{ left: `${left}%`, width: `${width}%` }}
+            aria-label={`Select high-energy section ${region.start.toFixed(2)} to ${region.end.toFixed(2)} seconds`}
+            title="Select section"
+            onClick={() => onSelectionChange(region)}
+          />
+        );
+      })}
       {showIpa && (
         <div className={`ipa-tier${showIpaFormants ? '' : ' ipa-tier-symbols-only'}`}>
           {ipaAnnotations.map((ann, i) => {
