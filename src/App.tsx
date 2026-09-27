@@ -35,7 +35,6 @@ import { VoiceReportDialog } from './components/VoiceReportDialog';
 import SpeechSynthesizerPanel from './components/SpeechSynthesizerPanel';
 import PitchSonificationPanel from './components/PitchSonificationPanel';
 import NoteTranscriptionPanel from './components/NoteTranscriptionPanel';
-import { VideoSync } from './components/VideoSync';
 import { Waveform } from './components/Waveform';
 import { DropOverlay, DropFileType } from './components/DropOverlay';
 import { Minimap } from './components/Minimap';
@@ -1036,7 +1035,6 @@ export default function App() {
         {!isMobile && (
           <RightSidebar>
             {{
-              video: <VideoSync currentTime={currentTime} isPlaying={isPlaying} onAudioExtracted={(samples, sr) => { currentSamplesRef.current = samples; setSampleRate(sr); }} onSeek={(t) => setCurrentTime(t)} />,
               settings: (
                 <>
                   <SettingsPanel settings={settings} onChange={setSettings} />

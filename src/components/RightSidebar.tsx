@@ -1,15 +1,14 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Video, Settings, Code, Circle,
+  Settings, Code, Circle,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
-type Tab = 'video' | 'settings' | 'script' | 'vowels';
+type Tab = 'settings' | 'script' | 'vowels';
 
 interface RightSidebarProps {
   children: {
-    video: ReactNode;
     settings: ReactNode;
     script: ReactNode;
     vowels: ReactNode;
@@ -17,7 +16,6 @@ interface RightSidebarProps {
 }
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
-  { id: 'video', label: 'Video', icon: Video },
   { id: 'settings', label: 'Settings', icon: Settings },
   { id: 'script', label: 'Script Editor', icon: Code },
   { id: 'vowels', label: 'Vowel Space', icon: Circle },
