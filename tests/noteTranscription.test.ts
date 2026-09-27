@@ -5,7 +5,6 @@ import {
   hzToSemitones,
   frequencyToNote,
   transcribePitch,
-  formatTranscription,
 } from '../src/audio/noteTranscription';
 import type { PitchData } from '../src/types';
 
@@ -126,17 +125,4 @@ describe('noteTranscription', () => {
     });
   });
 
-  describe('formatTranscription', () => {
-    it('formats events as readable text', () => {
-      const events = [{
-        startTime: 0,
-        endTime: 0.5,
-        note: { midi: 69, midiRounded: 69, name: 'A4', cents: 0, frequency: 440 },
-      }];
-      const text = formatTranscription(events);
-      expect(text).toContain('A4');
-      expect(text).toContain('440.0 Hz');
-      expect(text).toContain('0.000–0.500s');
-    });
-  });
 });

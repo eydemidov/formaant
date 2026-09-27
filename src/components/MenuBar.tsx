@@ -19,9 +19,6 @@ interface MenuBarProps {
   canUndo: boolean;
   canRedo: boolean;
   onLoadFile: (file: File) => void;
-  onExportFullWav: () => void;
-  onExportSelectionWav: () => void;
-  onExportFigure?: () => void;
   onGenerateTone?: () => void;
   onAnalyzeSelection?: () => void;
   onUndo: () => void;
@@ -104,7 +101,7 @@ function FileInput({ accept, onFile, children }: { accept: string; onFile: (f: F
 export function MenuBar(props: MenuBarProps) {
   const {
     hasAudio, selection, canUndo, canRedo,
-    onLoadFile, onExportFullWav, onExportSelectionWav,
+    onLoadFile,
     onUndo, onRedo, onCut, onCopy, onPaste, onDelete,
     onZoomIn, onZoomOut, onFitToWindow, onZoomToSelection,
     onTogglePitch, onToggleFormants, onToggleIntensity, onToggleIpa, onToggleIpaFormants,
@@ -126,13 +123,6 @@ export function MenuBar(props: MenuBarProps) {
         <MenubarTrigger>File</MenubarTrigger>
         <MenubarContent>
           <FileInput accept="audio/*" onFile={onLoadFile}>Open Audio…</FileInput>
-          <MenubarSeparator />
-          <MenubarItem disabled={!hasAudio} onClick={onExportFullWav}>Export WAV</MenubarItem>
-          <MenubarItem disabled={!selection} onClick={onExportSelectionWav}>Export Selection WAV</MenubarItem>
-          <MenubarSeparator />
-          {props.onExportFigure && (
-            <MenubarItem disabled={!hasAudio} onClick={props.onExportFigure}>Export Figure (PNG)</MenubarItem>
-          )}
         </MenubarContent>
       </MenubarMenu>
 

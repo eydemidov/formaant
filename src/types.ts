@@ -171,11 +171,6 @@ export interface FilterSettings {
   q: number;
 }
 
-export interface ExportSeriesRow {
-  time: number;
-  value: number | null;
-}
-
 export interface PitchTierPoint {
   time: number;
   frequency: number;

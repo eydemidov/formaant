@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { transcribePitch, formatTranscription, type TranscriptionOptions, type NoteEvent } from '../audio/noteTranscription';
+import { transcribePitch, type TranscriptionOptions, type NoteEvent } from '../audio/noteTranscription';
 import type { PitchData } from '../types';
 
 interface NoteTranscriptionPanelProps {
@@ -22,17 +22,6 @@ export default function NoteTranscriptionPanel({ pitch, onClose }: NoteTranscrip
     if (!pitch) return [];
     return transcribePitch(pitch, options);
   }, [pitch, options]);
-
-  const handleExport = () => {
-    const text = formatTranscription(events);
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'note-transcription.txt';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
 
   return (
     <div className="flex flex-col gap-3 p-4 bg-zinc-900 rounded-lg border border-zinc-700">
@@ -117,19 +106,9 @@ export default function NoteTranscriptionPanel({ pitch, onClose }: NoteTranscrip
         </div>
       )}
 
-      {/* Actions */}
-      <div className="flex gap-2">
-        <button
-          onClick={handleExport}
-          disabled={events.length === 0}
-          className="px-3 py-1 text-xs bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 rounded text-zinc-200"
-        >
-          Export TXT
-        </button>
-        <span className="text-xs text-zinc-500 self-center">
-          {events.length} note{events.length !== 1 ? 's' : ''} detected
-        </span>
-      </div>
+      <span className="text-xs text-zinc-500">
+        {events.length} note{events.length !== 1 ? 's' : ''} detected
+      </span>
     </div>
   );
 }

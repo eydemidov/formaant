@@ -123,7 +123,6 @@ All signal processing implemented in TypeScript — no third-party DSP libraries
 | Formants | Burg LPC → polynomial root finding → bandwidth filtering |
 | Noise reduction | Spectral subtraction (Boll 1979) |
 | Filters | RBJ-style biquad IIR + Butterworth cascades |
-| WAV export | PCM16 RIFF/WAVE encoding |
 
 ## References
 

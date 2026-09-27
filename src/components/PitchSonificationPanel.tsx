@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { sonifyPitch, playPitchSonification, type SonificationOptions } from '../audio/pitchSonification';
+import { playPitchSonification, type SonificationOptions } from '../audio/pitchSonification';
 import type { PitchData } from '../types';
 
 interface PitchSonificationPanelProps {
@@ -33,47 +33,6 @@ export default function PitchSonificationPanel({ pitch, onClose }: PitchSonifica
     setPlaying(false);
     setStopFn(null);
   }, [stopFn]);
-
-  const handleExport = useCallback(() => {
-    if (!pitch || pitch.times.length < 2) return;
-    const samples = sonifyPitch(pitch, { mode, sampleRate: 44100 });
-
-    // Create WAV
-    const numSamples = samples.length;
-    const buffer = new ArrayBuffer(44 + numSamples * 2);
-    const view = new DataView(buffer);
-
-    // WAV header
-    const writeStr = (offset: number, str: string) => {
-      for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
-    };
-    writeStr(0, 'RIFF');
-    view.setUint32(4, 36 + numSamples * 2, true);
-    writeStr(8, 'WAVE');
-    writeStr(12, 'fmt ');
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true);
-    view.setUint16(22, 1, true);
-    view.setUint32(24, 44100, true);
-    view.setUint32(28, 88200, true);
-    view.setUint16(32, 2, true);
-    view.setUint16(34, 16, true);
-    writeStr(36, 'data');
-    view.setUint32(40, numSamples * 2, true);
-
-    for (let i = 0; i < numSamples; i++) {
-      const s = Math.max(-1, Math.min(1, samples[i]));
-      view.setInt16(44 + i * 2, s * 32767, true);
-    }
-
-    const blob = new Blob([buffer], { type: 'audio/wav' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `pitch-sonification-${mode}.wav`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [pitch, mode]);
 
   const hasPitch = pitch && pitch.times.length >= 2;
   const voicedCount = pitch?.frequencies.filter(f => f !== null && f > 0).length ?? 0;
@@ -138,12 +97,6 @@ export default function PitchSonificationPanel({ pitch, onClose }: PitchSonifica
                 ■ Stop
               </button>
             )}
-            <button
-              className="px-4 py-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded text-sm"
-              onClick={handleExport}
-            >
-              💾 Export WAV
-            </button>
           </div>
         </>
       )}

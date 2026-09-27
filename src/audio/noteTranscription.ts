@@ -145,12 +145,3 @@ export function transcribePitch(pitch: PitchData, options: TranscriptionOptions 
 
   return events;
 }
-
-/**
- * Format note events as a simple text transcription.
- */
-export function formatTranscription(events: NoteEvent[]): string {
-  return events
-    .map(e => `${e.startTime.toFixed(3)}–${e.endTime.toFixed(3)}s: ${e.note.name} (${e.note.cents >= 0 ? '+' : ''}${e.note.cents}¢) [${e.note.frequency.toFixed(1)} Hz]`)
-    .join('\n');
-}

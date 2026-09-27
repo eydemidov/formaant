@@ -38,14 +38,9 @@ import { Minimap } from './components/Minimap';
 import { FilterPanel } from './components/FilterPanel';
 import { ListingPanel, type ListingData } from './components/ListingPanel';
 import { SelectionStats } from './components/SelectionStats';
-import { exportFigurePng } from './export/figure';
 import { normalize as soundNormalize } from './audio/soundManipulation';
 import { removeSilence } from './audio/soundEnhance';
 import { generateSineWave } from './audio/psola';
-import {
-  downloadBinaryFile,
-  exportSelectedRegionWav,
-} from './export';
 import type {
   AnalysisResult,
   AnalysisSettings,
@@ -605,7 +600,6 @@ export default function App() {
 
   const paletteCommands: Command[] = useMemo(() => [
     { id: 'file.open-audio', label: 'Open Audio', category: 'File', action: () => audioFileInputRef.current?.click() },
-    { id: 'file.export-wav', label: 'Export WAV', category: 'File', action: () => { if (currentSamplesRef.current) downloadBinaryFile('audio.wav', exportSelectedRegionWav(currentSamplesRef.current, sampleRate)); } },
     { id: 'edit.undo', label: 'Undo', category: 'Edit', shortcut: `${mod}Z`, action: handleUndo },
     { id: 'edit.redo', label: 'Redo', category: 'Edit', shortcut: `${mod}${shift}Z`, action: handleRedo },
     { id: 'edit.cut', label: 'Cut', category: 'Edit', shortcut: `${mod}X`, action: handleCut },
@@ -638,7 +632,6 @@ export default function App() {
     { id: 'edit.reverse', label: 'Reverse', category: 'Edit', action: () => { if (currentSamplesRef.current) { const r = new Float32Array(currentSamplesRef.current.length); for (let i = 0; i < r.length; i++) r[i] = currentSamplesRef.current[r.length - 1 - i]; applyEffect(r); } } },
     { id: 'edit.normalize', label: 'Normalize', category: 'Edit', action: () => { if (currentSamplesRef.current) applyEffect(soundNormalize(currentSamplesRef.current)); } },
     { id: 'edit.reduce-noise', label: 'Reduce Noise', category: 'Edit', action: () => { /* triggers via menu */ } },
-    { id: 'file.export-figure', label: 'Export Figure (PNG)', category: 'File', action: () => { if (analysis) exportFigurePng(analysis, { showPitch, showFormants, viewRange }); } },
     { id: 'view.vowel-space', label: 'Vowel Space', category: 'View', action: () => document.dispatchEvent(new CustomEvent('open-sidebar-tab', { detail: 'vowels' })) },
     { id: 'view.analyze-region', label: 'Analyze Visible Region', category: 'View', action: () => { if (currentSamplesRef.current) { const s = Math.floor(viewStart * sampleRate); const e = Math.min(Math.floor(viewEnd * sampleRate), currentSamplesRef.current.length); if (e - s > 100) processSamples(currentSamplesRef.current.slice(s, e), sampleRate, false); } } },
     { id: 'recording.start-stop', label: 'Start/Stop Recording', category: 'Recording', shortcut: 'R', action: () => { isRecording ? handleStopRecord() : handleRecord(); } },
@@ -654,25 +647,6 @@ export default function App() {
         canUndo={canUndo}
         canRedo={canRedo}
         onLoadFile={handleLoadFile}
-        onExportFullWav={() => {
-          if (!currentSamplesRef.current) return;
-          downloadBinaryFile('audio.wav', exportSelectedRegionWav(currentSamplesRef.current, sampleRate));
-        }}
-        onExportSelectionWav={() => {
-          const range = selectionToSampleRange();
-          if (!range || !currentSamplesRef.current) return;
-          const samples = currentSamplesRef.current.slice(range.start, range.end);
-          downloadBinaryFile('selection.wav', exportSelectedRegionWav(samples, sampleRate));
-        }}
-        onExportFigure={() => {
-          if (analysis) {
-            exportFigurePng(analysis, {
-              showPitch,
-              showFormants,
-              viewRange,
-            });
-          }
-        }}
         onGenerateTone={() => {
           const freqStr = prompt('Frequency (Hz):', '440');
           if (!freqStr) return;
@@ -887,7 +861,7 @@ export default function App() {
             <div className="empty-state">
               <div className="empty-icon">🎙️</div>
               <p>Drop audio here, or start recording.</p>
-              <p className="empty-hint">Waveform, spectrogram, pitch, formants, intensity, editing, filters, and exports are all live in this view.</p>
+              <p className="empty-hint">Waveform, spectrogram, pitch, formants, intensity, editing, and filters are all live in this view.</p>
             </div>
           )}
 
