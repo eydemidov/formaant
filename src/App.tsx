@@ -16,7 +16,6 @@ import { CommandPalette, Command } from './components/CommandPalette';
 import { RightSidebar } from './components/RightSidebar';
 import { SettingsPanel } from './components/SettingsPanel';
 import { Spectrogram } from './components/Spectrogram';
-import { ExcitationPattern } from './components/ExcitationPattern';
 import { StatusBar } from './components/StatusBar';
 import { TimeRuler } from './components/TimeRuler';
 import { Toolbar } from './components/Toolbar';
@@ -1037,7 +1036,6 @@ export default function App() {
         {!isMobile && (
           <RightSidebar>
             {{
-              excitation: analysis ? <ExcitationPattern samples={currentSamplesRef.current} sampleRate={sampleRate} /> : <div className="empty-panel">Load audio to see excitation pattern</div>,
               video: <VideoSync currentTime={currentTime} isPlaying={isPlaying} onAudioExtracted={(samples, sr) => { currentSamplesRef.current = samples; setSampleRate(sr); }} onSeek={(t) => setCurrentTime(t)} />,
               settings: (
                 <>

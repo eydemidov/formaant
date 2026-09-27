@@ -334,33 +334,6 @@ button, input, select {
   border-top: 1px solid var(--border);
 }
 
-.panel-legend {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  font-size: 12px;
-}
-
-.legend-item::before {
-  content: '';
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  margin-right: 6px;
-}
-
-.legend-blue::before { background: var(--accent); }
-.legend-red::before { background: var(--red); }
-
-.panel-axis-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 10px;
-  color: var(--text-dim);
-  padding: 0 2px;
-}
-
 @media (max-width: 1180px) {
   .app {
     flex-direction: column;
