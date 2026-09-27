@@ -192,10 +192,10 @@ export function VowelSpace({ analysis, selection, currentTime, profile, onProfil
 
         {/* Axis labels */}
         <text x={margin.left + plotW / 2} y={height - 4} textAnchor="middle" fontSize="10" fill="var(--text-dim)">
-          F2 (Hz) → high
+          front ← F2 (Hz) → back
         </text>
         <text x={10} y={margin.top + plotH / 2} textAnchor="middle" fontSize="10" fill="var(--text-dim)" transform={`rotate(-90, 10, ${margin.top + plotH / 2})`}>
-          F1 (Hz) ↓ open
+          open ← F1 (Hz) → close
         </text>
 
         {/* F2 tick labels */}

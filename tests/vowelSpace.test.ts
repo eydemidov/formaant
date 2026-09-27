@@ -37,6 +37,8 @@ describe('vowel space trace and marker', () => {
     expect(markup.match(/fill="var\(--accent, #89b4fa\)"/g)).toHaveLength(2);
     expect(markup).toContain('Target vowel');
     expect(markup).toContain('Target vowel comparison');
+    expect(markup).toContain('front ← F2 (Hz) → back');
+    expect(markup).toContain('open ← F1 (Hz) → close');
     expect(markup).toContain('<th scope="col">Target</th>');
     expect(markup).toContain('<td>290 Hz</td>');
     expect(markup).toContain('<td>2364 Hz</td>');
