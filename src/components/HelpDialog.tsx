@@ -37,10 +37,10 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
           <button className="shortcuts-close" onClick={onClose} aria-label="Close help dialog">×</button>
         </div>
         <section className="help-about">
-          <h3>About Web-Praat</h3>
+          <h3>About Formaant</h3>
           <p>A browser-based tool for speech analysis and accent training, based on Web Praat.</p>
           <p>Analyze pitch, formants, intensity, and spectrograms while practicing pronunciation.</p>
-          <p>GPL-3.0 · <a href="https://github.com/justinchuby/web-praat" target="_blank" rel="noreferrer">Original Web Praat</a></p>
+          <p>GPL-3.0 · <a href="https://github.com/eydemidov/formant" target="_blank" rel="noreferrer">On GitHub</a></p>
         </section>
         <section>
           <h3 className="help-section-title">Keyboard Shortcuts</h3>
