@@ -27,7 +27,8 @@ Don't take the numbers literally though, especially when they look absurd - if y
 ### Useful links
 
 - [IPA chart](https://en.wikipedia.org/wiki/International_Phonetic_Alphabet_chart) - overview of IPA vowels, consonants, stress, and tone symbols.
-- [Vowel diagram / vowel space](https://en.wikipedia.org/wiki/Vowel_diagram) — how vowels are organized by height and frontness/backness, including their relationship to F1 and F2.
+- [Vowel diagram](https://en.wikipedia.org/wiki/Vowel_diagram) — how vowels are organized by height and frontness/backness, including their relationship to F1 and F2.
+- [Vowel space](https://www.englishspeechservices.com/blog/the-vowel-space/) - linguist Geoff Lindsey describes it in more detail.
 
 ## Features
 
