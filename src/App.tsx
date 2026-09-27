@@ -9,7 +9,6 @@ import { BottomSheet } from './components/BottomSheet';
 import { AudioEditorHistory, ReplaceRangeCommand } from './audio/editor';
 import { applyBiquadFilter } from './audio/filters';
 import { loadAudioFile } from './audio/recorder';
-import { computeSpectrumSlice } from './audio/spectrum';
 import { KeyboardShortcutsDialog } from './components/KeyboardShortcutsDialog';
 import { AboutDialog } from "./components/AboutDialog";
 import { MenuBar } from './components/MenuBar';
@@ -17,7 +16,6 @@ import { CommandPalette, Command } from './components/CommandPalette';
 import { RightSidebar } from './components/RightSidebar';
 import { SettingsPanel } from './components/SettingsPanel';
 import { Spectrogram } from './components/Spectrogram';
-import { SpectrumSlice } from './components/SpectrumSlice';
 import { LtasPanel } from './components/LtasPanel';
 import { MfccPanel } from './components/MfccPanel';
 import { ExcitationPattern } from './components/ExcitationPattern';
@@ -31,7 +29,6 @@ import FormantGridEditor from './components/FormantGridEditor';
 import DurationTierEditor from './components/DurationTierEditor';
 import AmplitudeTierEditor from './components/AmplitudeTierEditor';
 import { VocalTractEditor } from './components/VocalTractEditor';
-import { SpectrumEditor } from './components/SpectrumEditor';
 import { ExperimentDesigner } from './components/ExperimentDesigner';
 import { ExperimentMFC } from './components/ExperimentMFC';
 import { ScriptEditor } from './components/ScriptEditor';
@@ -103,7 +100,6 @@ export default function App() {
   const [showDurationTier, setShowDurationTier] = useState(false);
   const [showAmplitudeTier, setShowAmplitudeTier] = useState(false);
   const [showVocalTract, setShowVocalTract] = useState(false);
-  const [showSpectrumEditor, setShowSpectrumEditor] = useState(false);
   const [showExperiment, setShowExperiment] = useState(false);
   const [showSpeechSynthesizer, setShowSpeechSynthesizer] = useState(false);
   const [showPitchSonification, setShowPitchSonification] = useState(false);
@@ -475,14 +471,6 @@ export default function App() {
     setViewEnd(next.end);
   }, [analysis]);
 
-  const handleSpectrumSliceSelect = useCallback((time: number) => {
-    if (!currentSamplesRef.current || !analysis) return;
-    setSelection(null);
-    setCurrentTime(time);
-    const slice = computeSpectrumSlice(currentSamplesRef.current, sampleRate, time, settings);
-    setAnalysis({ ...analysis, spectrumSlice: slice });
-  }, [analysis, sampleRate, settings]);
-
   const [isDragOver, setIsDragOver] = useState(false);
   const [dragFileType, setDragFileType] = useState<DropFileType>('audio');
   const dragCounterRef = useRef(0);
@@ -660,7 +648,6 @@ export default function App() {
     { id: 'tools.duration-tier', label: 'Duration Tier', category: 'Tools', action: () => setShowDurationTier(true) },
     { id: 'tools.amplitude-tier', label: 'Amplitude Tier', category: 'Tools', action: () => setShowAmplitudeTier(true) },
     { id: 'tools.vocal-tract', label: 'Vocal Tract', category: 'Tools', action: () => setShowVocalTract(true) },
-    { id: 'tools.spectrum-editor', label: 'Spectrum Editor', category: 'Tools', action: () => setShowSpectrumEditor(true) },
     { id: 'tools.experiment', label: 'Experiment', category: 'Tools', action: () => setShowExperiment(true) },
     { id: 'tools.speechSynthesizer', label: 'SpeechSynthesizer (TTS)', category: 'Tools', action: () => setShowSpeechSynthesizer(true) },
     { id: 'tools.pitchSonification', label: 'Pitch Sonification', category: 'Tools', action: () => setShowPitchSonification(true) },
@@ -803,7 +790,6 @@ export default function App() {
         onOpenDurationTier={() => setShowDurationTier(true)}
         onOpenAmplitudeTier={() => setShowAmplitudeTier(true)}
         onOpenVocalTract={() => setShowVocalTract(true)}
-        onOpenSpectrumEditor={() => setShowSpectrumEditor(true)}
         onOpenExperiment={() => setShowExperiment(true)}
         onOpenSpeechSynthesizer={() => setShowSpeechSynthesizer(true)}
         onOpenPitchSonification={() => setShowPitchSonification(true)}
@@ -969,7 +955,7 @@ export default function App() {
                     onPan={() => {}}
                     onZoomSelection={() => {}}
                     onSelectionChange={() => {}}
-                    onSpectrumSliceSelect={() => {}}
+                    onCursorChange={() => {}}
                   />
                 </>
               )}
@@ -1009,7 +995,7 @@ export default function App() {
                 pulses={showPulses ? analysis?.voiceQuality?.pulses : undefined}
                 showPulses={showPulses}
                 onSelectionChange={setSelection}
-                onCursorChange={(time: number) => { setSelection(null); setCurrentTime(time); handleSpectrumSliceSelect(time); }}
+                onCursorChange={(time: number) => { setSelection(null); setCurrentTime(time); }}
                 onWheelZoom={handleWheelZoom}
                 onPan={handlePan}
                 onZoomSelection={handleZoomSelection}
@@ -1035,7 +1021,7 @@ export default function App() {
                 onPan={handlePan}
                 onZoomSelection={handleZoomSelection}
                 onSelectionChange={setSelection}
-                onSpectrumSliceSelect={handleSpectrumSliceSelect}
+                onCursorChange={(time) => { setSelection(null); setCurrentTime(time); }}
                 onAnalyzeRegion={() => {
                   if (!currentSamplesRef.current) return;
                   const startSample = Math.floor(viewStart * sampleRate);
@@ -1057,7 +1043,6 @@ export default function App() {
         {!isMobile && (
           <RightSidebar>
             {{
-              spectrum: analysis ? <SpectrumSlice slice={analysis.spectrumSlice} /> : <div className="empty-panel">Load audio to see spectrum</div>,
               ltas: <LtasPanel samples={currentSamplesRef.current} sampleRate={sampleRate} selection={selection} />,
               mfcc: <MfccPanel samples={currentSamplesRef.current} sampleRate={sampleRate} selection={selection} />,
               excitation: analysis ? <ExcitationPattern samples={currentSamplesRef.current} sampleRate={sampleRate} /> : <div className="empty-panel">Load audio to see excitation pattern</div>,
@@ -1180,14 +1165,6 @@ export default function App() {
           <div className="modal-panel" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" aria-label="Close" onClick={() => setShowVocalTract(false)}>✕</button>
             <VocalTractEditor />
-          </div>
-        </div>
-      )}
-      {showSpectrumEditor && (
-        <div className="modal-overlay" onClick={() => setShowSpectrumEditor(false)}>
-          <div className="modal-panel" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" aria-label="Close" onClick={() => setShowSpectrumEditor(false)}>✕</button>
-            <SpectrumEditor slice={analysis?.spectrumSlice ?? null} samples={currentSamplesRef.current ?? null} sampleRate={sampleRate} onApplyFilter={(filtered) => { commitSamples(filtered); setShowSpectrumEditor(false); }} />
           </div>
         </div>
       )}

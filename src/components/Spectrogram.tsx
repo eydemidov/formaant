@@ -21,7 +21,7 @@ interface SpectrogramProps {
   onPan: (deltaTime: number) => void;
   onZoomSelection: (selection: TimeSelection) => void;
   onSelectionChange: (selection: TimeSelection | null) => void;
-  onSpectrumSliceSelect: (time: number) => void;
+  onCursorChange: (time: number) => void;
   onAnalyzeRegion?: () => void;
 }
 
@@ -42,7 +42,7 @@ export const Spectrogram = React.memo(function Spectrogram({
   onPan,
   onZoomSelection,
   onSelectionChange,
-  onSpectrumSliceSelect,
+  onCursorChange,
   onAnalyzeRegion,
 }: SpectrogramProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -294,7 +294,7 @@ export const Spectrogram = React.memo(function Spectrogram({
     if (dragModeRef.current === 'zoom' && selection && selection.end > selection.start) {
       onZoomSelection(selection);
     } else if (dragModeRef.current === 'select') {
-      onSpectrumSliceSelect(time);
+      onCursorChange(time);
     }
     dragModeRef.current = null;
   };
@@ -358,7 +358,7 @@ export const Spectrogram = React.memo(function Spectrogram({
         const rect = canvasRef.current!.getBoundingClientRect();
         const touch = e.changedTouches[0];
         const time = xToTime(touch.clientX - rect.left, rect.width, viewRange);
-        onSpectrumSliceSelect(time);
+        onCursorChange(time);
       }
     }
     dragModeRef.current = null;
