@@ -466,7 +466,7 @@ export default function App() {
   useKeyboardShortcuts(shortcutHandlers, true);
 
   const [helpOpen, setHelpOpen] = useState(false);
-  const [activePanel, setActivePanel] = useState<'settings' | 'vowels' | null>(null);
+  const [activePanel, setActivePanel] = useState<'settings' | 'vowels' | null>('vowels');
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {

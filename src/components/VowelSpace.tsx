@@ -95,7 +95,7 @@ export function VowelSpace({ analysis, selection, currentTime, profile, onProfil
   return (
     <div className="vowel-space-panel">
       <div className="vowel-space-header">
-        Vowel Space {hasRange ? '(selection)' : '(all)'}
+        Vowel Space
         <select
           value={profile}
           onChange={(e) => onProfileChange(e.target.value as VowelProfile)}
