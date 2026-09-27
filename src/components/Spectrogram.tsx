@@ -401,7 +401,7 @@ export const Spectrogram = React.memo(function Spectrogram({
           🔍 Analyze This Region
         </button>
       )}
-      {ipaAnnotations.length > 0 && (
+      {showIpa && (
         <div className={`ipa-tier${showIpaFormants ? '' : ' ipa-tier-symbols-only'}`}>
           {ipaAnnotations.map((ann, i) => {
             if (ann.time < viewRange.start || ann.time > viewRange.end) return null;
