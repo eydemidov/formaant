@@ -35,12 +35,6 @@ interface MenuBarProps {
   onZoomOut: () => void;
   onFitToWindow: () => void;
   onZoomToSelection: () => void;
-  onOpenManipulation?: () => void;
-  onOpenPitchTier?: () => void;
-  onOpenFormantGrid?: () => void;
-  onOpenDurationTier?: () => void;
-  onOpenAmplitudeTier?: () => void;
-  onOpenVocalTract?: () => void;
   onOpenExperiment?: () => void;
   onOpenSpeechSynthesizer?: () => void;
   onOpenPitchSonification?: () => void;
@@ -90,8 +84,6 @@ export function MenuBar(props: MenuBarProps) {
     onLoadFile,
     onUndo, onRedo, onCut, onCopy, onPaste, onDelete,
     onZoomIn, onZoomOut, onFitToWindow, onZoomToSelection,
-    onOpenManipulation, onOpenPitchTier, onOpenFormantGrid,
-    onOpenDurationTier, onOpenAmplitudeTier, onOpenVocalTract,
     onOpenExperiment, onOpenSpeechSynthesizer, onOpenPitchSonification, onOpenNoteTranscription,
     onOpenCommandPalette,
     themeSetting, onThemeChange,
@@ -156,14 +148,6 @@ export function MenuBar(props: MenuBarProps) {
       <MenubarMenu>
         <MenubarTrigger>Tools</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem disabled={!hasAudio} onClick={onOpenManipulation}>Manipulation Editor</MenubarItem>
-          <MenubarItem disabled={!hasAudio} onClick={onOpenPitchTier}>Pitch Tier Editor</MenubarItem>
-          <MenubarItem disabled={!hasAudio} onClick={onOpenFormantGrid}>Formant Grid Editor</MenubarItem>
-          <MenubarItem disabled={!hasAudio} onClick={onOpenDurationTier}>Duration Tier Editor</MenubarItem>
-          <MenubarItem disabled={!hasAudio} onClick={onOpenAmplitudeTier}>Amplitude Tier Editor</MenubarItem>
-          <MenubarSeparator />
-          <MenubarItem onClick={onOpenVocalTract}>Vocal Tract Editor</MenubarItem>
-          <MenubarSeparator />
           <MenubarItem onClick={onOpenExperiment}>Experiment (MFC)</MenubarItem>
           <MenubarItem onClick={onOpenSpeechSynthesizer}>SpeechSynthesizer (TTS)</MenubarItem>
           <MenubarItem onClick={onOpenPitchSonification}>Pitch Sonification</MenubarItem>

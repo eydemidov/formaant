@@ -19,12 +19,6 @@ import { Spectrogram } from './components/Spectrogram';
 import { StatusBar } from './components/StatusBar';
 import { TimeRuler } from './components/TimeRuler';
 import { Toolbar } from './components/Toolbar';
-import ManipulationEditor from './components/ManipulationEditor';
-import PitchTierEditor from './components/PitchTierEditor';
-import FormantGridEditor from './components/FormantGridEditor';
-import DurationTierEditor from './components/DurationTierEditor';
-import AmplitudeTierEditor from './components/AmplitudeTierEditor';
-import { VocalTractEditor } from './components/VocalTractEditor';
 import { ExperimentDesigner } from './components/ExperimentDesigner';
 import { ExperimentMFC } from './components/ExperimentMFC';
 import { VowelSpace } from './components/VowelSpace';
@@ -72,12 +66,6 @@ export default function App() {
   const [showIntensity, setShowIntensity] = useState(initialPreferences.overlays.intensity);
   const [showIpa, setShowIpa] = useState(initialPreferences.overlays.ipa);
   const [showIpaFormants, setShowIpaFormants] = useState(initialPreferences.overlays.ipaFormants);
-  const [showManipulation, setShowManipulation] = useState(false);
-  const [showPitchTier, setShowPitchTier] = useState(false);
-  const [showFormantGrid, setShowFormantGrid] = useState(false);
-  const [showDurationTier, setShowDurationTier] = useState(false);
-  const [showAmplitudeTier, setShowAmplitudeTier] = useState(false);
-  const [showVocalTract, setShowVocalTract] = useState(false);
   const [showExperiment, setShowExperiment] = useState(false);
   const [showSpeechSynthesizer, setShowSpeechSynthesizer] = useState(false);
   const [showPitchSonification, setShowPitchSonification] = useState(false);
@@ -612,12 +600,6 @@ export default function App() {
     { id: 'view.theme-light', label: 'Theme: Light', category: 'View', action: () => setThemeSetting('light') },
     { id: 'view.theme-hc-dark', label: 'Theme: HC Dark', category: 'View', action: () => setThemeSetting('hc-dark') },
     { id: 'view.theme-hc-light', label: 'Theme: HC Light', category: 'View', action: () => setThemeSetting('hc-light') },
-    { id: 'tools.manipulation', label: 'Manipulation', category: 'Tools', action: () => setShowManipulation(true) },
-    { id: 'tools.pitch-tier', label: 'Pitch Tier', category: 'Tools', action: () => setShowPitchTier(true) },
-    { id: 'tools.formant-grid', label: 'Formant Grid', category: 'Tools', action: () => setShowFormantGrid(true) },
-    { id: 'tools.duration-tier', label: 'Duration Tier', category: 'Tools', action: () => setShowDurationTier(true) },
-    { id: 'tools.amplitude-tier', label: 'Amplitude Tier', category: 'Tools', action: () => setShowAmplitudeTier(true) },
-    { id: 'tools.vocal-tract', label: 'Vocal Tract', category: 'Tools', action: () => setShowVocalTract(true) },
     { id: 'tools.experiment', label: 'Experiment', category: 'Tools', action: () => setShowExperiment(true) },
     { id: 'tools.speechSynthesizer', label: 'SpeechSynthesizer (TTS)', category: 'Tools', action: () => setShowSpeechSynthesizer(true) },
     { id: 'tools.pitchSonification', label: 'Pitch Sonification', category: 'Tools', action: () => setShowPitchSonification(true) },
@@ -714,12 +696,6 @@ export default function App() {
         onZoomOut={handleZoomOut}
         onFitToWindow={handleFitToWindow}
         onZoomToSelection={() => handleZoomSelection()}
-        onOpenManipulation={() => setShowManipulation(true)}
-        onOpenPitchTier={() => setShowPitchTier(true)}
-        onOpenFormantGrid={() => setShowFormantGrid(true)}
-        onOpenDurationTier={() => setShowDurationTier(true)}
-        onOpenAmplitudeTier={() => setShowAmplitudeTier(true)}
-        onOpenVocalTract={() => setShowVocalTract(true)}
         onOpenExperiment={() => setShowExperiment(true)}
         onOpenSpeechSynthesizer={() => setShowSpeechSynthesizer(true)}
         onOpenPitchSonification={() => setShowPitchSonification(true)}
@@ -1033,54 +1009,6 @@ export default function App() {
       <AboutDialog />
 
       {/* Tool Panels */}
-      {showManipulation && currentSamplesRef.current && (
-        <div className="modal-overlay" onClick={() => setShowManipulation(false)}>
-          <div className="modal-panel" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" aria-label="Close" onClick={() => setShowManipulation(false)}>✕</button>
-            <ManipulationEditor samples={currentSamplesRef.current} sampleRate={sampleRate} onSynthesized={(output) => { commitSamples(output); setShowManipulation(false); }} />
-          </div>
-        </div>
-      )}
-      {showPitchTier && currentSamplesRef.current && (
-        <div className="modal-overlay" onClick={() => setShowPitchTier(false)}>
-          <div className="modal-panel" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" aria-label="Close" onClick={() => setShowPitchTier(false)}>✕</button>
-            <PitchTierEditor samples={currentSamplesRef.current} sampleRate={sampleRate} onApply={() => setShowPitchTier(false)} />
-          </div>
-        </div>
-      )}
-      {showFormantGrid && analysis && (
-        <div className="modal-overlay" onClick={() => setShowFormantGrid(false)}>
-          <div className="modal-panel" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" aria-label="Close" onClick={() => setShowFormantGrid(false)}>✕</button>
-            <FormantGridEditor duration={analysis.duration} onApply={() => setShowFormantGrid(false)} />
-          </div>
-        </div>
-      )}
-      {showDurationTier && analysis && (
-        <div className="modal-overlay" onClick={() => setShowDurationTier(false)}>
-          <div className="modal-panel" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" aria-label="Close" onClick={() => setShowDurationTier(false)}>✕</button>
-            <DurationTierEditor duration={analysis.duration} onApply={() => setShowDurationTier(false)} />
-          </div>
-        </div>
-      )}
-      {showAmplitudeTier && analysis && (
-        <div className="modal-overlay" onClick={() => setShowAmplitudeTier(false)}>
-          <div className="modal-panel" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" aria-label="Close" onClick={() => setShowAmplitudeTier(false)}>✕</button>
-            <AmplitudeTierEditor duration={analysis.duration} onApply={() => setShowAmplitudeTier(false)} />
-          </div>
-        </div>
-      )}
-      {showVocalTract && (
-        <div className="modal-overlay" onClick={() => setShowVocalTract(false)}>
-          <div className="modal-panel" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" aria-label="Close" onClick={() => setShowVocalTract(false)}>✕</button>
-            <VocalTractEditor />
-          </div>
-        </div>
-      )}
       {showExperiment && !experimentConfig && (
         <div className="modal-overlay" onClick={() => setShowExperiment(false)}>
           <div className="modal-panel" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
