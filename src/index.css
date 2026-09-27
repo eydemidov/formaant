@@ -504,6 +504,36 @@ button, input, select {
   max-width: 420px;
   width: 90vw;
   animation: slideUp 0.2s ease;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.help-about {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+}
+
+.help-about h3,
+.help-section-title {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.help-about p {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.help-about p:last-child {
+  margin-bottom: 0;
+}
+
+.help-about a {
+  color: var(--accent);
 }
 
 .shortcuts-header {
@@ -604,7 +634,7 @@ select:focus-visible {
   box-shadow: 0 2px 12px rgba(137, 180, 250, 0.08);
 }
 
-/* ===== New Layout: MenuBar → Toolbar → Body → StatusBar ===== */
+/* ===== Main layout ===== */
 
 .app-layout {
   display: flex;
@@ -616,16 +646,6 @@ select:focus-visible {
   display: flex;
   flex: 1;
   overflow: hidden;
-}
-
-/* MenuBar */
-/* Menubar styles now handled by Radix Menubar + Tailwind (see ui/menubar.tsx) */
-
-.menu-shortcut {
-  margin-left: 16px;
-  font-size: 11px;
-  color: var(--text-dim);
-  opacity: 0.6;
 }
 
 /* Toolbar */
@@ -644,6 +664,10 @@ select:focus-visible {
   display: flex;
   align-items: center;
   gap: 2px;
+}
+
+.toolbar-actions {
+  margin-left: auto;
 }
 
 .toolbar-separator {
@@ -744,26 +768,6 @@ select:focus-visible {
   .app {
     flex-direction: column;
     overflow-x: hidden;
-  }
-
-  .menubar-root {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-
-  .menubar-root::-webkit-scrollbar {
-    display: none;
-  }
-
-  .menubar-trigger {
-    padding: 4px 8px;
-    font-size: 12px;
-    flex-shrink: 0;
-  }
-
-  .command-palette-trigger {
-    display: none;
   }
 
   .toolbar {
@@ -1180,32 +1184,6 @@ select:focus-visible {
   margin: 4px -4px;
   height: 1px;
   background: var(--border);
-}
-
-.menubar-row {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 0 4px;
-  background: var(--bg-surface);
-  border-bottom: 1px solid var(--border);
-}
-
-.command-palette-trigger {
-  margin-left: auto;
-  padding: 4px 10px;
-  font-size: 12px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: transparent;
-  color: var(--text-dim);
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.command-palette-trigger:hover {
-  color: var(--text);
-  border-color: var(--text-dim);
 }
 
 /* Voice Report Dialog */

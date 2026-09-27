@@ -1,6 +1,6 @@
 import {
   Play, Pause, Square, Circle,
-  AudioLines, Waves, Activity, Languages, Hash, Filter,
+  AudioLines, Waves, Activity, Languages, Hash, Filter, FolderOpen, CircleHelp, Search,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
@@ -8,10 +8,13 @@ interface ToolbarProps {
   hasAudio: boolean;
   isPlaying: boolean;
   isRecording: boolean;
+  onOpenAudio: () => void;
   onRecord: () => void;
   onStopRecord: () => void;
   onPlay: () => void;
   onPause: () => void;
+  onHelp: () => void;
+  onOpenCommandPalette: () => void;
   // Overlay toggles
   showPitch: boolean;
   showFormants: boolean;
@@ -59,7 +62,7 @@ function IconBtn({ icon: Icon, label, onClick, disabled, active, danger, color }
 export function Toolbar(props: ToolbarProps) {
   const {
     hasAudio, isPlaying, isRecording,
-    onRecord, onStopRecord, onPlay, onPause,
+    onOpenAudio, onRecord, onStopRecord, onPlay, onPause, onHelp, onOpenCommandPalette,
     showPitch, showFormants, showIntensity, showIpa, showIpaFormants, filterConsonants,
     onTogglePitch, onToggleFormants, onToggleIntensity, onToggleIpa, onToggleIpaFormants, onToggleConsonantFilter,
   } = props;
@@ -67,6 +70,7 @@ export function Toolbar(props: ToolbarProps) {
   return (
     <div className="toolbar" role="toolbar" aria-label="Tools">
       <div className="toolbar-group">
+        <IconBtn icon={FolderOpen} label="Open Audio" onClick={onOpenAudio} />
         <IconBtn
           icon={isRecording ? Square : Circle}
           label={isRecording ? 'Stop Recording' : 'Record'}
@@ -91,6 +95,11 @@ export function Toolbar(props: ToolbarProps) {
         <IconBtn icon={Languages} label="IPA Vowels" onClick={onToggleIpa} active={showIpa} color="#fab387" />
         <IconBtn icon={Hash} label="Vowel F1/F2" onClick={onToggleIpaFormants} active={showIpaFormants} color="#fab387" />
         <IconBtn icon={Filter} label="Filter Out Consonants" onClick={onToggleConsonantFilter} active={filterConsonants} color="#fab387" />
+      </div>
+
+      <div className="toolbar-group toolbar-actions">
+        <IconBtn icon={Search} label="Command Palette (⌘⇧P)" onClick={onOpenCommandPalette} />
+        <IconBtn icon={CircleHelp} label="Help" onClick={onHelp} />
       </div>
     </div>
   );

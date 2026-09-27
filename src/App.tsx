@@ -7,9 +7,7 @@ import { useIsMobile } from './hooks/useIsMobile';
 import { BottomSheet } from './components/BottomSheet';
 import { applyBiquadFilter } from './audio/filters';
 import { loadAudioFile } from './audio/recorder';
-import { KeyboardShortcutsDialog } from './components/KeyboardShortcutsDialog';
-import { AboutDialog } from "./components/AboutDialog";
-import { MenuBar } from './components/MenuBar';
+import { HelpDialog } from './components/HelpDialog';
 import { CommandPalette, Command } from './components/CommandPalette';
 import { RightSidebar } from './components/RightSidebar';
 import { SettingsPanel } from './components/SettingsPanel';
@@ -461,6 +459,7 @@ export default function App() {
   useKeyboardShortcuts(shortcutHandlers, true);
 
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -473,6 +472,18 @@ export default function App() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
+  useEffect(() => {
+    const handler = (event: KeyboardEvent) => {
+      if (event.key !== '?' || event.ctrlKey || event.metaKey || event.altKey) return;
+      const target = event.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
+      event.preventDefault();
+      setHelpOpen((open) => !open);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
+
   const paletteCommands: Command[] = useMemo(() => [
     { id: 'file.open-audio', label: 'Open Audio', category: 'File', action: () => audioFileInputRef.current?.click() },
     { id: 'edit.reverse', label: 'Reverse', category: 'Edit', action: () => { if (currentSamplesRef.current) { const r = new Float32Array(currentSamplesRef.current.length); for (let i = 0; i < r.length; i++) r[i] = currentSamplesRef.current[r.length - 1 - i]; applyEffect(r); } } },
@@ -483,22 +494,24 @@ export default function App() {
   return (
     <div className="app-layout">
       <DropOverlay visible={isDragOver} fileType={dragFileType} />
-      <input ref={audioFileInputRef} type="file" accept="audio/*" hidden onChange={(e) => e.target.files?.[0] && handleLoadFile(e.target.files[0])} />
-      <MenuBar
-        onLoadFile={handleLoadFile}
-        onOpenCommandPalette={() => setCommandPaletteOpen(true)}
-      />
-
+      <input ref={audioFileInputRef} type="file" accept="audio/*" hidden onChange={(event) => {
+        const file = event.target.files?.[0];
+        event.target.value = '';
+        if (file) void handleLoadFile(file);
+      }} />
       <CommandPalette commands={paletteCommands} open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} />
 
       <Toolbar
         hasAudio={!!analysis}
         isPlaying={isPlaying}
         isRecording={isRecording}
+        onOpenAudio={() => audioFileInputRef.current?.click()}
         onRecord={handleRecord}
         onStopRecord={handleStopRecord}
         onPlay={handlePlay}
         onPause={handlePause}
+        onHelp={() => setHelpOpen(true)}
+        onOpenCommandPalette={() => setCommandPaletteOpen(true)}
         showPitch={showPitch}
         showFormants={showFormants}
         showIntensity={showIntensity}
@@ -701,8 +714,7 @@ export default function App() {
         pitchAtCursor={pitchAtCursor}
         formantsAtCursor={formantsAtCursor}
       />
-      <KeyboardShortcutsDialog />
-      <AboutDialog />
+      <HelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
 
     </div>
   );
