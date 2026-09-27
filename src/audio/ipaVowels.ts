@@ -107,6 +107,7 @@ export interface IpaAnnotationOptions {
   minTimeGap: number;
   /** Minimum intensity (dB) to consider a frame voiced */
   minIntensityDb: number;
+  filterConsonants: boolean;
   profile?: VowelProfile;
 }
 
@@ -114,6 +115,7 @@ const defaultOptions: IpaAnnotationOptions = {
   minConfidence: 0.4,
   minTimeGap: 0.05,
   minIntensityDb: -40,
+  filterConsonants: true,
 };
 
 export interface VowelEvidence {
@@ -199,7 +201,7 @@ export function generateIpaAnnotations(
   evidence?: VowelEvidence
 ): IpaAnnotation[] {
   const opts = { ...defaultOptions, ...options };
-  const supportedFrames = evidence ? sustainedVowelFrames(times, evidence) : null;
+  const supportedFrames = opts.filterConsonants && evidence ? sustainedVowelFrames(times, evidence) : null;
   const annotations: IpaAnnotation[] = [];
   const annotationIndices: number[] = [];
   let lastAnnotationTime = -Infinity;

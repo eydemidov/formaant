@@ -55,6 +55,7 @@ export default function App() {
   const [showIntensity, setShowIntensity] = useState(initialPreferences.overlays.intensity);
   const [showIpa, setShowIpa] = useState(initialPreferences.overlays.ipa);
   const [showIpaFormants, setShowIpaFormants] = useState(initialPreferences.overlays.ipaFormants);
+  const [filterConsonants, setFilterConsonants] = useState(initialPreferences.filterConsonants);
   const [settings, setSettings] = useState<AnalysisSettings>(initialPreferences.settings);
   const [filterSettings, setFilterSettings] = useState<FilterSettings>(initialPreferences.filterSettings);
   const [vowelProfile, setVowelProfile] = useState(initialPreferences.vowelProfile);
@@ -67,6 +68,7 @@ export default function App() {
       settings,
       filterSettings,
       vowelProfile,
+      filterConsonants,
       overlays: {
         pitch: showPitch,
         formants: showFormants,
@@ -75,7 +77,7 @@ export default function App() {
         ipaFormants: showIpaFormants,
       },
     });
-  }, [settings, filterSettings, vowelProfile, showPitch, showFormants, showIntensity, showIpa, showIpaFormants]);
+  }, [settings, filterSettings, vowelProfile, filterConsonants, showPitch, showFormants, showIntensity, showIpa, showIpaFormants]);
 
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
@@ -549,11 +551,13 @@ export default function App() {
         showIntensity={showIntensity}
         showIpa={showIpa}
         showIpaFormants={showIpaFormants}
+        filterConsonants={filterConsonants}
         onTogglePitch={() => setShowPitch((v) => !v)}
         onToggleFormants={() => setShowFormants((v) => !v)}
         onToggleIntensity={() => setShowIntensity((v) => !v)}
         onToggleIpa={() => setShowIpa((v) => !v)}
         onToggleIpaFormants={() => setShowIpaFormants((v) => !v)}
+        onToggleConsonantFilter={() => setFilterConsonants((v) => !v)}
       />
 
       <div className="app-body">
@@ -596,6 +600,7 @@ export default function App() {
                     showIntensity={showIntensity}
                     showIpa={showIpa}
                     showIpaFormants={showIpaFormants}
+                    filterConsonants={filterConsonants}
                     vowelProfile={vowelProfile}
                     onWheelZoom={() => {}}
                     onPan={() => {}}
@@ -660,6 +665,7 @@ export default function App() {
                 showIntensity={showIntensity}
                 showIpa={showIpa}
                 showIpaFormants={showIpaFormants}
+                filterConsonants={filterConsonants}
                 vowelProfile={vowelProfile}
                 onWheelZoom={handleWheelZoom}
                 onPan={handlePan}
@@ -719,6 +725,11 @@ export default function App() {
                 <input type="checkbox" checked={showIpaFormants} onChange={() => setShowIpaFormants((v) => !v)} />
                 <span className="toggle-indicator ipa" />
                 Vowel F1/F2
+              </label>
+              <label className="toggle-label">
+                <input type="checkbox" checked={filterConsonants} onChange={() => setFilterConsonants((v) => !v)} />
+                <span className="toggle-indicator ipa" />
+                Filter Out Consonants
               </label>
             </div>
             {analysis && (

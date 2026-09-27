@@ -1,6 +1,6 @@
 import {
   Play, Pause, Square, Circle,
-  AudioLines, Waves, Activity, Languages, Hash,
+  AudioLines, Waves, Activity, Languages, Hash, Filter,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
@@ -18,11 +18,13 @@ interface ToolbarProps {
   showIntensity: boolean;
   showIpa: boolean;
   showIpaFormants: boolean;
+  filterConsonants: boolean;
   onTogglePitch: () => void;
   onToggleFormants: () => void;
   onToggleIntensity: () => void;
   onToggleIpa: () => void;
   onToggleIpaFormants: () => void;
+  onToggleConsonantFilter: () => void;
 }
 
 function IconBtn({ icon: Icon, label, onClick, disabled, active, danger, color }: {
@@ -58,8 +60,8 @@ export function Toolbar(props: ToolbarProps) {
   const {
     hasAudio, isPlaying, isRecording,
     onRecord, onStopRecord, onPlay, onPause,
-    showPitch, showFormants, showIntensity, showIpa, showIpaFormants,
-    onTogglePitch, onToggleFormants, onToggleIntensity, onToggleIpa, onToggleIpaFormants,
+    showPitch, showFormants, showIntensity, showIpa, showIpaFormants, filterConsonants,
+    onTogglePitch, onToggleFormants, onToggleIntensity, onToggleIpa, onToggleIpaFormants, onToggleConsonantFilter,
   } = props;
 
   return (
@@ -88,6 +90,7 @@ export function Toolbar(props: ToolbarProps) {
         <IconBtn icon={Activity} label="Intensity" onClick={onToggleIntensity} active={showIntensity} color="#a6e3a1" />
         <IconBtn icon={Languages} label="IPA Vowels" onClick={onToggleIpa} active={showIpa} color="#fab387" />
         <IconBtn icon={Hash} label="Vowel F1/F2" onClick={onToggleIpaFormants} active={showIpaFormants} color="#fab387" />
+        <IconBtn icon={Filter} label="Filter Out Consonants" onClick={onToggleConsonantFilter} active={filterConsonants} color="#fab387" />
       </div>
     </div>
   );

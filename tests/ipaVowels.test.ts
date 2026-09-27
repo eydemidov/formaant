@@ -281,4 +281,22 @@ describe('generateIpaAnnotations', () => {
 
     expect(annotations).toHaveLength(0);
   });
+
+  it('can skip sustained-energy filtering without changing vowel matching', () => {
+    const times = [0, 0.01, 0.02];
+    const silence = new Float64Array(80);
+    const evidence = {
+      pitch: { times, frequencies: [null, null, null] },
+      spectrogram: {
+        frameTimes: times, timeStep: 0.01, freqStep: 50, maxFreq: 4000,
+        magnitudes: [silence, silence, silence],
+      },
+    };
+
+    expect(generateIpaAnnotations(times, [270, 270, 270], [2290, 2290, 2290], undefined,
+      { minTimeGap: 0 }, evidence)).toHaveLength(0);
+    expect(generateIpaAnnotations(times, [270, 270, 270], [2290, 2290, 2290], undefined,
+      { minTimeGap: 0, filterConsonants: false }, evidence).map((annotation) => annotation.symbol))
+      .toEqual(['i', 'i', 'i']);
+  });
 });

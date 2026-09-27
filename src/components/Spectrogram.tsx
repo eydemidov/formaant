@@ -16,6 +16,7 @@ interface SpectrogramProps {
   showIntensity: boolean;
   showIpa: boolean;
   showIpaFormants: boolean;
+  filterConsonants: boolean;
   vowelProfile: VowelProfile;
   onWheelZoom: (pivotTime: number, zoomFactor: number) => void;
   onPan: (deltaTime: number) => void;
@@ -36,6 +37,7 @@ export const Spectrogram = React.memo(function Spectrogram({
   showIntensity,
   showIpa,
   showIpaFormants,
+  filterConsonants,
   vowelProfile,
   onWheelZoom,
   onPan,
@@ -369,10 +371,10 @@ export const Spectrogram = React.memo(function Spectrogram({
       analysis.formants.tracked[0] ?? [],
       analysis.formants.tracked[1] ?? [],
       analysis.intensity.values,
-      { minTimeGap: 0.08, minConfidence: 0.35, profile: vowelProfile },
+      { minTimeGap: 0.08, minConfidence: 0.35, profile: vowelProfile, filterConsonants },
       { pitch: analysis.pitch, spectrogram: analysis.spectrogram }
     );
-  }, [showIpa, showFormants, analysis, vowelProfile]);
+  }, [showIpa, showFormants, analysis, vowelProfile, filterConsonants]);
 
   return (
     <div
