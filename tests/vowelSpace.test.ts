@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { VowelSpace } from '../src/components/VowelSpace';
-import type { AnalysisResult, TimeSelection, VowelSpaceMode } from '../src/types';
+import type { AnalysisResult, TimeSelection } from '../src/types';
 
 const analysis = {
   formants: {
@@ -11,42 +11,32 @@ const analysis = {
   },
 } as AnalysisResult;
 
-function renderVowelSpace(mode: VowelSpaceMode, selection: TimeSelection | null, currentTime = 2): string {
+function renderVowelSpace(selection: TimeSelection | null, currentTime = 2): string {
   return renderToStaticMarkup(createElement(VowelSpace, {
     analysis,
     selection,
     currentTime,
     profile: 'modern-rp-male',
     onProfileChange: () => {},
-    mode,
-    onModeChange: () => {},
   }));
 }
 
-describe('vowel space display modes', () => {
-  it('keeps the trace points and current marker in Trace mode', () => {
-    const markup = renderVowelSpace('trace', null);
+describe('vowel space trace and marker', () => {
+  it('shows the trace points and nearest marker without a range selection', () => {
+    const markup = renderVowelSpace(null);
 
     expect(markup.match(/fill="var\(--accent, #89b4fa\)"/g)).toHaveLength(2);
     expect(markup).toContain('F1: 500 Hz | F2: 1900 Hz');
     expect(markup).toContain('2 points');
+    expect(markup).toContain('<polyline');
     expect(markup).toContain('stroke="#ef4444"');
   });
 
-  it('shows only the mean marker for a range, including valid points outside the profile axes', () => {
-    const markup = renderVowelSpace('average', { start: 0, end: 1 });
+  it('keeps the trace and moves the marker to the range mean, including valid points outside the profile axes', () => {
+    const markup = renderVowelSpace({ start: 0, end: 1 });
 
-    expect(markup).toContain('Average F1: 700 Hz | F2: 1700 Hz');
+    expect(markup).toContain('F1: 700 Hz | F2: 1700 Hz');
     expect(markup).toContain('stroke="#ef4444"');
-    expect(markup).not.toContain('fill="var(--accent, #89b4fa)"');
-    expect(markup).not.toContain('<polyline');
-  });
-
-  it('shows the nearest point when Average has no range selection', () => {
-    const markup = renderVowelSpace('average', null);
-
-    expect(markup).toContain('F1: 500 Hz | F2: 1900 Hz');
-    expect(markup).not.toContain('Average F1');
-    expect(markup).not.toContain('fill="var(--accent, #89b4fa)"');
+    expect(markup.match(/fill="var\(--accent, #89b4fa\)"/g)).toHaveLength(1);
   });
 });
