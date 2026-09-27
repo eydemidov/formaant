@@ -16,7 +16,6 @@ import { CommandPalette, Command } from './components/CommandPalette';
 import { RightSidebar } from './components/RightSidebar';
 import { SettingsPanel } from './components/SettingsPanel';
 import { Spectrogram } from './components/Spectrogram';
-import { LtasPanel } from './components/LtasPanel';
 import { MfccPanel } from './components/MfccPanel';
 import { ExcitationPattern } from './components/ExcitationPattern';
 import { StatusBar } from './components/StatusBar';
@@ -1043,7 +1042,6 @@ export default function App() {
         {!isMobile && (
           <RightSidebar>
             {{
-              ltas: <LtasPanel samples={currentSamplesRef.current} sampleRate={sampleRate} selection={selection} />,
               mfcc: <MfccPanel samples={currentSamplesRef.current} sampleRate={sampleRate} selection={selection} />,
               excitation: analysis ? <ExcitationPattern samples={currentSamplesRef.current} sampleRate={sampleRate} /> : <div className="empty-panel">Load audio to see excitation pattern</div>,
               voice: analysis ? <VoiceQualityPanel metrics={analysis.voiceQuality} /> : <div className="empty-panel">Load audio for voice quality</div>,
