@@ -381,7 +381,7 @@ export const Spectrogram = React.memo(function Spectrogram({
 
   const quickSelectRegions = useMemo(() => {
     if (!quickSelectEnabled || !analysis || analysis.spectrogram.magnitudes.length === 0) return [];
-    return findHighEnergyRegions(analysis.intensity, analysis.duration);
+    return findHighEnergyRegions(analysis.intensity, analysis.duration, analysis.formants);
   }, [analysis, quickSelectEnabled]);
 
   return (

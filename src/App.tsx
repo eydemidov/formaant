@@ -133,7 +133,7 @@ export default function App() {
         setProgress(100);
         setAnalysis(nextAnalysis);
         const firstRegion = selectFirstRegion && nextAnalysis.spectrogram.magnitudes.length > 0
-          ? findHighEnergyRegions(nextAnalysis.intensity, nextAnalysis.duration)[0]
+          ? findHighEnergyRegions(nextAnalysis.intensity, nextAnalysis.duration, nextAnalysis.formants)[0]
           : null;
         setSelection(firstRegion ?? null);
         setCurrentTime(0);
