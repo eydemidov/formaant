@@ -23,7 +23,6 @@ import { DropOverlay, DropFileType } from './components/DropOverlay';
 import { Minimap } from './components/Minimap';
 import { FilterPanel } from './components/FilterPanel';
 import { normalize as soundNormalize } from './audio/soundManipulation';
-import { removeSilence } from './audio/soundEnhance';
 import type {
   AnalysisResult,
   AnalysisSettings,
@@ -45,7 +44,6 @@ export default function App() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [selection, setSelection] = useState<TimeSelection | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const currentTimeRef = useRef(0);
@@ -479,61 +477,15 @@ export default function App() {
     { id: 'file.open-audio', label: 'Open Audio', category: 'File', action: () => audioFileInputRef.current?.click() },
     { id: 'edit.reverse', label: 'Reverse', category: 'Edit', action: () => { if (currentSamplesRef.current) { const r = new Float32Array(currentSamplesRef.current.length); for (let i = 0; i < r.length; i++) r[i] = currentSamplesRef.current[r.length - 1 - i]; applyEffect(r); } } },
     { id: 'edit.normalize', label: 'Normalize', category: 'Edit', action: () => { if (currentSamplesRef.current) applyEffect(soundNormalize(currentSamplesRef.current)); } },
-    { id: 'edit.reduce-noise', label: 'Reduce Noise', category: 'Edit', action: () => { /* triggers via menu */ } },
     { id: 'recording.start-stop', label: 'Start/Stop Recording', category: 'Recording', shortcut: 'R', action: () => { isRecording ? handleStopRecord() : handleRecord(); } },
-  ], [isRecording, handleRecord, handleStopRecord, sampleRate]);
+  ], [isRecording, handleRecord, handleStopRecord, applyEffect]);
 
   return (
     <div className="app-layout">
       <DropOverlay visible={isDragOver} fileType={dragFileType} />
       <input ref={audioFileInputRef} type="file" accept="audio/*" hidden onChange={(e) => e.target.files?.[0] && handleLoadFile(e.target.files[0])} />
       <MenuBar
-        hasAudio={!!analysis}
         onLoadFile={handleLoadFile}
-        onReverse={() => {
-          if (currentSamplesRef.current) {
-            const samples = currentSamplesRef.current;
-            const reversed = new Float32Array(samples.length);
-            for (let i = 0; i < samples.length; i++) reversed[i] = samples[samples.length - 1 - i];
-            applyEffect(reversed);
-          }
-        }}
-        onNormalize={() => {
-          if (currentSamplesRef.current) {
-            const normalized = soundNormalize(currentSamplesRef.current);
-            applyEffect(normalized);
-          }
-        }}
-        onReduceNoise={() => {
-          if (!currentSamplesRef.current || isProcessing) return;
-          setIsProcessing(true);
-          const worker = new Worker(
-            new URL('./workers/noiseWorker.ts', import.meta.url),
-            { type: 'module' }
-          );
-          const input = currentSamplesRef.current.slice();
-          worker.postMessage(
-            { type: 'reduceNoise', samples: input, sampleRate },
-            [input.buffer]
-          );
-          worker.onmessage = (e) => {
-            setIsProcessing(false);
-            worker.terminate();
-            if (e.data.type === 'result') {
-              applyEffect(e.data.samples);
-            }
-          };
-          worker.onerror = () => {
-            setIsProcessing(false);
-            worker.terminate();
-          };
-        }}
-        onRemoveSilence={() => {
-          if (currentSamplesRef.current) {
-            const trimmed = removeSilence(currentSamplesRef.current, sampleRate);
-            applyEffect(trimmed);
-          }
-        }}
         onOpenCommandPalette={() => setCommandPaletteOpen(true)}
       />
 
@@ -631,12 +583,6 @@ export default function App() {
 
           {analysis && !streaming.isStreaming && (
             <>
-              {isProcessing && (
-                <div className="processing-bar">
-                  <div className="processing-bar-fill" />
-                  <span className="processing-bar-text">Processing audio…</span>
-                </div>
-              )}
               <div className="audio-visualizations">
               <TimeRuler duration={analysis.duration} viewRange={viewRange} />
               <Waveform

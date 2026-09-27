@@ -8,12 +8,7 @@ import {
 } from './ui/menubar';
 
 interface MenuBarProps {
-  hasAudio: boolean;
   onLoadFile: (file: File) => void;
-  onReverse?: () => void;
-  onNormalize?: () => void;
-  onReduceNoise?: () => void;
-  onRemoveSilence?: () => void;
   onOpenCommandPalette?: () => void;
 }
 
@@ -41,7 +36,6 @@ function FileInput({ accept, onFile, children }: { accept: string; onFile: (f: F
 
 export function MenuBar(props: MenuBarProps) {
   const {
-    hasAudio,
     onLoadFile,
     onOpenCommandPalette,
   } = props;
@@ -54,17 +48,6 @@ export function MenuBar(props: MenuBarProps) {
         <MenubarTrigger>File</MenubarTrigger>
         <MenubarContent>
           <FileInput accept="audio/*" onFile={onLoadFile}>Open Audio…</FileInput>
-        </MenubarContent>
-      </MenubarMenu>
-
-      {/* Edit */}
-      <MenubarMenu>
-        <MenubarTrigger>Edit</MenubarTrigger>
-        <MenubarContent>
-          {props.onReverse && <MenubarItem disabled={!hasAudio} onClick={props.onReverse}>Reverse</MenubarItem>}
-          {props.onNormalize && <MenubarItem disabled={!hasAudio} onClick={props.onNormalize}>Normalize</MenubarItem>}
-          {props.onReduceNoise && <MenubarItem disabled={!hasAudio} onClick={props.onReduceNoise}>Reduce Noise</MenubarItem>}
-          {props.onRemoveSilence && <MenubarItem disabled={!hasAudio} onClick={props.onRemoveSilence}>Remove Silence</MenubarItem>}
         </MenubarContent>
       </MenubarMenu>
 

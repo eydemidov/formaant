@@ -1291,37 +1291,6 @@ select:focus-visible {
   color: var(--text-dim);
 }
 
-.processing-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 12px;
-  background: var(--bg-surface);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.processing-bar-fill {
-  flex: 1;
-  height: 3px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--accent, #89b4fa), #a6e3a1);
-  animation: indeterminate 1.5s ease-in-out infinite;
-  transform-origin: left;
-}
-
-.processing-bar-text {
-  font-size: 11px;
-  color: var(--text-dim);
-  white-space: nowrap;
-}
-
-@keyframes indeterminate {
-  0% { transform: scaleX(0); opacity: 0.5; }
-  50% { transform: scaleX(1); opacity: 1; }
-  100% { transform: scaleX(0); opacity: 0.5; }
-}
-
 .vowel-space-panel {
   display: flex;
   flex-direction: column;
