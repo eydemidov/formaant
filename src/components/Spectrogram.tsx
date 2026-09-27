@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { getColormap } from '../utils/colormap';
 import type { AnalysisResult, TimeSelection, ViewRange } from '../types';
 import { useZoomPan } from '../hooks/useZoomPan';
@@ -27,7 +27,9 @@ interface SpectrogramProps {
   onCursorChange: (time: number) => void;
 }
 
-type DragMode = 'select' | 'pan' | 'zoom' | null;
+type DragMode = 'select' | 'pan' | 'zoom' | 'move-selection' | 'resize-left' | 'resize-right' | null;
+
+const EDGE_TOLERANCE = 5;
 
 export const Spectrogram = React.memo(function Spectrogram({
   analysis,
@@ -52,6 +54,7 @@ export const Spectrogram = React.memo(function Spectrogram({
   const dragModeRef = useRef<DragMode>(null);
   const dragStartTimeRef = useRef(0);
   const lastPanTimeRef = useRef(0);
+  const selectionAtDragStartRef = useRef<TimeSelection | null>(null);
   const crosshairRef = useRef<HTMLDivElement>(null);
   const readoutRef = useRef<HTMLDivElement>(null);
 
@@ -239,6 +242,26 @@ export const Spectrogram = React.memo(function Spectrogram({
       const x2 = timeToX(selection.end, width, viewRange);
       ctx.fillStyle = style.getPropertyValue('--selection-bg').trim() || 'rgba(137, 180, 250, 0.1)';
       ctx.fillRect(x1, 0, x2 - x1, height);
+
+      ctx.fillStyle = 'rgba(137, 180, 250, 0.7)';
+      ctx.fillRect(x1 - 1, 0, 2, height);
+      ctx.fillRect(x2 - 1, 0, 2, height);
+
+      ctx.fillStyle = '#89b4fa';
+      for (const edgeX of [x1, x2]) {
+        ctx.beginPath();
+        ctx.moveTo(edgeX, 0);
+        ctx.lineTo(edgeX - 4, 6);
+        ctx.lineTo(edgeX + 4, 6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(edgeX, height);
+        ctx.lineTo(edgeX - 4, height - 6);
+        ctx.lineTo(edgeX + 4, height - 6);
+        ctx.closePath();
+        ctx.fill();
+      }
     }
 
     // IPA annotations rendered as HTML tier below (not on canvas)
@@ -249,6 +272,18 @@ export const Spectrogram = React.memo(function Spectrogram({
     const rect = canvasRef.current!.getBoundingClientRect();
     return xToTime(event.clientX - rect.left, rect.width, viewRange);
   };
+
+  const getHitZone = useCallback((event: React.MouseEvent<HTMLCanvasElement>): 'left-edge' | 'right-edge' | 'inside' | 'outside' => {
+    if (!selection || !canvasRef.current) return 'outside';
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const x1 = timeToX(selection.start, rect.width, viewRange);
+    const x2 = timeToX(selection.end, rect.width, viewRange);
+    if (Math.abs(x - x1) < EDGE_TOLERANCE) return 'left-edge';
+    if (Math.abs(x - x2) < EDGE_TOLERANCE) return 'right-edge';
+    if (x > x1 + EDGE_TOLERANCE && x < x2 - EDGE_TOLERANCE) return 'inside';
+    return 'outside';
+  }, [selection, viewRange]);
 
   const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
     if (!analysis) return;
@@ -264,12 +299,40 @@ export const Spectrogram = React.memo(function Spectrogram({
       onSelectionChange(null);
       return;
     }
+
+    const zone = getHitZone(event);
+    if (zone === 'left-edge') {
+      dragModeRef.current = 'resize-left';
+      selectionAtDragStartRef.current = selection;
+      return;
+    }
+    if (zone === 'right-edge') {
+      dragModeRef.current = 'resize-right';
+      selectionAtDragStartRef.current = selection;
+      return;
+    }
+    if (zone === 'inside') {
+      dragModeRef.current = 'move-selection';
+      selectionAtDragStartRef.current = selection;
+      return;
+    }
+
     dragModeRef.current = 'select';
     onSelectionChange(null);
   };
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!dragModeRef.current) return;
+    if (!analysis) return;
+    if (!dragModeRef.current) {
+      const zone = getHitZone(event);
+      const canvas = canvasRef.current;
+      if (canvas) {
+        canvas.style.cursor = zone === 'left-edge' || zone === 'right-edge'
+          ? 'ew-resize' : zone === 'inside' ? 'grab' : 'crosshair';
+      }
+      return;
+    }
+
     const time = getTime(event);
     if (dragModeRef.current === 'pan') {
       const delta = lastPanTimeRef.current - time;
@@ -277,6 +340,32 @@ export const Spectrogram = React.memo(function Spectrogram({
       onPan(delta);
       return;
     }
+
+    if (dragModeRef.current === 'resize-left') {
+      const original = selectionAtDragStartRef.current!;
+      const start = Math.max(0, Math.min(time, original.end - 0.001));
+      onSelectionChange({ start, end: original.end });
+      return;
+    }
+
+    if (dragModeRef.current === 'resize-right') {
+      const original = selectionAtDragStartRef.current!;
+      const end = Math.min(analysis.duration, Math.max(time, original.start + 0.001));
+      onSelectionChange({ start: original.start, end });
+      return;
+    }
+
+    if (dragModeRef.current === 'move-selection') {
+      const original = selectionAtDragStartRef.current!;
+      const duration = original.end - original.start;
+      let start = original.start + time - dragStartTimeRef.current;
+      if (start < 0) start = 0;
+      if (start + duration > analysis.duration) start = analysis.duration - duration;
+      onSelectionChange({ start, end: start + duration });
+      if (canvasRef.current) canvasRef.current.style.cursor = 'grabbing';
+      return;
+    }
+
     const start = Math.min(dragStartTimeRef.current, time);
     const end = Math.max(dragStartTimeRef.current, time);
     if (end - start > 0.001) {
@@ -285,13 +374,14 @@ export const Spectrogram = React.memo(function Spectrogram({
   };
 
   const handleMouseUp = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    const time = getTime(event);
     if (dragModeRef.current === 'zoom' && selection && selection.end > selection.start) {
       onZoomSelection(selection);
-    } else if (dragModeRef.current === 'select') {
-      onCursorChange(time);
+    } else if (dragModeRef.current === 'select' && !selection) {
+      onCursorChange(getTime(event));
     }
     dragModeRef.current = null;
+    selectionAtDragStartRef.current = null;
+    if (canvasRef.current) canvasRef.current.style.cursor = 'crosshair';
   };
 
   const zoomPanCallbacks = useMemo(() => ({ onWheelZoom, onPan }), [onWheelZoom, onPan]);
@@ -393,9 +483,7 @@ export const Spectrogram = React.memo(function Spectrogram({
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
-          onMouseLeave={() => {
-            dragModeRef.current = null;
-          }}
+          onMouseLeave={handleMouseUp}
         />
         {analysis && currentTime >= viewRange.start && currentTime <= viewRange.end && (
           <div
