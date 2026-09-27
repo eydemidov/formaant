@@ -1,5 +1,9 @@
+import type { AnalysisResult } from '../types';
+import { SelectionStats } from './SelectionStats';
+
 interface StatusBarProps {
   hasAudio: boolean;
+  analysis: AnalysisResult | null;
   duration: number;
   selection: { start: number; end: number } | null;
   sampleRate: number;
@@ -10,8 +14,9 @@ interface StatusBarProps {
   formantsAtCursor?: { f1: number | null; f2: number | null; f3: number | null };
 }
 
-export function StatusBar({ hasAudio, duration, selection, sampleRate, isRecording, streamDuration, cursorTime, pitchAtCursor, formantsAtCursor }: StatusBarProps) {
+export function StatusBar({ hasAudio, analysis, duration, selection, sampleRate, isRecording, streamDuration, cursorTime, pitchAtCursor, formantsAtCursor }: StatusBarProps) {
   const fmt = (t: number) => t.toFixed(3) + 's';
+  const hasSelection = selection != null && selection.end - selection.start >= 0.001;
 
   return (
     <footer className="statusbar" role="status" aria-label="Status bar">
@@ -26,10 +31,11 @@ export function StatusBar({ hasAudio, duration, selection, sampleRate, isRecordi
           <span className="statusbar-item">Sample Rate: {sampleRate} Hz</span>
           {selection && (
             <span className="statusbar-item">
-              Selection: {fmt(selection.start)} – {fmt(selection.end)} ({fmt(selection.end - selection.start)})
+              Selection: {fmt(selection.start)} – {fmt(selection.end)} ({((selection.end - selection.start) * 1000).toFixed(0)} ms)
             </span>
           )}
-          {cursorTime != null && (
+          <SelectionStats analysis={analysis} selection={selection} />
+          {cursorTime != null && !hasSelection && (
             <span className="statusbar-item statusbar-cursor-info">
               {pitchAtCursor != null && pitchAtCursor > 0 ? `F0: ${pitchAtCursor.toFixed(1)} Hz` : 'F0: —'}
               {formantsAtCursor && (

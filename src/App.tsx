@@ -37,7 +37,6 @@ import { DropOverlay, DropFileType } from './components/DropOverlay';
 import { Minimap } from './components/Minimap';
 import { FilterPanel } from './components/FilterPanel';
 import { ListingPanel, type ListingData } from './components/ListingPanel';
-import { SelectionStats } from './components/SelectionStats';
 import { normalize as soundNormalize } from './audio/soundManipulation';
 import { removeSilence } from './audio/soundEnhance';
 import { generateSineWave } from './audio/psola';
@@ -1041,9 +1040,9 @@ export default function App() {
         </BottomSheet>
       )}
 
-            <SelectionStats analysis={analysis} selection={selection} />
             <StatusBar
         hasAudio={!!analysis}
+        analysis={analysis}
         duration={analysis?.duration ?? 0}
         selection={selection}
         sampleRate={sampleRate}

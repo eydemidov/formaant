@@ -25,8 +25,6 @@ export function SelectionStats({ analysis, selection }: SelectionStatsProps) {
   if (!analysis || !selection || selection.end - selection.start < 0.001) return null;
 
   const { start, end } = selection;
-  const duration = end - start;
-
   const pitchStats = computeStats(
     analysis.pitch.frequencies,
     analysis.pitch.times,
@@ -38,28 +36,27 @@ export function SelectionStats({ analysis, selection }: SelectionStatsProps) {
   const f3Stats = computeStats(analysis.formants.f3, analysis.formants.times, start, end);
 
   return (
-    <div className="selection-stats">
-      <span className="selection-stats-duration">{(duration * 1000).toFixed(0)} ms</span>
+    <>
       {pitchStats && (
-        <span className="selection-stats-item" title={`Pitch: ${pitchStats.min.toFixed(0)}–${pitchStats.max.toFixed(0)} Hz, σ=${pitchStats.stdev.toFixed(1)}`}>
+        <span className="statusbar-item statusbar-cursor-info" title={`Pitch: ${pitchStats.min.toFixed(0)}–${pitchStats.max.toFixed(0)} Hz, σ=${pitchStats.stdev.toFixed(1)}`}>
           F0: {pitchStats.mean.toFixed(0)} Hz
         </span>
       )}
       {f1Stats && (
-        <span className="selection-stats-item" title={`F1: ${f1Stats.min.toFixed(0)}–${f1Stats.max.toFixed(0)} Hz`}>
+        <span className="statusbar-item statusbar-cursor-info" title={`F1: ${f1Stats.min.toFixed(0)}–${f1Stats.max.toFixed(0)} Hz`}>
           F1: {f1Stats.mean.toFixed(0)}
         </span>
       )}
       {f2Stats && (
-        <span className="selection-stats-item" title={`F2: ${f2Stats.min.toFixed(0)}–${f2Stats.max.toFixed(0)} Hz`}>
+        <span className="statusbar-item statusbar-cursor-info" title={`F2: ${f2Stats.min.toFixed(0)}–${f2Stats.max.toFixed(0)} Hz`}>
           F2: {f2Stats.mean.toFixed(0)}
         </span>
       )}
       {f3Stats && (
-        <span className="selection-stats-item" title={`F3: ${f3Stats.min.toFixed(0)}–${f3Stats.max.toFixed(0)} Hz`}>
+        <span className="statusbar-item statusbar-cursor-info" title={`F3: ${f3Stats.min.toFixed(0)}–${f3Stats.max.toFixed(0)} Hz`}>
           F3: {f3Stats.mean.toFixed(0)}
         </span>
       )}
-    </div>
+    </>
   );
 }
