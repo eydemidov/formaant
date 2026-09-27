@@ -739,10 +739,6 @@ select:focus-visible {
     flex-shrink: 0;
   }
 
-  .menu-version {
-    display: none;
-  }
-
   .command-palette-trigger {
     display: none;
   }
@@ -1318,16 +1314,6 @@ select:focus-visible {
   text-align: center;
   color: var(--text-dim);
   font-size: 13px;
-}
-
-.menu-version {
-  margin-left: auto;
-  font-size: 11px;
-  color: var(--text-dim);
-  opacity: 0.6;
-  font-family: monospace;
-  user-select: none;
-  padding-right: 8px;
 }
 
 .ipa-tier {

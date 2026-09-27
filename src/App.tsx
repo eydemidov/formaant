@@ -1045,7 +1045,6 @@ export default function App() {
         analysis={analysis}
         duration={analysis?.duration ?? 0}
         selection={selection}
-        sampleRate={sampleRate}
         isRecording={isRecording}
         streamDuration={streaming.streamDuration}
         cursorTime={analysis ? currentTime : undefined}

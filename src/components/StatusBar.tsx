@@ -6,7 +6,6 @@ interface StatusBarProps {
   analysis: AnalysisResult | null;
   duration: number;
   selection: { start: number; end: number } | null;
-  sampleRate: number;
   isRecording: boolean;
   streamDuration?: number;
   cursorTime?: number;
@@ -14,7 +13,7 @@ interface StatusBarProps {
   formantsAtCursor?: { f1: number | null; f2: number | null; f3: number | null };
 }
 
-export function StatusBar({ hasAudio, analysis, duration, selection, sampleRate, isRecording, streamDuration, cursorTime, pitchAtCursor, formantsAtCursor }: StatusBarProps) {
+export function StatusBar({ hasAudio, analysis, duration, selection, isRecording, streamDuration, cursorTime, pitchAtCursor, formantsAtCursor }: StatusBarProps) {
   const fmt = (t: number) => t.toFixed(3) + 's';
   const hasSelection = selection != null && selection.end - selection.start >= 0.001;
 
@@ -28,7 +27,6 @@ export function StatusBar({ hasAudio, analysis, duration, selection, sampleRate,
       {hasAudio && (
         <>
           <span className="statusbar-item">Duration: {fmt(duration)}</span>
-          <span className="statusbar-item">Sample Rate: {sampleRate} Hz</span>
           {selection && (
             <span className="statusbar-item">
               Selection: {fmt(selection.start)} – {fmt(selection.end)} ({((selection.end - selection.start) * 1000).toFixed(0)} ms)
