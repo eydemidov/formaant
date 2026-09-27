@@ -89,19 +89,6 @@ Reference vowel profiles (male and female F1/F2) are available for:
 - Diphtongs for English
 - Pitch training for Mandarin
 
-## Accuracy
-
-Validated against Praat 6.4 via [Parselmouth](https://parselmouth.readthedocs.io/) (same LPC order):
-
-| Measurement | vs Praat |
-|---|---|
-| Pitch (F0) | ±5 Hz |
-| Formants (F1) | ±50 Hz |
-| Formants (F2) | ±50 Hz (well-separated); varies for close F2/F3 |
-| Intensity (relative) | ±2 dB |
-
-See [`docs/METHODS.md`](docs/METHODS.md) for algorithm citations and [`tests/validation/`](tests/validation/) for the full cross-validation suite.
-
 ## Getting Started
 
 ```bash
@@ -110,27 +97,3 @@ npm run dev     # dev server at localhost:5173
 npm test        # run tests
 npm run build   # production build
 ```
-
-## DSP Implementation
-
-All signal processing implemented in TypeScript — no third-party DSP libraries.
-
-| Component | Algorithm |
-|---|---|
-| FFT | Radix-2 Cooley-Tukey (+ WebGPU compute shader) |
-| Spectrogram | STFT with configurable window |
-| Pitch | Normalized autocorrelation + parabolic interpolation + Viterbi |
-| Formants | Burg LPC → polynomial root finding → bandwidth filtering |
-| Noise reduction | Spectral subtraction (Boll 1979) |
-| Filters | RBJ-style biquad IIR + Butterworth cascades |
-
-## References
-
-- Boersma, P. & Weenink, D. (2024). *Praat: doing phonetics by computer.* https://www.praat.org/
-- Boersma, P. (1993). Accurate short-term analysis of the fundamental period and the harmonics-to-noise ratio of a sampled sound. *IFA Proceedings 17*, 97–110.
-- Burg, J.P. (1975). Maximum entropy spectral analysis. PhD thesis, Stanford University.
-- Davis, S.B. & Mermelstein, P. (1980). Comparison of parametric representations for monosyllabic word recognition. *IEEE TASSP*, 28(4), 357–366.
-
-## License
-
-GPL-3.0
