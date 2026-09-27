@@ -16,7 +16,6 @@ import { CommandPalette, Command } from './components/CommandPalette';
 import { RightSidebar } from './components/RightSidebar';
 import { SettingsPanel } from './components/SettingsPanel';
 import { Spectrogram } from './components/Spectrogram';
-import { MfccPanel } from './components/MfccPanel';
 import { ExcitationPattern } from './components/ExcitationPattern';
 import { StatusBar } from './components/StatusBar';
 import { TimeRuler } from './components/TimeRuler';
@@ -1042,7 +1041,6 @@ export default function App() {
         {!isMobile && (
           <RightSidebar>
             {{
-              mfcc: <MfccPanel samples={currentSamplesRef.current} sampleRate={sampleRate} selection={selection} />,
               excitation: analysis ? <ExcitationPattern samples={currentSamplesRef.current} sampleRate={sampleRate} /> : <div className="empty-panel">Load audio to see excitation pattern</div>,
               voice: analysis ? <VoiceQualityPanel metrics={analysis.voiceQuality} /> : <div className="empty-panel">Load audio for voice quality</div>,
               hnr: analysis ? <HarmonicityPanel data={analysis.harmonicity} viewStart={viewStart} viewEnd={viewEnd} /> : <div className="empty-panel">Load audio for HNR</div>,

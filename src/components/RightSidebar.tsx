@@ -1,15 +1,14 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Mic, Activity, Ear, Video, Settings, Code, Layers, Circle,
+  Mic, Activity, Ear, Video, Settings, Code, Circle,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
-type Tab = 'mfcc' | 'voice' | 'hnr' | 'excitation' | 'video' | 'settings' | 'script' | 'vowels';
+type Tab = 'voice' | 'hnr' | 'excitation' | 'video' | 'settings' | 'script' | 'vowels';
 
 interface RightSidebarProps {
   children: {
-    mfcc: ReactNode;
     voice: ReactNode;
     hnr: ReactNode;
     excitation: ReactNode;
@@ -21,7 +20,6 @@ interface RightSidebarProps {
 }
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
-  { id: 'mfcc', label: 'MFCC', icon: Layers },
   { id: 'voice', label: 'Voice Quality', icon: Mic },
   { id: 'hnr', label: 'HNR', icon: Activity },
   { id: 'excitation', label: 'Excitation', icon: Ear },
