@@ -2,7 +2,7 @@ import { defaultAnalysisSettings, defaultFilterSettings } from '../audio/default
 import { getProfileVowels, isBuiltInVowelProfile, parseCustomVowelProfile, vowelProfiles, type CustomVowelProfile, type VowelProfileId } from '../audio/vowelProfiles';
 import type { AnalysisSettings, FilterSettings } from '../types';
 
-const STORAGE_KEY = 'web-praat-preferences';
+const STORAGE_KEY = 'formaant-preferences';
 
 export interface AppPreferences {
   settings: AnalysisSettings;

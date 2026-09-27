@@ -24,4 +24,4 @@ jobs:
           fail_ci_if_error: false
       - run: npm run build
         env:
-          BASE_URL: /web-praat/
+          BASE_URL: /formaant/

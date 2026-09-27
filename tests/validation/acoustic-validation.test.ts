@@ -4,7 +4,7 @@
  * Tests that our pitch/formant/intensity algorithms produce numerically
  * correct results on signals where the answer is mathematically deterministic.
  *
- * These tests serve as the academic rigor guarantee: if web-praat produces
+ * These tests serve as the academic rigor guarantee: if formaant produces
  * correct results on known signals, researchers can trust it for real data.
  */
 import { describe, it, expect } from 'vitest';

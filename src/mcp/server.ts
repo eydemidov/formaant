@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * web-praat MCP Server — exposes speech analysis tools via MCP protocol.
+ * formaant MCP Server — exposes speech analysis tools via MCP protocol.
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -23,7 +23,7 @@ function getAudio(args: { filePath?: string; base64?: string }) {
 }
 
 const server = new McpServer({
-  name: 'web-praat',
+  name: 'formaant',
   version: '0.1.0',
 });
 
