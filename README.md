@@ -47,11 +47,16 @@ Reference vowel profiles (male and female) are available for:
 - [**Japanese**](https://www.internationalphoneticassociation.org/icphs-proceedings/ICPhS2019/papers/ICPhS_720.pdf)
 - [**Serbian**](https://doi.org/10.18485/ms_zmsfil.2021.64.2.3)
 
-<img width="570" height="606" alt="image" src="https://github.com/user-attachments/assets/acffc207-aa3f-4baf-bb2e-df32b75c4f42" /><img width="586" height="602" alt="image" src="https://github.com/user-attachments/assets/43e6c015-c0dc-4d4a-98db-e21992471a60" /><img width="586" height="608" alt="image" src="https://github.com/user-attachments/assets/7fbf64fd-8aa6-4ccc-8d5c-9922a747bb01" /><img width="584" height="610" alt="image" src="https://github.com/user-attachments/assets/badcae59-be7e-4776-8190-c198635fbac3" />
-
-
-
-
+<table>
+  <tr>
+    <td><img width="240" alt="Image 1" src="https://github.com/user-attachments/assets/acffc207-aa3f-4baf-bb2e-df32b75c4f42"></td>
+    <td><img width="240" alt="Image 2" src="https://github.com/user-attachments/assets/43e6c015-c0dc-4d4a-98db-e21992471a60"></td>
+  </tr>
+  <tr>
+    <td><img width="240" alt="Image 3" src="https://github.com/user-attachments/assets/7fbf64fd-8aa6-4ccc-8d5c-9922a747bb01"></td>
+    <td><img width="240" alt="Image 4" src="https://github.com/user-attachments/assets/badcae59-be7e-4776-8190-c198635fbac3"></td>
+  </tr>
+</table>
 
 ### Coming soon (maybe):
 
