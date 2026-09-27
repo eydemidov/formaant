@@ -22,7 +22,6 @@ interface SpectrogramProps {
   onZoomSelection: (selection: TimeSelection) => void;
   onSelectionChange: (selection: TimeSelection | null) => void;
   onCursorChange: (time: number) => void;
-  onAnalyzeRegion?: () => void;
 }
 
 type DragMode = 'select' | 'pan' | 'zoom' | null;
@@ -43,7 +42,6 @@ export const Spectrogram = React.memo(function Spectrogram({
   onZoomSelection,
   onSelectionChange,
   onCursorChange,
-  onAnalyzeRegion,
 }: SpectrogramProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dragModeRef = useRef<DragMode>(null);
@@ -396,11 +394,6 @@ export const Spectrogram = React.memo(function Spectrogram({
           dragModeRef.current = null;
         }}
       />
-      {onAnalyzeRegion && analysis && analysis.spectrogram.magnitudes.length === 0 && (
-        <button className="analyze-region-btn" onClick={onAnalyzeRegion}>
-          🔍 Analyze This Region
-        </button>
-      )}
       {showIpa && (
         <div className={`ipa-tier${showIpaFormants ? '' : ' ipa-tier-symbols-only'}`}>
           {ipaAnnotations.map((ann, i) => {

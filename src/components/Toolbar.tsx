@@ -1,5 +1,5 @@
 import {
-  Play, Pause, Square, Circle, ZoomIn, ZoomOut, Maximize,
+  Play, Pause, Square, Circle,
   AudioLines, Waves, Activity, Languages, Hash,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
@@ -12,9 +12,6 @@ interface ToolbarProps {
   onStopRecord: () => void;
   onPlay: () => void;
   onPause: () => void;
-  onZoomIn: () => void;
-  onZoomOut: () => void;
-  onFitToWindow: () => void;
   // Overlay toggles
   showPitch: boolean;
   showFormants: boolean;
@@ -61,7 +58,6 @@ export function Toolbar(props: ToolbarProps) {
   const {
     hasAudio, isPlaying, isRecording,
     onRecord, onStopRecord, onPlay, onPause,
-    onZoomIn, onZoomOut, onFitToWindow,
     showPitch, showFormants, showIntensity, showIpa, showIpaFormants,
     onTogglePitch, onToggleFormants, onToggleIntensity, onToggleIpa, onToggleIpaFormants,
   } = props;
@@ -82,14 +78,6 @@ export function Toolbar(props: ToolbarProps) {
           onClick={isPlaying ? onPause : onPlay}
           disabled={!hasAudio}
         />
-      </div>
-
-      <div className="toolbar-separator" />
-
-      <div className="toolbar-group">
-        <IconBtn icon={ZoomIn} label="Zoom In" onClick={onZoomIn} />
-        <IconBtn icon={ZoomOut} label="Zoom Out" onClick={onZoomOut} />
-        <IconBtn icon={Maximize} label="Fit to Window" onClick={onFitToWindow} disabled={!hasAudio} />
       </div>
 
       <div className="toolbar-separator" />

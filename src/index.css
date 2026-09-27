@@ -18,6 +18,7 @@
 }
 
 :root {
+  color-scheme: dark;
   --bg-base: #1e1e2e;
   --bg-surface: #181825;
   --bg-overlay: #11111b;
@@ -30,6 +31,16 @@
   --orange: #fab387;
   --yellow: #f9e2af;
   --border: #313244;
+  --spectrogram-bg: #11111b;
+  --waveform-bg: #1e1e2e;
+  --waveform-line: #89b4fa;
+  --waveform-center: #45475a;
+  --selection-bg: rgba(137, 180, 250, 0.15);
+  --cursor-color: #f38ba8;
+  --intensity-color: #a6e3a1;
+  --text-overlay: rgba(205, 214, 244, 0.8);
+  --playhead-color: #cdd6f4;
+  --colormap-invert: 0;
 }
 
 * {
@@ -1380,27 +1391,6 @@ select:focus-visible {
   background: var(--accent, #89b4fa);
   border: none;
   cursor: pointer;
-}
-
-.analyze-region-btn {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 10px 20px;
-  font-size: 14px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg-surface);
-  color: var(--text);
-  cursor: pointer;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-
-.analyze-region-btn:hover {
-  background: var(--accent, #89b4fa);
-  color: #fff;
 }
 
 .vowel-space-select {

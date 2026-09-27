@@ -4,7 +4,6 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useStreamingRecording } from './hooks/useStreamingRecording';
 import { useAnalysisWorker } from './hooks/useAnalysisWorker';
 import { useIsMobile } from './hooks/useIsMobile';
-import { useTheme } from './hooks/useTheme';
 import { BottomSheet } from './components/BottomSheet';
 import { applyBiquadFilter } from './audio/filters';
 import { loadAudioFile } from './audio/recorder';
@@ -43,7 +42,6 @@ function createAudioBufferFromSamples(samples: Float32Array, sampleRate: number)
 export default function App() {
   const [initialPreferences] = useState(loadAppPreferences);
   const isMobile = useIsMobile();
-  const { setting: themeSetting, setTheme: setThemeSetting } = useTheme();
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [selection, setSelection] = useState<TimeSelection | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -203,8 +201,7 @@ export default function App() {
       if (buffer.duration > 300) {
         const proceed = confirm(
           `This file is ${Math.round(buffer.duration / 60)} minutes long.\n\n` +
-          `It will load in waveform-only mode (no spectrogram/pitch/formant).\n` +
-          `Zoom into a region and use View > Analyze Selection for detailed analysis.\n\n` +
+          `It will load in waveform-only mode (no spectrogram/pitch/formant analysis).\n\n` +
           `Continue?`
         );
         if (!proceed) return;
@@ -475,30 +472,13 @@ export default function App() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  const isMac = typeof navigator !== 'undefined' && /Mac/.test(navigator.platform);
-  const mod = isMac ? '\u2318' : 'Ctrl+';
-
   const paletteCommands: Command[] = useMemo(() => [
     { id: 'file.open-audio', label: 'Open Audio', category: 'File', action: () => audioFileInputRef.current?.click() },
-    { id: 'view.zoom-in', label: 'Zoom In', category: 'View', shortcut: `${mod}+`, action: handleZoomIn },
-    { id: 'view.zoom-out', label: 'Zoom Out', category: 'View', shortcut: `${mod}\u2212`, action: handleZoomOut },
-    { id: 'view.fit-to-window', label: 'Fit to Window', category: 'View', shortcut: `${mod}0`, action: handleFitToWindow },
-    { id: 'view.toggle-pitch', label: 'Toggle Pitch', category: 'View', action: () => setShowPitch((v) => !v) },
-    { id: 'view.toggle-formants', label: 'Toggle Formants', category: 'View', action: () => setShowFormants((v) => !v) },
-    { id: 'view.toggle-intensity', label: 'Toggle Intensity', category: 'View', action: () => setShowIntensity((v) => !v) },
-    { id: 'view.toggle-ipa', label: 'Toggle IPA', category: 'View', action: () => setShowIpa((v) => !v) },
-    { id: 'view.toggle-ipa-formants', label: 'Toggle Vowel F1/F2', category: 'View', action: () => setShowIpaFormants((v) => !v) },
-    { id: 'view.theme-dark', label: 'Theme: Dark', category: 'View', action: () => setThemeSetting('dark') },
-    { id: 'view.theme-light', label: 'Theme: Light', category: 'View', action: () => setThemeSetting('light') },
-    { id: 'view.theme-hc-dark', label: 'Theme: HC Dark', category: 'View', action: () => setThemeSetting('hc-dark') },
-    { id: 'view.theme-hc-light', label: 'Theme: HC Light', category: 'View', action: () => setThemeSetting('hc-light') },
     { id: 'edit.reverse', label: 'Reverse', category: 'Edit', action: () => { if (currentSamplesRef.current) { const r = new Float32Array(currentSamplesRef.current.length); for (let i = 0; i < r.length; i++) r[i] = currentSamplesRef.current[r.length - 1 - i]; applyEffect(r); } } },
     { id: 'edit.normalize', label: 'Normalize', category: 'Edit', action: () => { if (currentSamplesRef.current) applyEffect(soundNormalize(currentSamplesRef.current)); } },
     { id: 'edit.reduce-noise', label: 'Reduce Noise', category: 'Edit', action: () => { /* triggers via menu */ } },
-    { id: 'view.vowel-space', label: 'Vowel Space', category: 'View', action: () => document.dispatchEvent(new CustomEvent('open-sidebar-tab', { detail: 'vowels' })) },
-    { id: 'view.analyze-region', label: 'Analyze Visible Region', category: 'View', action: () => { if (currentSamplesRef.current) { const s = Math.floor(viewStart * sampleRate); const e = Math.min(Math.floor(viewEnd * sampleRate), currentSamplesRef.current.length); if (e - s > 100) processSamples(currentSamplesRef.current.slice(s, e), sampleRate); } } },
     { id: 'recording.start-stop', label: 'Start/Stop Recording', category: 'Recording', shortcut: 'R', action: () => { isRecording ? handleStopRecord() : handleRecord(); } },
-  ], [analysis, handleZoomIn, handleZoomOut, handleFitToWindow, isRecording, handleRecord, handleStopRecord, sampleRate, mod]);
+  ], [isRecording, handleRecord, handleStopRecord, sampleRate]);
 
   return (
     <div className="app-layout">
@@ -506,16 +486,7 @@ export default function App() {
       <input ref={audioFileInputRef} type="file" accept="audio/*" hidden onChange={(e) => e.target.files?.[0] && handleLoadFile(e.target.files[0])} />
       <MenuBar
         hasAudio={!!analysis}
-        selection={selection}
         onLoadFile={handleLoadFile}
-        onAnalyzeSelection={() => {
-          if (!currentSamplesRef.current) return;
-          const startSample = Math.floor(viewStart * sampleRate);
-          const endSample = Math.min(Math.floor(viewEnd * sampleRate), currentSamplesRef.current.length);
-          if (endSample - startSample < 100) return;
-          const region = currentSamplesRef.current.slice(startSample, endSample);
-          processSamples(region, sampleRate);
-        }}
         onReverse={() => {
           if (currentSamplesRef.current) {
             const samples = currentSamplesRef.current;
@@ -560,12 +531,6 @@ export default function App() {
             applyEffect(trimmed);
           }
         }}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onFitToWindow={handleFitToWindow}
-        onZoomToSelection={() => handleZoomSelection()}
-        themeSetting={themeSetting}
-        onThemeChange={setThemeSetting}
         onOpenCommandPalette={() => setCommandPaletteOpen(true)}
       />
 
@@ -579,9 +544,6 @@ export default function App() {
         onStopRecord={handleStopRecord}
         onPlay={handlePlay}
         onPause={handlePause}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onFitToWindow={handleFitToWindow}
         showPitch={showPitch}
         showFormants={showFormants}
         showIntensity={showIntensity}
@@ -704,14 +666,6 @@ export default function App() {
                 onZoomSelection={handleZoomSelection}
                 onSelectionChange={setSelection}
                 onCursorChange={(time) => { setSelection(null); setCurrentTime(time); }}
-                onAnalyzeRegion={() => {
-                  if (!currentSamplesRef.current) return;
-                  const startSample = Math.floor(viewStart * sampleRate);
-                  const endSample = Math.min(Math.floor(viewEnd * sampleRate), currentSamplesRef.current.length);
-                  if (endSample - startSample < 100) return;
-                  const region = currentSamplesRef.current.slice(startSample, endSample);
-                  processSamples(region, sampleRate);
-                }}
               />
               </div>
             </>
