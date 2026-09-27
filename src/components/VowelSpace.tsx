@@ -17,6 +17,7 @@ interface VowelPoint {
 }
 
 export function VowelSpace({ analysis, selection, currentTime, profile, onProfileChange }: VowelSpaceProps) {
+  const hasRange = selection !== null && selection.end > selection.start;
   const references = vowelProfiles[profile];
   const f1Min = Math.floor(Math.min(...references.map((vowel) => (vowel.f1Min ?? vowel.f1) * (1 - VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
   const f1Max = Math.ceil(Math.max(...references.map((vowel) => (vowel.f1Max ?? vowel.f1) * (1 + VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
@@ -30,7 +31,7 @@ export function VowelSpace({ analysis, selection, currentTime, profile, onProfil
     { length: Math.floor(f2Max / 500) - Math.ceil(f2Min / 500) + 1 },
     (_, index) => (Math.ceil(f2Min / 500) + index) * 500
   );
-  const points = useMemo(() => {
+  const allPoints = useMemo(() => {
     if (!analysis) return [];
     const result: VowelPoint[] = [];
     const f1Track = analysis.formants.tracked[0] ?? [];
@@ -39,28 +40,46 @@ export function VowelSpace({ analysis, selection, currentTime, profile, onProfil
 
     for (let i = 0; i < times.length; i++) {
       const t = times[i];
-      // Filter to selection if present
-      if (selection && (t < selection.start || t > selection.end)) continue;
       const f1 = f1Track[i];
       const f2 = f2Track[i];
-      if (f1 != null && f2 != null && f1 >= f1Min && f1 <= f1Max && f2 >= f2Min && f2 <= f2Max) {
+      if (f1 != null && f2 != null && Number.isFinite(f1) && Number.isFinite(f2) && f1 > 0 && f2 > 0) {
         result.push({ f1, f2, time: t });
       }
     }
     return result;
-  }, [analysis, selection, f1Min, f1Max, f2Min, f2Max]);
+  }, [analysis]);
 
-  // Find current point (nearest to cursor)
-  const currentPoint = useMemo(() => {
-    if (!analysis || points.length === 0) return null;
+  const selectedPoints = useMemo(() => {
+    if (!hasRange || !selection) return allPoints;
+    return allPoints.filter((point) => point.time >= selection.start && point.time <= selection.end);
+  }, [allPoints, selection, hasRange]);
+
+  const points = useMemo(() => selectedPoints.filter((point) =>
+    point.f1 >= f1Min && point.f1 <= f1Max && point.f2 >= f2Min && point.f2 <= f2Max
+  ), [selectedPoints, f1Min, f1Max, f2Min, f2Max]);
+
+  const selectionAverage = useMemo(() => {
+    if (!hasRange || selectedPoints.length === 0) return null;
+    let totalF1 = 0;
+    let totalF2 = 0;
+    for (const point of selectedPoints) {
+      totalF1 += point.f1;
+      totalF2 += point.f2;
+    }
+    return { f1: totalF1 / selectedPoints.length, f2: totalF2 / selectedPoints.length };
+  }, [hasRange, selectedPoints]);
+
+  const nearestPoint = useMemo(() => {
     let nearest: VowelPoint | null = null;
     let minDist = Infinity;
-    for (const p of points) {
-      const d = Math.abs(p.time - currentTime);
-      if (d < minDist) { minDist = d; nearest = p; }
+    for (const point of allPoints) {
+      const distance = Math.abs(point.time - currentTime);
+      if (distance < minDist) { minDist = distance; nearest = point; }
     }
     return nearest;
-  }, [analysis, points, currentTime]);
+  }, [allPoints, currentTime]);
+
+  const marker = hasRange ? selectionAverage : nearestPoint;
 
   // Plot dimensions
   const width = 280;
@@ -76,7 +95,7 @@ export function VowelSpace({ analysis, selection, currentTime, profile, onProfil
   return (
     <div className="vowel-space-panel">
       <div className="vowel-space-header">
-        Vowel Space {selection ? '(selection)' : '(all)'}
+        Vowel Space {hasRange ? '(selection)' : '(all)'}
         <select
           value={profile}
           onChange={(e) => onProfileChange(e.target.value as VowelProfile)}
@@ -150,11 +169,10 @@ export function VowelSpace({ analysis, selection, currentTime, profile, onProfil
           />
         ))}
 
-        {/* Current cursor point */}
-        {currentPoint && (
+        {marker && (
           <circle
-            cx={toX(currentPoint.f2)}
-            cy={toY(currentPoint.f1)}
+            cx={toX(marker.f2)}
+            cy={toY(marker.f1)}
             r="5"
             fill="none"
             stroke="#ef4444"
@@ -186,9 +204,9 @@ export function VowelSpace({ analysis, selection, currentTime, profile, onProfil
       </svg>
 
       {/* Stats */}
-      {currentPoint && (
+      {marker && (
         <div className="vowel-space-stats">
-          F1: {currentPoint.f1.toFixed(0)} Hz | F2: {currentPoint.f2.toFixed(0)} Hz
+          F1: {marker.f1.toFixed(0)} Hz | F2: {marker.f2.toFixed(0)} Hz
         </div>
       )}
       {points.length > 0 && (
