@@ -94,7 +94,7 @@ export function Toolbar(props: ToolbarProps) {
         />
         <IconBtn
           icon={isPlaying ? Pause : Play}
-          label={isPlaying ? 'Pause' : 'Play'}
+          label={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
           onClick={isPlaying ? onPause : onPlay}
           disabled={!hasAudio}
         />
