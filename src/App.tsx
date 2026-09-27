@@ -20,7 +20,6 @@ import { ExcitationPattern } from './components/ExcitationPattern';
 import { StatusBar } from './components/StatusBar';
 import { TimeRuler } from './components/TimeRuler';
 import { Toolbar } from './components/Toolbar';
-import { HarmonicityPanel } from './components/HarmonicityPanel';
 import ManipulationEditor from './components/ManipulationEditor';
 import PitchTierEditor from './components/PitchTierEditor';
 import FormantGridEditor from './components/FormantGridEditor';
@@ -659,7 +658,6 @@ export default function App() {
     { id: 'file.export-figure', label: 'Export Figure (PNG)', category: 'File', action: () => { if (analysis) exportFigurePng(analysis, { showPitch, showFormants, viewRange }); } },
     { id: 'view.vowel-space', label: 'Vowel Space', category: 'View', action: () => document.dispatchEvent(new CustomEvent('open-sidebar-tab', { detail: 'vowels' })) },
     { id: 'view.analyze-region', label: 'Analyze Visible Region', category: 'View', action: () => { if (currentSamplesRef.current) { const s = Math.floor(viewStart * sampleRate); const e = Math.min(Math.floor(viewEnd * sampleRate), currentSamplesRef.current.length); if (e - s > 100) processSamples(currentSamplesRef.current.slice(s, e), sampleRate, false); } } },
-    { id: 'analysis.compute-hnr', label: 'Compute HNR', category: 'Analysis', action: () => {} },
     { id: 'recording.start-stop', label: 'Start/Stop Recording', category: 'Recording', shortcut: 'R', action: () => { isRecording ? handleStopRecord() : handleRecord(); } },
   ], [analysis, handleUndo, handleRedo, handleCut, handleCopy, handlePaste, handleDelete, handleZoomIn, handleZoomOut, handleFitToWindow, isRecording, handleRecord, handleStopRecord, sampleRate, mod, shift]);
 
@@ -1040,7 +1038,6 @@ export default function App() {
           <RightSidebar>
             {{
               excitation: analysis ? <ExcitationPattern samples={currentSamplesRef.current} sampleRate={sampleRate} /> : <div className="empty-panel">Load audio to see excitation pattern</div>,
-              hnr: analysis ? <HarmonicityPanel data={analysis.harmonicity} viewStart={viewStart} viewEnd={viewEnd} /> : <div className="empty-panel">Load audio for HNR</div>,
               video: <VideoSync currentTime={currentTime} isPlaying={isPlaying} onAudioExtracted={(samples, sr) => { currentSamplesRef.current = samples; setSampleRate(sr); }} onSeek={(t) => setCurrentTime(t)} />,
               settings: (
                 <>

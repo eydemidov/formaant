@@ -334,13 +334,6 @@ button, input, select {
   border-top: 1px solid var(--border);
 }
 
-.panel-plot {
-  width: 100%;
-  height: 100px;
-  background: var(--bg-overlay);
-  border-radius: 6px;
-}
-
 .panel-legend {
   display: flex;
   gap: 10px;
@@ -366,43 +359,6 @@ button, input, select {
   font-size: 10px;
   color: var(--text-dim);
   padding: 0 2px;
-}
-
-.panel-plot-container {
-  display: flex;
-  gap: 4px;
-  align-items: stretch;
-}
-
-.panel-plot-container .panel-plot {
-  flex: 1;
-}
-
-.panel-y-axis {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-end;
-  font-size: 9px;
-  color: var(--text-dim);
-  padding: 2px 0;
-  min-width: 20px;
-}
-
-.stat-grid {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 4px 10px;
-  font-size: 12px;
-}
-
-.stat-grid strong {
-  font-variant-numeric: tabular-nums;
-  color: var(--text);
-}
-
-.stat-grid span {
-  color: var(--text-dim);
 }
 
 @media (max-width: 1180px) {
