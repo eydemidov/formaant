@@ -25,6 +25,7 @@ function mountHook(handlers: KeyboardShortcutHandlers, enabled: boolean) {
 function makeHandlers(): KeyboardShortcutHandlers {
   return {
     onOpenAudio: vi.fn(),
+    onToggleRecording: vi.fn(),
     onPlayPause: vi.fn(),
     onSelectAll: vi.fn(),
     onMoveSelectionLeft: vi.fn(),
@@ -64,6 +65,28 @@ describe('useKeyboardShortcuts', () => {
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'o', bubbles: true }));
     input.remove();
     expect(handlers.onOpenAudio).not.toHaveBeenCalled();
+  });
+
+  it('R toggles recording without repeating when held', () => {
+    const handlers = makeHandlers();
+    unmount = mountHook(handlers, true);
+    fire('r');
+    fire('R', { shiftKey: true });
+    fire('r', { repeat: true });
+    expect(handlers.onToggleRecording).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not toggle recording while typing or using modifiers', () => {
+    const handlers = makeHandlers();
+    unmount = mountHook(handlers, true);
+    fire('r', { metaKey: true });
+    fire('r', { ctrlKey: true });
+    fire('r', { altKey: true });
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'r', bubbles: true }));
+    input.remove();
+    expect(handlers.onToggleRecording).not.toHaveBeenCalled();
   });
 
   it('Space triggers play/pause', () => {

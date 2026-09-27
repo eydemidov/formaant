@@ -87,7 +87,7 @@ export function Toolbar(props: ToolbarProps) {
         <IconBtn icon={FolderOpen} label="Open Audio (O)" onClick={onOpenAudio} />
         <IconBtn
           icon={isRecording ? Square : Circle}
-          label={isRecording ? 'Stop Recording' : 'Record'}
+          label={isRecording ? 'Stop Recording (R)' : 'Record (R)'}
           onClick={isRecording ? onStopRecord : onRecord}
           danger={!isRecording}
           active={isRecording}

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 export interface KeyboardShortcutHandlers {
   onOpenAudio: () => void;
+  onToggleRecording: () => void;
   onPlayPause: () => void;
   onSelectAll: () => void;
   onMoveSelectionLeft: () => void;
@@ -15,6 +16,7 @@ export interface KeyboardShortcutHandlers {
  * Global keyboard shortcuts for the audio editor.
  *
  * O = open audio
+ * R = start/stop recording
  * Space = play/pause
  * Cmd/Ctrl+A = select all
  * ArrowLeft = move selection left
@@ -39,6 +41,12 @@ export function useKeyboardShortcuts(handlers: KeyboardShortcutHandlers, enabled
       if (!mod && !e.altKey && e.key.toLowerCase() === 'o') {
         e.preventDefault();
         handlers.onOpenAudio();
+        return;
+      }
+
+      if (!mod && !e.altKey && e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        if (!e.repeat) handlers.onToggleRecording();
         return;
       }
 

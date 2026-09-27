@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 const shortcuts = [
   { keys: 'O', description: 'Open audio' },
+  { keys: 'R', description: 'Start / Stop recording' },
   { keys: 'Space', description: 'Play / Pause' },
   { keys: '⌘/Ctrl + A', description: 'Select all' },
   { keys: '← / →', description: 'Move selection / pan' },

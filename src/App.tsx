@@ -498,9 +498,14 @@ export default function App() {
   }, [isPlaying, handlePause, handlePlay]);
 
   const handleOpenAudio = useCallback(() => audioFileInputRef.current?.click(), []);
+  const handleToggleRecording = useCallback(() => {
+    if (isRecording) handleStopRecord();
+    else void handleRecord();
+  }, [isRecording, handleRecord, handleStopRecord]);
 
   const shortcutHandlers = useMemo(() => ({
     onOpenAudio: handleOpenAudio,
+    onToggleRecording: handleToggleRecording,
     onPlayPause: handlePlayPause,
     onSelectAll: handleSelectAll,
     onMoveSelectionLeft: handleMoveSelectionLeft,
@@ -508,7 +513,7 @@ export default function App() {
     onZoomIn: handleZoomIn,
     onZoomOut: handleZoomOut,
     onFitToWindow: handleFitToWindow,
-  }), [handleOpenAudio, handlePlayPause, handleSelectAll, handleMoveSelectionLeft, handleMoveSelectionRight, handleZoomIn, handleZoomOut, handleFitToWindow]);
+  }), [handleOpenAudio, handleToggleRecording, handlePlayPause, handleSelectAll, handleMoveSelectionLeft, handleMoveSelectionRight, handleZoomIn, handleZoomOut, handleFitToWindow]);
 
   useKeyboardShortcuts(shortcutHandlers, true);
 
