@@ -15,9 +15,9 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["node"],
+    "types": ["node", "@webgpu/types"],
     "ignoreDeprecations": "6.0"
   },
-  "include": ["src/mcp/**/*", "src/audio/**/*", "src/scripting/**/*", "src/utils/**/*", "src/types.ts"],
+  "include": ["src/mcp/**/*", "src/audio/**/*", "src/utils/**/*", "src/types.ts"],
   "exclude": ["node_modules", "dist", "src/utils/fft-gpu.ts", "src/utils/colormap.ts", "src/utils/view.ts", "src/audio/recorder.ts", "src/audio/streamingRecorder.ts", "src/audio/editor.ts"]
 }

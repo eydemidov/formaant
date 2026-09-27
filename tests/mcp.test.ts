@@ -5,8 +5,6 @@ import { computeHarmonicity } from '../src/audio/harmonicity';
 import { computeVoiceQuality } from '../src/audio/voiceQuality';
 import { computeSpectrumSlice } from '../src/audio/spectrum';
 import { generateIpaAnnotations } from '../src/audio/ipaVowels';
-import { runPraatScript } from '../src/scripting/interpreter';
-import { runJavaScript } from '../src/scripting/jsRunner';
 import { defaultAnalysisSettings } from '../src/audio/defaults';
 
 // Generate a test sine wave WAV in memory
@@ -116,21 +114,5 @@ describe('MCP tool handlers', () => {
       formants.times, formants.f1, formants.f2, intensity.values
     );
     expect(Array.isArray(annotations)).toBe(true);
-  });
-});
-
-describe('MCP scripting tools', () => {
-  it('run_praat_script returns output', () => {
-    const result = runPraatScript('writeInfoLine: "hello world"');
-    expect(result.output).toContain('hello world');
-    expect(result.errors.length).toBe(0);
-  });
-
-  it('run_js_script returns output', () => {
-    const result = runJavaScript(
-      'praat.log("test output")',
-      { samples: new Float32Array(100), sampleRate: 16000 }
-    );
-    expect(result.output).toContain('test output');
   });
 });

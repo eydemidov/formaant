@@ -11,8 +11,6 @@ import { computeHarmonicity } from '../audio/harmonicity.js';
 import { computeVoiceQuality } from '../audio/voiceQuality.js';
 import { computeSpectrumSlice } from '../audio/spectrum.js';
 import { generateIpaAnnotations } from '../audio/ipaVowels.js';
-import { runPraatScript } from '../scripting/interpreter.js';
-import { runJavaScript } from '../scripting/jsRunner.js';
 import { defaultAnalysisSettings } from '../audio/defaults.js';
 
 const audioInputSchema = {
@@ -205,54 +203,6 @@ server.tool(
   }
 );
 
-// --- run_praat_script ---
-server.tool(
-  'run_praat_script',
-  'Execute a Praat script and return output.',
-  {
-    script: z.string().describe('Praat script source code'),
-  },
-  async (args) => {
-    const result = runPraatScript(args.script);
-
-    return {
-      content: [{
-        type: 'text' as const,
-        text: JSON.stringify({
-          output: result.output,
-          errors: result.errors,
-        }, null, 2),
-      }],
-    };
-  }
-);
-
-// --- run_js_script ---
-server.tool(
-  'run_js_script',
-  'Execute a JavaScript script with access to audio data via the praat API object.',
-  {
-    script: z.string().describe('JavaScript source code'),
-    ...audioInputSchema,
-  },
-  async (args) => {
-    const { samples, sampleRate } = args.filePath || args.base64
-      ? getAudio(args)
-      : { samples: new Float32Array(0), sampleRate: 44100 };
-
-    const result = runJavaScript(args.script, { samples, sampleRate });
-
-    return {
-      content: [{
-        type: 'text' as const,
-        text: JSON.stringify({
-          output: result.output,
-          errors: result.errors,
-        }, null, 2),
-      }],
-    };
-  }
-);
 
 // --- Start server ---
 async function main() {

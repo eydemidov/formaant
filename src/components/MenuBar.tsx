@@ -27,7 +27,6 @@ interface MenuBarProps {
   onExportHarmonicityCsv: () => void;
   onExportFigure?: () => void;
   onGenerateTone?: () => void;
-  onBatchProcess?: () => void;
   onAnalyzeSelection?: () => void;
   onUndo: () => void;
   onRedo: () => void;
@@ -63,7 +62,6 @@ interface MenuBarProps {
   onOpenSpeechSynthesizer?: () => void;
   onOpenPitchSonification?: () => void;
   onOpenNoteTranscription?: () => void;
-  onOpenPlugins?: () => void;
   onOpenCommandPalette?: () => void;
   themeSetting?: ThemeSetting;
   onThemeChange?: (theme: ThemeSetting) => void;
@@ -118,7 +116,7 @@ export function MenuBar(props: MenuBarProps) {
     showPitch, showFormants, showIntensity, showIpa, showIpaFormants,
     onOpenManipulation, onOpenPitchTier, onOpenFormantGrid,
     onOpenDurationTier, onOpenAmplitudeTier, onOpenVocalTract,
-    onOpenExperiment, onOpenSpeechSynthesizer, onOpenPitchSonification, onOpenNoteTranscription, onOpenPlugins,
+    onOpenExperiment, onOpenSpeechSynthesizer, onOpenPitchSonification, onOpenNoteTranscription,
     onOpenCommandPalette,
     themeSetting, onThemeChange,
   } = props;
@@ -226,12 +224,8 @@ export function MenuBar(props: MenuBarProps) {
           <MenubarItem onClick={onOpenExperiment}>Experiment (MFC)</MenubarItem>
           <MenubarItem onClick={onOpenSpeechSynthesizer}>SpeechSynthesizer (TTS)</MenubarItem>
           <MenubarItem onClick={onOpenPitchSonification}>Pitch Sonification</MenubarItem>
-                    <MenubarItem onClick={onOpenNoteTranscription}>Note Transcription</MenubarItem>
-          <MenubarItem onClick={onOpenPlugins}>🧩 Plugins</MenubarItem>
-          <MenubarSeparator />
+          <MenubarItem onClick={onOpenNoteTranscription}>Note Transcription</MenubarItem>
           {props.onGenerateTone && <MenubarItem onClick={props.onGenerateTone}>Generate Tone…</MenubarItem>}
-          <MenubarSeparator />
-          {props.onBatchProcess && <MenubarItem onClick={props.onBatchProcess}>Batch Process…</MenubarItem>}
         </MenubarContent>
       </MenubarMenu>
 

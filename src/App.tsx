@@ -27,8 +27,6 @@ import AmplitudeTierEditor from './components/AmplitudeTierEditor';
 import { VocalTractEditor } from './components/VocalTractEditor';
 import { ExperimentDesigner } from './components/ExperimentDesigner';
 import { ExperimentMFC } from './components/ExperimentMFC';
-import { PluginManager } from './components/PluginManager';
-import { BatchProcess } from './components/BatchProcess';
 import { VowelSpace } from './components/VowelSpace';
 import { VoiceReportDialog } from './components/VoiceReportDialog';
 import SpeechSynthesizerPanel from './components/SpeechSynthesizerPanel';
@@ -97,8 +95,6 @@ export default function App() {
   const [showSpeechSynthesizer, setShowSpeechSynthesizer] = useState(false);
   const [showPitchSonification, setShowPitchSonification] = useState(false);
   const [showNoteTranscription, setShowNoteTranscription] = useState(false);
-  const [showPlugins, setShowPlugins] = useState(false);
-  const [showBatch, setShowBatch] = useState(false);
   const [showVoiceReport, setShowVoiceReport] = useState(false);
   const [experimentConfig, setExperimentConfig] = useState<{ config: any; audioMap: Record<string, string> } | null>(null);
   const [settings, setSettings] = useState<AnalysisSettings>(initialPreferences.settings);
@@ -645,8 +641,6 @@ export default function App() {
     { id: 'tools.speechSynthesizer', label: 'SpeechSynthesizer (TTS)', category: 'Tools', action: () => setShowSpeechSynthesizer(true) },
     { id: 'tools.pitchSonification', label: 'Pitch Sonification', category: 'Tools', action: () => setShowPitchSonification(true) },
     { id: 'tools.noteTranscription', label: 'Note Transcription', category: 'Tools', action: () => setShowNoteTranscription(true) },
-    { id: 'tools.plugins', label: 'Plugins', category: 'Tools', action: () => setShowPlugins(true) },
-    { id: 'tools.batch-process', label: 'Batch Process', category: 'Tools', action: () => setShowBatch(true) },
     { id: 'tools.generate-tone', label: 'Generate Tone', category: 'Tools', action: () => { const f = prompt('Frequency (Hz):', '440'); if (f) { const dur = Number(prompt('Duration (s):', '1')) || 1; processSamples(generateSineWave(Number(f), dur, 44100), 44100); } } },
     { id: 'edit.reverse', label: 'Reverse', category: 'Edit', action: () => { if (currentSamplesRef.current) { const r = new Float32Array(currentSamplesRef.current.length); for (let i = 0; i < r.length; i++) r[i] = currentSamplesRef.current[r.length - 1 - i]; applyEffect(r); } } },
     { id: 'edit.normalize', label: 'Normalize', category: 'Edit', action: () => { if (currentSamplesRef.current) applyEffect(soundNormalize(currentSamplesRef.current)); } },
@@ -701,7 +695,6 @@ export default function App() {
           const tone = generateSineWave(freq, dur, sr);
           processSamples(tone, sr);
         }}
-        onBatchProcess={() => setShowBatch(true)}
         onAnalyzeSelection={() => {
           if (!currentSamplesRef.current) return;
           const startSample = Math.floor(viewStart * sampleRate);
@@ -784,7 +777,6 @@ export default function App() {
         onOpenSpeechSynthesizer={() => setShowSpeechSynthesizer(true)}
         onOpenPitchSonification={() => setShowPitchSonification(true)}
         onOpenNoteTranscription={() => setShowNoteTranscription(true)}
-        onOpenPlugins={() => setShowPlugins(true)}
         themeSetting={themeSetting}
         onThemeChange={setThemeSetting}
         onOpenCommandPalette={() => setCommandPaletteOpen(true)}
@@ -1167,8 +1159,6 @@ export default function App() {
         </div>
       )}
 
-      {showPlugins && <PluginManager onClose={() => setShowPlugins(false)} samples={currentSamplesRef.current ?? undefined} sampleRate={sampleRate} />}
-      {showBatch && <BatchProcess onClose={() => setShowBatch(false)} />}
       <VoiceReportDialog
         open={showVoiceReport}
         onClose={() => setShowVoiceReport(false)}
