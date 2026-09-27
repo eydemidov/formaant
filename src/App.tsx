@@ -20,6 +20,7 @@ import { DropOverlay, DropFileType } from './components/DropOverlay';
 import { Minimap } from './components/Minimap';
 import { FilterPanel } from './components/FilterPanel';
 import { normalize as soundNormalize } from './audio/soundManipulation';
+import { findHighEnergyRegions } from './audio/quickSelect';
 import type {
   AnalysisResult,
   AnalysisSettings,
@@ -57,6 +58,7 @@ export default function App() {
   const [viewStart, setViewStart] = useState(0);
   const [viewEnd, setViewEnd] = useState(1);
   const [sampleRate, setSampleRate] = useState(44100);
+  const sampleRateRef = useRef(44100);
 
   useEffect(() => {
     saveAppPreferences({
@@ -118,8 +120,9 @@ export default function App() {
   const [progress, setProgress] = useState(0);
 
   const processSamples = useCallback(
-    (samples: Float32Array, nextSampleRate: number) => {
+    (samples: Float32Array, nextSampleRate: number, selectFirstRegion = false) => {
       currentSamplesRef.current = Float32Array.from(samples);
+      sampleRateRef.current = nextSampleRate;
       setSampleRate(nextSampleRate);
       setAnalyzing(true);
       setProgress(0);
@@ -129,7 +132,10 @@ export default function App() {
         setAnalyzing(false);
         setProgress(100);
         setAnalysis(nextAnalysis);
-        setSelection(null);
+        const firstRegion = selectFirstRegion && nextAnalysis.spectrogram.magnitudes.length > 0
+          ? findHighEnergyRegions(nextAnalysis.intensity, nextAnalysis.duration)[0]
+          : null;
+        setSelection(firstRegion ?? null);
         setCurrentTime(0);
         const fitted = fitToWindow(nextAnalysis.duration);
         setViewStart(fitted.start);
@@ -151,6 +157,7 @@ export default function App() {
       const LONG_THRESHOLD = 300; // seconds
       if (buffer.duration > LONG_THRESHOLD) {
         currentSamplesRef.current = samples;
+        sampleRateRef.current = buffer.sampleRate;
         setSampleRate(buffer.sampleRate);
         const duration = buffer.duration;
         // Create minimal analysis with just waveform data
@@ -167,12 +174,13 @@ export default function App() {
           settings: settingsRef.current as AnalysisSettings,
         };
         setAnalysis(emptyAnalysis);
+        setSelection(null);
         setAnalyzing(false);
         setViewStart(0);
         setViewEnd(Math.min(30, duration)); // Show first 30s
         return;
       }
-      processSamples(samples, buffer.sampleRate);
+      processSamples(samples, buffer.sampleRate, true);
     },
     [processSamples]
   );
@@ -184,8 +192,8 @@ export default function App() {
 
   useEffect(() => {
     if (!currentSamplesRef.current) return;
-    processSamples(currentSamplesRef.current, sampleRate);
-  }, [processSamples, sampleRate, settings]);
+    processSamples(currentSamplesRef.current, sampleRateRef.current);
+  }, [processSamples, settings]);
 
   const handleLoadFile = useCallback(async (file: File) => {
     if (analysis) {
@@ -224,7 +232,7 @@ export default function App() {
     if (samples.length > 0) {
       const normalized = soundNormalize(samples);
       originalSamplesRef.current = Float32Array.from(normalized);
-      processSamples(normalized, sr);
+      processSamples(normalized, sr, true);
     }
   }, [streaming, processSamples]);
 
