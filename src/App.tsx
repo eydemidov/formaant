@@ -714,16 +714,6 @@ export default function App() {
         onZoomOut={handleZoomOut}
         onFitToWindow={handleFitToWindow}
         onZoomToSelection={() => handleZoomSelection()}
-        onTogglePitch={() => setShowPitch((v) => !v)}
-        onToggleFormants={() => setShowFormants((v) => !v)}
-        onToggleIntensity={() => setShowIntensity((v) => !v)}
-        onToggleIpa={() => setShowIpa((v) => !v)}
-        onToggleIpaFormants={() => setShowIpaFormants((v) => !v)}
-        showPitch={showPitch}
-        showFormants={showFormants}
-        showIntensity={showIntensity}
-        showIpa={showIpa}
-        showIpaFormants={showIpaFormants}
         onOpenManipulation={() => setShowManipulation(true)}
         onOpenPitchTier={() => setShowPitchTier(true)}
         onOpenFormantGrid={() => setShowFormantGrid(true)}

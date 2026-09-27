@@ -35,16 +35,6 @@ interface MenuBarProps {
   onZoomOut: () => void;
   onFitToWindow: () => void;
   onZoomToSelection: () => void;
-  onTogglePitch: () => void;
-  onToggleFormants: () => void;
-  onToggleIntensity: () => void;
-  onToggleIpa: () => void;
-  onToggleIpaFormants: () => void;
-  showPitch: boolean;
-  showFormants: boolean;
-  showIntensity: boolean;
-  showIpa: boolean;
-  showIpaFormants: boolean;
   onOpenManipulation?: () => void;
   onOpenPitchTier?: () => void;
   onOpenFormantGrid?: () => void;
@@ -100,8 +90,6 @@ export function MenuBar(props: MenuBarProps) {
     onLoadFile,
     onUndo, onRedo, onCut, onCopy, onPaste, onDelete,
     onZoomIn, onZoomOut, onFitToWindow, onZoomToSelection,
-    onTogglePitch, onToggleFormants, onToggleIntensity, onToggleIpa, onToggleIpaFormants,
-    showPitch, showFormants, showIntensity, showIpa, showIpaFormants,
     onOpenManipulation, onOpenPitchTier, onOpenFormantGrid,
     onOpenDurationTier, onOpenAmplitudeTier, onOpenVocalTract,
     onOpenExperiment, onOpenSpeechSynthesizer, onOpenPitchSonification, onOpenNoteTranscription,
@@ -161,28 +149,6 @@ export function MenuBar(props: MenuBarProps) {
               ))}
             </MenubarSubContent>
           </MenubarSub>
-        </MenubarContent>
-      </MenubarMenu>
-
-      {/* Analysis */}
-      <MenubarMenu>
-        <MenubarTrigger>Analysis</MenubarTrigger>
-        <MenubarContent>
-          <MenubarItem onClick={onTogglePitch}>
-            {showPitch ? '✓ ' : ''}Pitch Overlay
-          </MenubarItem>
-          <MenubarItem onClick={onToggleFormants}>
-            {showFormants ? '✓ ' : ''}Formant Overlay
-          </MenubarItem>
-          <MenubarItem onClick={onToggleIntensity}>
-            {showIntensity ? '✓ ' : ''}Intensity Overlay
-          </MenubarItem>
-          <MenubarItem onClick={onToggleIpa}>
-            {showIpa ? '✓ ' : ''}IPA Vowel Labels
-          </MenubarItem>
-          <MenubarItem onClick={onToggleIpaFormants}>
-            {showIpaFormants ? '✓ ' : ''}Vowel F1/F2 Values
-          </MenubarItem>
         </MenubarContent>
       </MenubarMenu>
 
