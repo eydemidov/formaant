@@ -26,7 +26,6 @@ export function AboutDialog() {
           <li>Pitch, Formant, Intensity, Harmonicity analysis</li>
           <li>Spectrogram</li>
           <li>PSOLA manipulation</li>
-          <li>Praat Script + JavaScript scripting</li>
           <li>Perception experiments (MFC)</li>
         </ul>
         <p style={{ marginTop: '16px', color: 'var(--text-tertiary)', fontSize: '12px' }}>

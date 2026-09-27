@@ -63,7 +63,6 @@ interface MenuBarProps {
   onOpenSpeechSynthesizer?: () => void;
   onOpenPitchSonification?: () => void;
   onOpenNoteTranscription?: () => void;
-  onOpenScriptEditor?: () => void;
   onOpenPlugins?: () => void;
   onOpenCommandPalette?: () => void;
   themeSetting?: ThemeSetting;
@@ -119,7 +118,7 @@ export function MenuBar(props: MenuBarProps) {
     showPitch, showFormants, showIntensity, showIpa, showIpaFormants,
     onOpenManipulation, onOpenPitchTier, onOpenFormantGrid,
     onOpenDurationTier, onOpenAmplitudeTier, onOpenVocalTract,
-    onOpenExperiment, onOpenSpeechSynthesizer, onOpenPitchSonification, onOpenNoteTranscription, onOpenScriptEditor, onOpenPlugins,
+    onOpenExperiment, onOpenSpeechSynthesizer, onOpenPitchSonification, onOpenNoteTranscription, onOpenPlugins,
     onOpenCommandPalette,
     themeSetting, onThemeChange,
   } = props;
@@ -228,7 +227,6 @@ export function MenuBar(props: MenuBarProps) {
           <MenubarItem onClick={onOpenSpeechSynthesizer}>SpeechSynthesizer (TTS)</MenubarItem>
           <MenubarItem onClick={onOpenPitchSonification}>Pitch Sonification</MenubarItem>
                     <MenubarItem onClick={onOpenNoteTranscription}>Note Transcription</MenubarItem>
-          <MenubarItem onClick={onOpenScriptEditor}>Script Editor</MenubarItem>
           <MenubarItem onClick={onOpenPlugins}>🧩 Plugins</MenubarItem>
           <MenubarSeparator />
           {props.onGenerateTone && <MenubarItem onClick={props.onGenerateTone}>Generate Tone…</MenubarItem>}

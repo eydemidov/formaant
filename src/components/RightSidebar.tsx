@@ -1,27 +1,24 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Settings, Code, Circle,
+  Settings, Circle,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
-type Tab = 'settings' | 'script' | 'vowels';
+type Tab = 'settings' | 'vowels';
 
 interface RightSidebarProps {
   children: {
     settings: ReactNode;
-    script: ReactNode;
     vowels: ReactNode;
   };
 }
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: 'settings', label: 'Settings', icon: Settings },
-  { id: 'script', label: 'Script Editor', icon: Code },
   { id: 'vowels', label: 'Vowel Space', icon: Circle },
 ];
 
-const DEFAULT_WIDTH: Record<string, number> = { script: 480 };
 const FALLBACK_WIDTH = 320;
 
 export function RightSidebar({ children }: RightSidebarProps) {
@@ -35,7 +32,7 @@ export function RightSidebar({ children }: RightSidebarProps) {
     const handler = (e: Event) => {
       const tab = (e as CustomEvent).detail as Tab;
       setActiveTab(tab);
-      setWidth(DEFAULT_WIDTH[tab] ?? FALLBACK_WIDTH);
+      setWidth(FALLBACK_WIDTH);
     };
     document.addEventListener('open-sidebar-tab', handler);
     return () => document.removeEventListener('open-sidebar-tab', handler);
@@ -44,7 +41,7 @@ export function RightSidebar({ children }: RightSidebarProps) {
   const handleTabClick = (tab: Tab) => {
     setActiveTab((current) => {
       if (current === tab) return null;
-      setWidth(DEFAULT_WIDTH[tab] ?? FALLBACK_WIDTH);
+      setWidth(FALLBACK_WIDTH);
       return tab;
     });
   };

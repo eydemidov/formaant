@@ -27,7 +27,6 @@ import AmplitudeTierEditor from './components/AmplitudeTierEditor';
 import { VocalTractEditor } from './components/VocalTractEditor';
 import { ExperimentDesigner } from './components/ExperimentDesigner';
 import { ExperimentMFC } from './components/ExperimentMFC';
-import { ScriptEditor } from './components/ScriptEditor';
 import { PluginManager } from './components/PluginManager';
 import { BatchProcess } from './components/BatchProcess';
 import { VowelSpace } from './components/VowelSpace';
@@ -646,7 +645,6 @@ export default function App() {
     { id: 'tools.speechSynthesizer', label: 'SpeechSynthesizer (TTS)', category: 'Tools', action: () => setShowSpeechSynthesizer(true) },
     { id: 'tools.pitchSonification', label: 'Pitch Sonification', category: 'Tools', action: () => setShowPitchSonification(true) },
     { id: 'tools.noteTranscription', label: 'Note Transcription', category: 'Tools', action: () => setShowNoteTranscription(true) },
-    { id: 'tools.script-editor', label: 'Script Editor', category: 'Tools', action: () => document.dispatchEvent(new CustomEvent('open-sidebar-tab', { detail: 'script' })) },
     { id: 'tools.plugins', label: 'Plugins', category: 'Tools', action: () => setShowPlugins(true) },
     { id: 'tools.batch-process', label: 'Batch Process', category: 'Tools', action: () => setShowBatch(true) },
     { id: 'tools.generate-tone', label: 'Generate Tone', category: 'Tools', action: () => { const f = prompt('Frequency (Hz):', '440'); if (f) { const dur = Number(prompt('Duration (s):', '1')) || 1; processSamples(generateSineWave(Number(f), dur, 44100), 44100); } } },
@@ -786,7 +784,6 @@ export default function App() {
         onOpenSpeechSynthesizer={() => setShowSpeechSynthesizer(true)}
         onOpenPitchSonification={() => setShowPitchSonification(true)}
         onOpenNoteTranscription={() => setShowNoteTranscription(true)}
-        onOpenScriptEditor={() => document.dispatchEvent(new CustomEvent('open-sidebar-tab', { detail: 'script' }))}
         onOpenPlugins={() => setShowPlugins(true)}
         themeSetting={themeSetting}
         onThemeChange={setThemeSetting}
@@ -1041,7 +1038,6 @@ export default function App() {
                   <FilterPanel settings={filterSettings} onChange={setFilterSettings} onApply={handleApplyFilter} onReset={handleResetFilter} />
                 </>
               ),
-              script: <ScriptEditor samples={currentSamplesRef.current ?? undefined} sampleRate={sampleRate} />,
               vowels: <VowelSpace analysis={analysis} selection={selection} currentTime={currentTime} profile={vowelProfile} onProfileChange={setVowelProfile} />,
             }}
           </RightSidebar>
