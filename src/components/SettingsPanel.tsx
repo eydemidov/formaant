@@ -114,16 +114,6 @@ export function SettingsPanel({ settings, onChange }: SettingsPanelProps) {
           onChange={(v) => updateSpectrogram({ dynamicRangeDb: v })}
         />
 
-        <SliderField
-          label="Max frequency"
-          value={local.spectrogram.maxViewFrequency}
-          min={2000}
-          max={22050}
-          step={500}
-          unit=" Hz"
-          onChange={(v) => updateSpectrogram({ maxViewFrequency: v })}
-        />
-
         <label className="settings-field">
           <span>Pre-emphasis (dB/oct)</span>
           <input

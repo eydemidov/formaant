@@ -70,7 +70,7 @@ export const Spectrogram = React.memo(function Spectrogram({
 
     const { spectrogram } = analysis;
     if (spectrogram.magnitudes.length === 0) return;
-    const maxDisplayFreq = Math.min(analysis.settings.spectrogram.maxViewFrequency, spectrogram.maxFreq);
+    const maxDisplayFreq = Math.min(analysis.settings.formant.maxFrequency, spectrogram.maxFreq);
     const binsToShow = Math.min(
       spectrogram.magnitudes[0].length,
       Math.ceil(maxDisplayFreq / spectrogram.freqStep)
@@ -139,10 +139,11 @@ export const Spectrogram = React.memo(function Spectrogram({
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     const freqSteps = [0, 1000, 2000, 3000, 4000, 5000].filter(f => f <= maxDisplayFreq);
+    if (!freqSteps.includes(maxDisplayFreq)) freqSteps.push(maxDisplayFreq);
     for (const freq of freqSteps) {
       if (freq === 0) continue;
       const y = height - (freq / maxDisplayFreq) * height;
-      ctx.fillText(`${freq / 1000}k`, 3, y);
+      ctx.fillText(`${freq / 1000}k`, 3, Math.max(6, y));
       // Subtle grid line
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
       ctx.lineWidth = 0.5;
@@ -313,7 +314,7 @@ export const Spectrogram = React.memo(function Spectrogram({
       crosshairRef.current.style.display = 'block';
     }
     if (readoutRef.current && analysis && canvasRect) {
-      const maxDisplayFreq = Math.min(analysis.settings.spectrogram.maxViewFrequency, analysis.spectrogram.maxFreq);
+      const maxDisplayFreq = Math.min(analysis.settings.formant.maxFrequency, analysis.spectrogram.maxFreq);
       const time = xToTime(x, canvasRect.width, viewRange);
       const canvasY = event.clientY - canvasRect.top;
       const freq = (1 - canvasY / canvasRect.height) * maxDisplayFreq;
@@ -414,7 +415,8 @@ export const Spectrogram = React.memo(function Spectrogram({
                 <span className="ipa-symbol">{ann.symbol}</span>
                 {showIpaFormants && (
                   <span className="ipa-formants">
-                    {Math.round(ann.averageF1)} | {Math.round(ann.averageF2)}
+                    <span>F1: {Math.round(ann.averageF1)}</span>
+                    <span>F2: {Math.round(ann.averageF2)}</span>
                   </span>
                 )}
               </span>

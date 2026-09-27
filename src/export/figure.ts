@@ -90,7 +90,7 @@ export function exportFigurePng(
   // ─── Spectrogram ────────────────────────────────────────────────────────────
 
   const { spectrogram } = analysis;
-  const maxDisplayFreq = Math.min(analysis.settings.spectrogram.maxViewFrequency, spectrogram.maxFreq);
+  const maxDisplayFreq = Math.min(analysis.settings.formant.maxFrequency, spectrogram.maxFreq);
   const binsToShow = Math.min(
     spectrogram.magnitudes[0]?.length ?? 0,
     Math.ceil(maxDisplayFreq / spectrogram.freqStep)
@@ -205,6 +205,7 @@ export function exportFigurePng(
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
   const freqSteps = [0, 1000, 2000, 3000, 4000, 5000].filter(f => f <= maxDisplayFreq);
+  if (!freqSteps.includes(maxDisplayFreq)) freqSteps.push(maxDisplayFreq);
   for (const freq of freqSteps) {
     const y = margin.top + waveH + specH - (freq / maxDisplayFreq) * specH;
     ctx.fillText(`${freq / 1000}k`, margin.left - 8, y);
