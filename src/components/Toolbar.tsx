@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Play, Pause, Square, Circle,
   AudioLines, Waves, Activity, Languages, Hash, Filter, FolderOpen, CircleHelp, Settings,
@@ -13,6 +14,8 @@ interface ToolbarProps {
   onStopRecord: () => void;
   onPlay: () => void;
   onPause: () => void;
+  playbackSpeed: number;
+  onPlaybackSpeedChange: (speed: number) => void;
   onHelp: () => void;
   activePanel: 'settings' | 'vowels' | null;
   onToggleSettings: () => void;
@@ -65,10 +68,18 @@ export function Toolbar(props: ToolbarProps) {
   const {
     hasAudio, isPlaying, isRecording,
     onOpenAudio, onRecord, onStopRecord, onPlay, onPause, onHelp,
+    playbackSpeed, onPlaybackSpeedChange,
     activePanel, onToggleSettings, onToggleVowelSpace,
     showPitch, showFormants, showIntensity, showIpa, showIpaFormants, filterConsonants,
     onTogglePitch, onToggleFormants, onToggleIntensity, onToggleIpa, onToggleIpaFormants, onToggleConsonantFilter,
   } = props;
+  const [speedInput, setSpeedInput] = useState(playbackSpeed.toFixed(1));
+
+  const handleSpeedInput = (value: string) => {
+    setSpeedInput(value);
+    const speed = Number(value);
+    if (value.trim() !== '' && speed >= 0.2 && speed <= 2) onPlaybackSpeedChange(Math.round(speed * 10) / 10);
+  };
 
   return (
     <div className="toolbar" role="toolbar" aria-label="Tools">
@@ -87,6 +98,19 @@ export function Toolbar(props: ToolbarProps) {
           onClick={isPlaying ? onPause : onPlay}
           disabled={!hasAudio}
         />
+        <label className="toolbar-speed" title="Playback speed">
+          <input
+            type="number"
+            min="0.2"
+            max="2"
+            step="0.1"
+            value={speedInput}
+            onChange={(event) => handleSpeedInput(event.target.value)}
+            onBlur={() => setSpeedInput(playbackSpeed.toFixed(1))}
+            aria-label="Playback speed"
+          />
+          <span>×</span>
+        </label>
       </div>
 
       <div className="toolbar-separator" />

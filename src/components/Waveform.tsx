@@ -103,23 +103,13 @@ export const Waveform = React.memo(function Waveform({
       }
     }
 
-    // Playhead cursor
-    if (currentTime >= viewRange.start && currentTime <= viewRange.end) {
-      const x = timeToX(currentTime, width, viewRange);
-      ctx.strokeStyle = style.getPropertyValue('--cursor-color').trim() || '#f38ba8';
-      ctx.beginPath();
-      ctx.moveTo(x + 0.5, 0);
-      ctx.lineTo(x + 0.5, height);
-      ctx.stroke();
-    }
-
     // Center line
     ctx.strokeStyle = style.getPropertyValue('--waveform-center').trim() || '#45475a';
     ctx.beginPath();
     ctx.moveTo(0, height / 2 + 0.5);
     ctx.lineTo(width, height / 2 + 0.5);
     ctx.stroke();
-  }, [analysis, currentTime, selection, viewRange]);
+  }, [analysis, selection, viewRange]);
 
   const getTime = (event: React.MouseEvent<HTMLCanvasElement>): number => {
     const rect = canvasRef.current!.getBoundingClientRect();
@@ -256,13 +246,21 @@ export const Waveform = React.memo(function Waveform({
   useZoomPan(canvasRef, viewRange, zoomPanCallbacks, !!analysis);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="waveform-canvas"
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-    />
+    <div className="waveform-container">
+      <canvas
+        ref={canvasRef}
+        className="waveform-canvas"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      />
+      {analysis && currentTime >= viewRange.start && currentTime <= viewRange.end && (
+        <div
+          className="waveform-playhead"
+          style={{ left: `${(currentTime - viewRange.start) / (viewRange.end - viewRange.start) * 100}%` }}
+        />
+      )}
+    </div>
   );
 });

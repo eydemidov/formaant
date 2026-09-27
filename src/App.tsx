@@ -21,6 +21,7 @@ import { Minimap } from './components/Minimap';
 import { FilterPanel } from './components/FilterPanel';
 import { normalize as soundNormalize } from './audio/soundManipulation';
 import { findHighEnergyRegions } from './audio/quickSelect';
+import { createPlaybackWav } from './audio/playbackWav';
 import { vowelProfiles, type VowelProfile } from './audio/vowelProfiles';
 import type {
   AnalysisResult,
@@ -29,13 +30,8 @@ import type {
   TimeSelection,
 } from './types';
 import { fitToWindow, panViewRange, selectionToView, zoomAroundPoint } from './utils/view';
+import { advancePlaybackClock } from './utils/playbackClock';
 import { loadAppPreferences, saveAppPreferences } from './utils/preferences';
-
-function createAudioBufferFromSamples(samples: Float32Array, sampleRate: number): AudioBuffer {
-  const buffer = new AudioBuffer({ length: samples.length, sampleRate, numberOfChannels: 1 });
-  buffer.getChannelData(0).set(samples);
-  return buffer;
-}
 
 export default function App() {
   const [initialPreferences] = useState(loadAppPreferences);
@@ -43,6 +39,7 @@ export default function App() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [selection, setSelection] = useState<TimeSelection | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [isRecording, setIsRecording] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const currentTimeRef = useRef(0);
@@ -92,10 +89,11 @@ export default function App() {
 
   const streaming = useStreamingRecording(settings);
   const { analyze: analyzeInWorker } = useAnalysisWorker();
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const sourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const playbackAudioRef = useRef<HTMLAudioElement | null>(null);
+  const playbackUrlRef = useRef<{ samples: Float32Array; sampleRate: number; startSample: number; endSample: number; url: string } | null>(null);
+  const playbackOffsetRef = useRef(0);
   const animFrameRef = useRef<number>(0);
-  const playStartRef = useRef(0);
+  const playbackSpeedRef = useRef(1);
   const originalSamplesRef = useRef<Float32Array | null>(null);
   const currentSamplesRef = useRef<Float32Array | null>(null);
   const audioFileInputRef = useRef<HTMLInputElement>(null);
@@ -246,56 +244,91 @@ export default function App() {
     }
   }, [streaming, processSamples]);
 
+  const handlePlaybackSpeedChange = useCallback((speed: number) => {
+    if (playbackAudioRef.current) playbackAudioRef.current.playbackRate = speed;
+    playbackSpeedRef.current = speed;
+    setPlaybackSpeed(speed);
+  }, []);
+
   const handlePlay = useCallback(() => {
-    if (!currentSamplesRef.current) return;
-    const buffer = createAudioBufferFromSamples(currentSamplesRef.current, sampleRate);
-    const ctx = new AudioContext();
-    audioCtxRef.current = ctx;
-
+    const samples = currentSamplesRef.current;
+    if (!samples) return;
+    playbackAudioRef.current?.pause();
     const startOffset = selection?.start ?? currentTimeRef.current;
-    const duration = selection ? selection.end - selection.start : undefined;
-    const selEnd = selection?.end;
-    const looping = !!selection;
-
-    function startSource() {
-      const source = ctx.createBufferSource();
-      source.buffer = buffer;
-      source.connect(ctx.destination);
-      source.start(0, startOffset, duration);
-      sourceRef.current = source;
-      playStartRef.current = ctx.currentTime - startOffset;
-
-      source.onended = () => {
-        if (looping && audioCtxRef.current === ctx) {
-          // Loop: restart from selection start
-          startSource();
-        } else {
-          setIsPlaying(false);
-          cancelAnimationFrame(animFrameRef.current);
-          if (selEnd !== undefined) setCurrentTime(startOffset);
-        }
+    const startSample = selection ? Math.floor(selection.start * sampleRate) : 0;
+    const endSample = selection ? Math.ceil(selection.end * sampleRate) : samples.length;
+    const playbackOffset = selection ? startSample / sampleRate : 0;
+    let playbackFile = playbackUrlRef.current;
+    if (!playbackFile || playbackFile.samples !== samples || playbackFile.sampleRate !== sampleRate ||
+      playbackFile.startSample !== startSample || playbackFile.endSample !== endSample) {
+      if (playbackFile) URL.revokeObjectURL(playbackFile.url);
+      playbackFile = {
+        samples,
+        sampleRate,
+        startSample,
+        endSample,
+        url: URL.createObjectURL(createPlaybackWav(samples.subarray(startSample, endSample), sampleRate)),
       };
+      playbackUrlRef.current = playbackFile;
     }
 
-    startSource();
-    setIsPlaying(true);
+    const audio = new Audio(playbackFile.url);
+    audio.preservesPitch = true;
+    audio.playbackRate = playbackSpeedRef.current;
+    audio.loop = !!selection;
+    playbackAudioRef.current = audio;
+    playbackOffsetRef.current = playbackOffset;
+
+    audio.currentTime = selection ? 0 : startOffset;
+    const clipDuration = (endSample - startSample) / sampleRate;
+    let playbackClock = {
+      displayedTime: audio.currentTime,
+      mediaTime: audio.currentTime,
+      wallTime: performance.now(),
+    };
+
+    const handlePlaybackError = (error: unknown) => {
+      if (playbackAudioRef.current !== audio) return;
+      playbackAudioRef.current = null;
+      setIsPlaying(false);
+      cancelAnimationFrame(animFrameRef.current);
+      console.error('Playback failed:', error);
+    };
+
+    audio.onended = () => {
+      if (playbackAudioRef.current !== audio) return;
+      playbackAudioRef.current = null;
+      setCurrentTime(samples.length / sampleRate);
+      setIsPlaying(false);
+      cancelAnimationFrame(animFrameRef.current);
+    };
 
     const updateTime = () => {
-      if (!audioCtxRef.current || audioCtxRef.current !== ctx) return;
-      let t = audioCtxRef.current.currentTime - playStartRef.current;
-      // Clamp to selection bounds
-      if (selEnd !== undefined && t > selEnd) t = selEnd;
-      setCurrentTime(t);
+      if (playbackAudioRef.current !== audio) return;
+      playbackClock = advancePlaybackClock(
+        playbackClock,
+        audio.currentTime,
+        performance.now(),
+        audio.playbackRate,
+        clipDuration,
+        audio.loop,
+        !audio.paused && !audio.seeking && audio.readyState >= 2
+      );
+      setCurrentTime(playbackOffset + playbackClock.displayedTime);
       animFrameRef.current = requestAnimationFrame(updateTime);
     };
+    setIsPlaying(true);
     updateTime();
+    void audio.play().catch(handlePlaybackError);
   }, [sampleRate, selection]);
 
   const handlePause = useCallback(() => {
-    sourceRef.current?.stop();
-    const ctx = audioCtxRef.current;
-    audioCtxRef.current = null;
-    ctx?.close();
+    const audio = playbackAudioRef.current;
+    playbackAudioRef.current = null;
+    if (audio) {
+      setCurrentTime(playbackOffsetRef.current + audio.currentTime);
+      audio.pause();
+    }
     cancelAnimationFrame(animFrameRef.current);
     setIsPlaying(false);
   }, []);
@@ -408,7 +441,8 @@ export default function App() {
 
   useEffect(() => () => {
     cancelAnimationFrame(animFrameRef.current);
-    audioCtxRef.current?.close();
+    playbackAudioRef.current?.pause();
+    if (playbackUrlRef.current) URL.revokeObjectURL(playbackUrlRef.current.url);
   }, []);
 
   const handleSelectAll = useCallback(() => {
@@ -507,6 +541,8 @@ export default function App() {
         onStopRecord={handleStopRecord}
         onPlay={handlePlay}
         onPause={handlePause}
+        playbackSpeed={playbackSpeed}
+        onPlaybackSpeedChange={handlePlaybackSpeedChange}
         onHelp={() => setHelpOpen(true)}
         activePanel={activePanel}
         onToggleSettings={() => setActivePanel((panel) => panel === 'settings' ? null : 'settings')}

@@ -243,15 +243,7 @@ export const Spectrogram = React.memo(function Spectrogram({
 
     // IPA annotations rendered as HTML tier below (not on canvas)
 
-    if (currentTime >= viewRange.start && currentTime <= viewRange.end) {
-      const x = timeToX(currentTime, width, viewRange);
-      ctx.strokeStyle = style.getPropertyValue('--playhead-color').trim() || '#cdd6f4';
-      ctx.beginPath();
-      ctx.moveTo(x + 0.5, 0);
-      ctx.lineTo(x + 0.5, height);
-      ctx.stroke();
-    }
-  }, [analysis, currentTime, selection, showFormants, showIntensity, showIpa, showPitch, viewRange]);
+  }, [analysis, selection, showFormants, showIntensity, showIpa, showPitch, viewRange]);
 
   const getTime = (event: React.MouseEvent<HTMLCanvasElement>): number => {
     const rect = canvasRef.current!.getBoundingClientRect();
@@ -390,20 +382,28 @@ export const Spectrogram = React.memo(function Spectrogram({
       onMouseMove={handleCrosshairMove}
       onMouseLeave={handleCrosshairLeave}
     >
-      <canvas
-        ref={canvasRef}
-        className="spectrogram-canvas"
-        aria-label="Spectrogram visualization"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onMouseLeave={() => {
-          dragModeRef.current = null;
-        }}
-      />
+      <div className="spectrogram-canvas-area">
+        <canvas
+          ref={canvasRef}
+          className="spectrogram-canvas"
+          aria-label="Spectrogram visualization"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onMouseLeave={() => {
+            dragModeRef.current = null;
+          }}
+        />
+        {analysis && currentTime >= viewRange.start && currentTime <= viewRange.end && (
+          <div
+            className="spectrogram-playhead"
+            style={{ left: `${(currentTime - viewRange.start) / (viewRange.end - viewRange.start) * 100}%` }}
+          />
+        )}
+      </div>
       {quickSelectRegions.map((region, index) => {
         if (region.end <= viewRange.start || region.start >= viewRange.end) return null;
         const start = Math.max(region.start, viewRange.start);
