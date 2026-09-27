@@ -150,7 +150,7 @@ export default function App() {
 
   const processAudioBuffer = useCallback(
     (buffer: AudioBuffer) => {
-      const samples = Float32Array.from(buffer.getChannelData(0));
+      const samples = soundNormalize(buffer.getChannelData(0));
       originalSamplesRef.current = Float32Array.from(samples);
       // For long audio (>5 min), show waveform immediately without full analysis
       const LONG_THRESHOLD = 300; // seconds
@@ -227,8 +227,9 @@ export default function App() {
     const { samples, sampleRate: sr } = streaming.stopStreaming();
     setIsRecording(false);
     if (samples.length > 0) {
-      originalSamplesRef.current = Float32Array.from(samples);
-      processSamples(samples, sr);
+      const normalized = soundNormalize(samples);
+      originalSamplesRef.current = Float32Array.from(normalized);
+      processSamples(normalized, sr);
     }
   }, [streaming, processSamples]);
 
