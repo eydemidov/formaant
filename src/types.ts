@@ -40,20 +40,6 @@ export interface SpectrumSliceData {
   lpcEnvelope: Float64Array;
 }
 
-export interface VoiceQualityMetrics {
-  pulses: number[];
-  periodDurations: number[];
-  pulseAmplitudes: number[];
-  jitterLocalPercent: number;
-  jitterAbsolute: number;
-  rap: number;
-  ppq5: number;
-  shimmerLocalPercent: number;
-  shimmerDb: number;
-  apq3: number;
-  apq5: number;
-}
-
 export interface RhythmMetrics {
   count: number;
   mean: number;
@@ -85,7 +71,6 @@ export interface AnalysisResult {
   formants: FormantData;
   intensity: IntensityData;
   harmonicity: HarmonicityData;
-  voiceQuality: VoiceQualityMetrics;
   spectrumSlice: SpectrumSliceData | null;
   settings: AnalysisSettings;
 }
@@ -184,5 +169,4 @@ export interface DurationTierPoint {
 export interface ManipulationData {
   pitchTier: PitchTierPoint[];
   durationTier: DurationTierPoint[];
-  originalPulses: number[];
 }

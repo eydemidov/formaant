@@ -16,13 +16,6 @@ describe('pitchSonification', () => {
     expect(nonZero).toBeGreaterThan(samples.length * 0.5);
   });
 
-  it('generates pulse train output', () => {
-    const samples = sonifyPitch(mockPitch, { mode: 'pulse', sampleRate: 8000 });
-    expect(samples.length).toBe(Math.ceil(0.1 * 8000));
-    const max = Math.max(...Array.from(samples).map(Math.abs));
-    expect(max).toBeGreaterThan(0);
-  });
-
   it('generates hum output', () => {
     const samples = sonifyPitch(mockPitch, { mode: 'hum', sampleRate: 8000 });
     expect(samples.length).toBe(Math.ceil(0.1 * 8000));

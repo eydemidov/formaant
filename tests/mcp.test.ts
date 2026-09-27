@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { loadAudio } from '../src/mcp/audioLoader';
 import { computePitch, computeFormants, computeIntensity } from '../src/audio/analyzer';
 import { computeHarmonicity } from '../src/audio/harmonicity';
-import { computeVoiceQuality } from '../src/audio/voiceQuality';
 import { computeSpectrumSlice } from '../src/audio/spectrum';
 import { generateIpaAnnotations } from '../src/audio/ipaVowels';
 import { defaultAnalysisSettings } from '../src/audio/defaults';
@@ -93,12 +92,6 @@ describe('MCP tool handlers', () => {
     const harmonicity = computeHarmonicity(audio.samples, audio.sampleRate);
     expect(harmonicity.times.length).toBeGreaterThan(0);
     expect(typeof harmonicity.meanHnrDb).toBe('number');
-  });
-
-  it('analyze_voice_quality returns jitter/shimmer', () => {
-    const vq = computeVoiceQuality(audio.samples, audio.sampleRate);
-    expect(typeof vq.jitterLocalPercent).toBe('number');
-    expect(typeof vq.shimmerLocalPercent).toBe('number');
   });
 
   it('get_spectrum returns frequency data', () => {

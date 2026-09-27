@@ -8,7 +8,6 @@ import { z } from 'zod';
 import { loadAudio } from './audioLoader.js';
 import { computePitch, computeFormants, computeIntensity } from '../audio/analyzer.js';
 import { computeHarmonicity } from '../audio/harmonicity.js';
-import { computeVoiceQuality } from '../audio/voiceQuality.js';
 import { computeSpectrumSlice } from '../audio/spectrum.js';
 import { generateIpaAnnotations } from '../audio/ipaVowels.js';
 import { defaultAnalysisSettings } from '../audio/defaults.js';
@@ -118,34 +117,6 @@ server.tool(
           values: harmonicity.values,
           meanHnrDb: harmonicity.meanHnrDb,
           medianHnrDb: harmonicity.medianHnrDb,
-        }, null, 2),
-      }],
-    };
-  }
-);
-
-// --- analyze_voice_quality ---
-server.tool(
-  'analyze_voice_quality',
-  'Analyze voice quality: jitter (pitch perturbation) and shimmer (amplitude perturbation).',
-  audioInputSchema,
-  async (args) => {
-    const { samples, sampleRate } = getAudio(args);
-    const vq = computeVoiceQuality(samples, sampleRate);
-
-    return {
-      content: [{
-        type: 'text' as const,
-        text: JSON.stringify({
-          jitterLocalPercent: vq.jitterLocalPercent,
-          jitterAbsolute: vq.jitterAbsolute,
-          rap: vq.rap,
-          ppq5: vq.ppq5,
-          shimmerLocalPercent: vq.shimmerLocalPercent,
-          shimmerDb: vq.shimmerDb,
-          apq3: vq.apq3,
-          apq5: vq.apq5,
-          numberOfPulses: vq.pulses.length,
         }, null, 2),
       }],
     };

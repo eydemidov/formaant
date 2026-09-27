@@ -8,8 +8,6 @@ interface WaveformProps {
   selection: TimeSelection | null;
   currentTime: number;
   viewRange: ViewRange;
-  pulses?: number[];
-  showPulses?: boolean;
   onSelectionChange: (selection: TimeSelection | null) => void;
   onCursorChange: (time: number) => void;
   onWheelZoom: (pivotTime: number, zoomFactor: number) => void;
@@ -26,8 +24,6 @@ export const Waveform = React.memo(function Waveform({
   selection,
   currentTime,
   viewRange,
-  pulses,
-  showPulses,
   onSelectionChange,
   onCursorChange,
   onWheelZoom,
@@ -105,23 +101,6 @@ export const Waveform = React.memo(function Waveform({
         ctx.closePath();
         ctx.fill();
       }
-    }
-
-    // Pulses overlay
-    if (showPulses && pulses && pulses.length > 0) {
-      ctx.strokeStyle = '#cba6f7';
-      ctx.lineWidth = 1;
-      ctx.globalAlpha = 0.7;
-      for (const t of pulses) {
-        if (t < viewRange.start || t > viewRange.end) continue;
-        const x = timeToX(t, width, viewRange);
-        ctx.beginPath();
-        ctx.moveTo(x + 0.5, 0);
-        ctx.lineTo(x + 0.5, height);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-      ctx.lineWidth = 1;
     }
 
     // Playhead cursor

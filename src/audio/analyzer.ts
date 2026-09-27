@@ -3,7 +3,6 @@ import { defaultAnalysisSettings } from './defaults';
 import { extractFormants } from './lpc';
 import { trackFormants } from './formantTracking';
 import { computeHarmonicity } from './harmonicity';
-import { computeVoiceQuality } from './voiceQuality';
 import type {
   AnalysisResult,
   AnalysisSettings,
@@ -49,7 +48,6 @@ export function analyzeAudioWithProgress(
   const intensity = computeIntensity(samples, sampleRate);
   const harmonicity = computeHarmonicity(samples, sampleRate);
   onProgress?.(80);
-  const voiceQuality = computeVoiceQuality(samples, sampleRate);
   onProgress?.(100);
 
   return {
@@ -61,7 +59,6 @@ export function analyzeAudioWithProgress(
     formants,
     intensity,
     harmonicity,
-    voiceQuality,
     spectrumSlice: null,
     settings: resolved,
   };
@@ -106,7 +103,6 @@ export async function analyzeAudioAsync(
   onProgress?.(85);
   await tick();
 
-  const voiceQuality = computeVoiceQuality(samples, sampleRate);
   onProgress?.(100);
 
   return {
@@ -118,7 +114,6 @@ export async function analyzeAudioAsync(
     formants,
     intensity,
     harmonicity,
-    voiceQuality,
     spectrumSlice: null,
     settings: resolved,
   };

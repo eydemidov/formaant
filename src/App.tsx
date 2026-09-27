@@ -28,7 +28,6 @@ import { VocalTractEditor } from './components/VocalTractEditor';
 import { ExperimentDesigner } from './components/ExperimentDesigner';
 import { ExperimentMFC } from './components/ExperimentMFC';
 import { VowelSpace } from './components/VowelSpace';
-import { VoiceReportDialog } from './components/VoiceReportDialog';
 import SpeechSynthesizerPanel from './components/SpeechSynthesizerPanel';
 import PitchSonificationPanel from './components/PitchSonificationPanel';
 import NoteTranscriptionPanel from './components/NoteTranscriptionPanel';
@@ -73,7 +72,6 @@ export default function App() {
   const [showIntensity, setShowIntensity] = useState(initialPreferences.overlays.intensity);
   const [showIpa, setShowIpa] = useState(initialPreferences.overlays.ipa);
   const [showIpaFormants, setShowIpaFormants] = useState(initialPreferences.overlays.ipaFormants);
-  const [showPulses, setShowPulses] = useState(initialPreferences.overlays.pulses);
   const [showManipulation, setShowManipulation] = useState(false);
   const [showPitchTier, setShowPitchTier] = useState(false);
   const [showFormantGrid, setShowFormantGrid] = useState(false);
@@ -84,7 +82,6 @@ export default function App() {
   const [showSpeechSynthesizer, setShowSpeechSynthesizer] = useState(false);
   const [showPitchSonification, setShowPitchSonification] = useState(false);
   const [showNoteTranscription, setShowNoteTranscription] = useState(false);
-  const [showVoiceReport, setShowVoiceReport] = useState(false);
   const [experimentConfig, setExperimentConfig] = useState<{ config: any; audioMap: Record<string, string> } | null>(null);
   const [settings, setSettings] = useState<AnalysisSettings>(initialPreferences.settings);
   const [filterSettings, setFilterSettings] = useState<FilterSettings>(initialPreferences.filterSettings);
@@ -107,10 +104,9 @@ export default function App() {
         intensity: showIntensity,
         ipa: showIpa,
         ipaFormants: showIpaFormants,
-        pulses: showPulses,
       },
     });
-  }, [settings, filterSettings, vowelProfile, showPitch, showFormants, showIntensity, showIpa, showIpaFormants, showPulses]);
+  }, [settings, filterSettings, vowelProfile, showPitch, showFormants, showIntensity, showIpa, showIpaFormants]);
 
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
@@ -217,7 +213,6 @@ export default function App() {
           formants: { tracked: [[], [], []], times: [], f1: [], f2: [], f3: [], candidates: [] },
           intensity: { values: [], times: [] },
           harmonicity: { values: [], times: [], meanHnrDb: 0, medianHnrDb: 0 },
-          voiceQuality: { pulses: [], periodDurations: [], pulseAmplitudes: [], jitterLocalPercent: 0, jitterAbsolute: 0, rap: 0, ppq5: 0, shimmerLocalPercent: 0, shimmerDb: 0, apq3: 0, apq5: 0 },
           spectrumSlice: null,
           settings: settingsRef.current as AnalysisSettings,
         };
@@ -812,9 +807,6 @@ export default function App() {
           const t = findNearestZeroCrossing(currentSamplesRef.current, sampleRate, selection.end);
           setSelection({ start: selection.start, end: t });
         }}
-        showPulses={showPulses}
-        onTogglePulses={() => setShowPulses((v) => !v)}
-        onShowVoiceReport={() => setShowVoiceReport(true)}
       />
 
       <CommandPalette commands={paletteCommands} open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} />
@@ -844,13 +836,11 @@ export default function App() {
         showIntensity={showIntensity}
         showIpa={showIpa}
         showIpaFormants={showIpaFormants}
-        showPulses={showPulses}
         onTogglePitch={() => setShowPitch((v) => !v)}
         onToggleFormants={() => setShowFormants((v) => !v)}
         onToggleIntensity={() => setShowIntensity((v) => !v)}
         onToggleIpa={() => setShowIpa((v) => !v)}
         onToggleIpaFormants={() => setShowIpaFormants((v) => !v)}
-        onTogglePulses={() => setShowPulses((v) => !v)}
       />
 
       <div className="app-body">
@@ -935,8 +925,6 @@ export default function App() {
                 selection={selection}
                 currentTime={currentTime}
                 viewRange={viewRange}
-                pulses={showPulses ? analysis?.voiceQuality?.pulses : undefined}
-                showPulses={showPulses}
                 onSelectionChange={setSelection}
                 onCursorChange={(time: number) => { setSelection(null); setCurrentTime(time); }}
                 onWheelZoom={handleWheelZoom}
@@ -1119,18 +1107,6 @@ export default function App() {
           </div>
         </div>
       )}
-
-      <VoiceReportDialog
-        open={showVoiceReport}
-        onClose={() => setShowVoiceReport(false)}
-        metrics={analysis?.voiceQuality ?? null}
-        duration={currentSamplesRef.current ? currentSamplesRef.current.length / sampleRate : 0}
-        meanPitch={analysis ? (() => { const f = (analysis.pitch.frequencies as (number | null)[]).filter((v): v is number => v != null && v > 0); return f.length ? f.reduce((a, b) => a + b, 0) / f.length : 0; })() : 0}
-        medianPitch={analysis ? (() => { const f = (analysis.pitch.frequencies as (number | null)[]).filter((v): v is number => v != null && v > 0).sort((a, b) => a - b); return f.length ? f[Math.floor(f.length / 2)] : 0; })() : 0}
-        pulseCount={analysis?.voiceQuality?.pulses.length ?? 0}
-        meanPeriod={analysis?.voiceQuality ? (() => { const pd = analysis.voiceQuality.periodDurations; return pd.length ? pd.reduce((a, b) => a + b, 0) / pd.length : 0; })() : 0}
-        hnrMean={analysis?.harmonicity ? (() => { const h = analysis.harmonicity.values.filter((v: number) => Number.isFinite(v) && v > -200); return h.length ? h.reduce((a: number, b: number) => a + b, 0) / h.length : 0; })() : 0}
-      />
 
       {showSpeechSynthesizer && (
         <div className="modal-overlay" onClick={() => setShowSpeechSynthesizer(false)}>

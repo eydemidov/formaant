@@ -60,7 +60,7 @@ export default function PitchSonificationPanel({ pitch, onClose }: PitchSonifica
           <div className="space-y-2">
             <label className="text-sm font-medium">Mode</label>
             <div className="flex gap-2">
-              {(['sine', 'hum', 'pulse'] as const).map((m) => (
+              {(['sine', 'hum'] as const).map((m) => (
                 <button
                   key={m}
                   className={`px-3 py-1.5 rounded text-sm ${
@@ -70,14 +70,13 @@ export default function PitchSonificationPanel({ pitch, onClose }: PitchSonifica
                   }`}
                   onClick={() => setMode(m)}
                 >
-                  {m === 'sine' ? '🎵 Sine' : m === 'hum' ? '🗣️ Hum' : '⚡ Pulse'}
+                  {m === 'sine' ? '🎵 Sine' : '🗣️ Hum'}
                 </button>
               ))}
             </div>
             <p className="text-xs text-muted-foreground">
               {mode === 'sine' && 'Smooth sine wave — easiest to hear pitch contour'}
-              {mode === 'hum' && 'Pulse train + formants — voice-like humming sound'}
-              {mode === 'pulse' && 'Raw glottal pulses — buzzy, shows voicing clearly'}
+              {mode === 'hum' && 'Sine wave + formants — voice-like humming sound'}
             </p>
           </div>
 

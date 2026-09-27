@@ -49,12 +49,4 @@ describe('Query menu computations', () => {
     expect(Number.isFinite(hnr.values[bestIdx])).toBe(true);
   });
 
-  it('voice quality jitter and shimmer are computed', () => {
-    const vq = analysis.voiceQuality;
-    expect(vq).toBeDefined();
-    expect(vq.jitterLocalPercent).toBeGreaterThanOrEqual(0);
-    expect(vq.shimmerLocalPercent).toBeGreaterThanOrEqual(0);
-    expect(vq.shimmerDb).toBeGreaterThanOrEqual(0);
-    expect(Number.isFinite(vq.jitterAbsolute)).toBe(true);
-  });
 });

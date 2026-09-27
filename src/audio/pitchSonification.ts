@@ -1,16 +1,15 @@
 /**
  * Pitch sonification — synthesize audio from pitch track for auditory verification.
  *
- * Three modes (matching Praat):
- * 1. Pulse train: raw glottal pulses at pitch frequency
- * 2. Hum: pulse train filtered through vowel-like formants
- * 3. Sine: smooth sine wave following pitch contour
+ * Two modes:
+ * 1. Sine: smooth sine wave following pitch contour
+ * 2. Hum: sine wave filtered through vowel-like formants
  */
 
 import type { PitchData } from '../types';
 
 export interface SonificationOptions {
-  mode: 'pulse' | 'hum' | 'sine';
+  mode: 'hum' | 'sine';
   sampleRate?: number;
   gain?: number;
 }
@@ -36,13 +35,9 @@ export function sonifyPitch(
   const numSamples = Math.ceil(duration * sr);
   const output = new Float32Array(numSamples);
 
-  if (options.mode === 'sine') {
-    synthesizeSine(output, pitch, startTime, sr, gain);
-  } else {
-    synthesizePulseTrain(output, pitch, startTime, sr, gain);
-    if (options.mode === 'hum') {
-      applyFormantFilter(output, sr);
-    }
+  synthesizeSine(output, pitch, startTime, sr, gain);
+  if (options.mode === 'hum') {
+    applyFormantFilter(output, sr);
   }
 
   return output;
@@ -68,37 +63,6 @@ function synthesizeSine(
     } else {
       output[i] = 0;
       // Keep phase for smooth restart
-    }
-  }
-}
-
-/**
- * Pulse train synthesis — glottal pulses at pitch frequency.
- */
-function synthesizePulseTrain(
-  output: Float32Array,
-  pitch: PitchData,
-  startTime: number,
-  sr: number,
-  gain: number,
-): void {
-  let timeSinceLastPulse = 0;
-  for (let i = 0; i < output.length; i++) {
-    const t = startTime + i / sr;
-    const freq = interpolateFreq(pitch, t);
-    if (freq !== null && freq > 0) {
-      const period = 1 / freq;
-      timeSinceLastPulse += 1 / sr;
-      if (timeSinceLastPulse >= period) {
-        timeSinceLastPulse -= period;
-        // Glottal pulse: short exponential decay
-        for (let j = 0; j < Math.min(Math.floor(period * sr * 0.7), output.length - i); j++) {
-          const env = Math.exp(-j / (period * sr * 0.15));
-          output[i + j] += gain * env * (1 - 2 * j / (period * sr * 0.7));
-        }
-      }
-    } else {
-      timeSinceLastPulse = 0;
     }
   }
 }

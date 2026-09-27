@@ -235,9 +235,9 @@ describe('Advanced — speech/silence voicing detection', () => {
   });
 });
 
-// ─── 5. Jitter/Shimmer ──────────────────────────────────────────────────────
+// ─── 5. Perturbed voice pitch ────────────────────────────────────────────────
 
-describe('Advanced — jitter and shimmer measurement', () => {
+describe('Advanced — perturbed voice pitch', () => {
   const { samples, sampleRate } = loadWav('fixtures/jittery_voice.wav');
   const result = analyzeAudio(samples, sampleRate, {
     pitch: { ...defaultAnalysisSettings.pitch, maxHz: 600 },
@@ -251,21 +251,6 @@ describe('Advanced — jitter and shimmer measurement', () => {
     expect(Math.abs(meanPitch - expected.f0)).toBeLessThan(5);
   });
 
-  it('jitter is positive and in reasonable range for perturbed signal', () => {
-    const ourJitter = result.voiceQuality.jitterLocalPercent;
-    // Synthesized with ~2% nominal jitter; algorithm may measure differently
-    // but should be positive and < 5%
-    expect(ourJitter).toBeGreaterThan(0.5);
-    expect(ourJitter).toBeLessThan(5);
-  });
-
-  it('shimmer is positive and in reasonable range for perturbed signal', () => {
-    const ourShimmer = result.voiceQuality.shimmerLocalPercent;
-    // Synthesized with ~5% nominal shimmer; algorithm may measure differently
-    // but should be positive and < 10%
-    expect(ourShimmer).toBeGreaterThan(0.3);
-    expect(ourShimmer).toBeLessThan(10);
-  });
 });
 
 // ─── 6. Formant Bandwidth ────────────────────────────────────────────────────
