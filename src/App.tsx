@@ -30,7 +30,7 @@ import type {
   TimeSelection,
 } from './types';
 import { fitToWindow, panViewRange, selectionToView, zoomAroundPoint } from './utils/view';
-import { advancePlaybackClock } from './utils/playbackClock';
+import { advancePlaybackClock, playbackStartTime } from './utils/playbackClock';
 import { loadAppPreferences, saveAppPreferences } from './utils/preferences';
 
 export default function App() {
@@ -254,7 +254,7 @@ export default function App() {
     const samples = currentSamplesRef.current;
     if (!samples) return;
     playbackAudioRef.current?.pause();
-    const startOffset = selection?.start ?? currentTimeRef.current;
+    const startOffset = playbackStartTime(currentTimeRef.current, samples.length / sampleRate, selection?.start);
     const startSample = selection ? Math.floor(selection.start * sampleRate) : 0;
     const endSample = selection ? Math.ceil(selection.end * sampleRate) : samples.length;
     const playbackOffset = selection ? startSample / sampleRate : 0;

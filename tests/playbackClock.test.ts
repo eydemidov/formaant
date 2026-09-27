@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { advancePlaybackClock } from '../src/utils/playbackClock';
+import { advancePlaybackClock, playbackStartTime } from '../src/utils/playbackClock';
+
+describe('playbackStartTime', () => {
+  it('restarts after the file ends while preserving a cursor or selection start', () => {
+    expect(playbackStartTime(2, 2)).toBe(0);
+    expect(playbackStartTime(1.2, 2)).toBe(1.2);
+    expect(playbackStartTime(2, 2, 0.5)).toBe(0.5);
+  });
+});
 
 describe('advancePlaybackClock', () => {
   const initial = { displayedTime: 0, mediaTime: 0, wallTime: 0 };

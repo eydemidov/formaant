@@ -4,6 +4,10 @@ export interface PlaybackClock {
   wallTime: number;
 }
 
+export function playbackStartTime(cursorTime: number, duration: number, selectionStart?: number): number {
+  return selectionStart ?? (cursorTime >= duration ? 0 : cursorTime);
+}
+
 export function advancePlaybackClock(
   previous: PlaybackClock,
   mediaTime: number,
