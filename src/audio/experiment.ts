@@ -49,14 +49,3 @@ export function generateTrialOrder(config: ExperimentConfig): string[] {
   }
   return trials;
 }
-
-/**
- * Export results to CSV string.
- */
-export function exportResultsToCSV(results: ExperimentResults): string {
-  const header = 'trial,stimulus,response,reactionTime_ms';
-  const rows = results.trials.map(
-    (t) => `${t.trialIndex},${t.stimulus},${t.response},${t.reactionTime}`
-  );
-  return [header, ...rows].join('\n');
-}

@@ -1,10 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   generateTrialOrder,
-  exportResultsToCSV,
   type ExperimentConfig,
-  type ExperimentResults,
-  type TrialResult,
 } from '../src/audio/experiment';
 
 const baseConfig: ExperimentConfig = {
@@ -52,37 +49,5 @@ describe('generateTrialOrder', () => {
       }
     }
     expect(diffFound).toBe(true);
-  });
-});
-
-describe('exportResultsToCSV', () => {
-  it('produces correct header and rows', () => {
-    const trials: TrialResult[] = [
-      { trialIndex: 0, stimulus: 's1.wav', response: 'ba', reactionTime: 320 },
-      { trialIndex: 1, stimulus: 's2.wav', response: 'pa', reactionTime: 450 },
-    ];
-    const results: ExperimentResults = {
-      config: baseConfig,
-      trials,
-      startTime: 1000,
-      endTime: 5000,
-    };
-    const csv = exportResultsToCSV(results);
-    const lines = csv.split('\n');
-    expect(lines[0]).toBe('trial,stimulus,response,reactionTime_ms');
-    expect(lines[1]).toBe('0,s1.wav,ba,320');
-    expect(lines[2]).toBe('1,s2.wav,pa,450');
-    expect(lines.length).toBe(3); // header + 2 rows
-  });
-
-  it('handles empty results', () => {
-    const results: ExperimentResults = {
-      config: baseConfig,
-      trials: [],
-      startTime: 0,
-      endTime: 0,
-    };
-    const csv = exportResultsToCSV(results);
-    expect(csv).toBe('trial,stimulus,response,reactionTime_ms');
   });
 });

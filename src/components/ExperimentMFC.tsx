@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { ExperimentConfig, TrialResult, ExperimentResults } from '../audio/experiment';
-import { generateTrialOrder, exportResultsToCSV } from '../audio/experiment';
+import { generateTrialOrder } from '../audio/experiment';
 
 interface ExperimentMFCProps {
   config: ExperimentConfig;
@@ -82,25 +82,6 @@ export function ExperimentMFC({ config, audioMap, onComplete }: ExperimentMFCPro
       <div className="flex flex-col items-center gap-4 p-8">
         <h2 className="text-xl font-bold">Experiment Complete</h2>
         <p>Total trials: {results.length}</p>
-        <button
-          className="px-4 py-2 bg-blue-600 text-white rounded"
-          onClick={() => {
-            const csv = exportResultsToCSV({
-              config,
-              trials: results,
-              startTime,
-              endTime: Date.now(),
-            });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'experiment_results.csv';
-            a.click();
-          }}
-        >
-          Download CSV
-        </button>
       </div>
     );
   }

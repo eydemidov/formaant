@@ -21,10 +21,6 @@ interface MenuBarProps {
   onLoadFile: (file: File) => void;
   onExportFullWav: () => void;
   onExportSelectionWav: () => void;
-  onExportPitchCsv: () => void;
-  onExportFormantCsv: () => void;
-  onExportIntensityCsv: () => void;
-  onExportHarmonicityCsv: () => void;
   onExportFigure?: () => void;
   onGenerateTone?: () => void;
   onAnalyzeSelection?: () => void;
@@ -109,7 +105,6 @@ export function MenuBar(props: MenuBarProps) {
   const {
     hasAudio, selection, canUndo, canRedo,
     onLoadFile, onExportFullWav, onExportSelectionWav,
-    onExportPitchCsv, onExportFormantCsv, onExportIntensityCsv, onExportHarmonicityCsv,
     onUndo, onRedo, onCut, onCopy, onPaste, onDelete,
     onZoomIn, onZoomOut, onFitToWindow, onZoomToSelection,
     onTogglePitch, onToggleFormants, onToggleIntensity, onToggleIpa, onToggleIpaFormants,
@@ -135,10 +130,6 @@ export function MenuBar(props: MenuBarProps) {
           <MenubarItem disabled={!hasAudio} onClick={onExportFullWav}>Export WAV</MenubarItem>
           <MenubarItem disabled={!selection} onClick={onExportSelectionWav}>Export Selection WAV</MenubarItem>
           <MenubarSeparator />
-          <MenubarItem disabled={!hasAudio} onClick={onExportPitchCsv}>Export Pitch CSV</MenubarItem>
-          <MenubarItem disabled={!hasAudio} onClick={onExportFormantCsv}>Export Formant CSV</MenubarItem>
-          <MenubarItem disabled={!hasAudio} onClick={onExportIntensityCsv}>Export Intensity CSV</MenubarItem>
-          <MenubarItem disabled={!hasAudio} onClick={onExportHarmonicityCsv}>Export HNR CSV</MenubarItem>
           {props.onExportFigure && (
             <MenubarItem disabled={!hasAudio} onClick={props.onExportFigure}>Export Figure (PNG)</MenubarItem>
           )}

@@ -44,11 +44,6 @@ import { removeSilence } from './audio/soundEnhance';
 import { generateSineWave } from './audio/psola';
 import {
   downloadBinaryFile,
-  downloadTextFile,
-  exportFormantCsv,
-  exportHarmonicityCsv,
-  exportIntensityCsv,
-  exportPitchCsv,
   exportSelectedRegionWav,
 } from './export';
 import type {
@@ -611,8 +606,6 @@ export default function App() {
   const paletteCommands: Command[] = useMemo(() => [
     { id: 'file.open-audio', label: 'Open Audio', category: 'File', action: () => audioFileInputRef.current?.click() },
     { id: 'file.export-wav', label: 'Export WAV', category: 'File', action: () => { if (currentSamplesRef.current) downloadBinaryFile('audio.wav', exportSelectedRegionWav(currentSamplesRef.current, sampleRate)); } },
-    { id: 'file.export-pitch-csv', label: 'Export Pitch CSV', category: 'File', action: () => { if (analysis) downloadTextFile('pitch.csv', exportPitchCsv(analysis.pitch), 'text/csv'); } },
-    { id: 'file.export-formant-csv', label: 'Export Formant CSV', category: 'File', action: () => { if (analysis) downloadTextFile('formants.csv', exportFormantCsv(analysis.formants), 'text/csv'); } },
     { id: 'edit.undo', label: 'Undo', category: 'Edit', shortcut: `${mod}Z`, action: handleUndo },
     { id: 'edit.redo', label: 'Redo', category: 'Edit', shortcut: `${mod}${shift}Z`, action: handleRedo },
     { id: 'edit.cut', label: 'Cut', category: 'Edit', shortcut: `${mod}X`, action: handleCut },
@@ -671,10 +664,6 @@ export default function App() {
           const samples = currentSamplesRef.current.slice(range.start, range.end);
           downloadBinaryFile('selection.wav', exportSelectedRegionWav(samples, sampleRate));
         }}
-        onExportPitchCsv={() => analysis && downloadTextFile('pitch.csv', exportPitchCsv(analysis.pitch), 'text/csv')}
-        onExportFormantCsv={() => analysis && downloadTextFile('formants.csv', exportFormantCsv(analysis.formants), 'text/csv')}
-        onExportIntensityCsv={() => analysis && downloadTextFile('intensity.csv', exportIntensityCsv(analysis.intensity), 'text/csv')}
-        onExportHarmonicityCsv={() => analysis && downloadTextFile('harmonicity.csv', exportHarmonicityCsv(analysis.harmonicity), 'text/csv')}
         onExportFigure={() => {
           if (analysis) {
             exportFigurePng(analysis, {

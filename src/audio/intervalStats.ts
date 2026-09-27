@@ -68,22 +68,3 @@ export function computeIntervalStats(analysis: AnalysisResult, textGrid: TextGri
 
   return results;
 }
-
-export function intervalStatsToCsv(stats: IntervalStats[]): string {
-  const headers = ['tier', 'label', 'start', 'end', 'duration', 'pitch_mean', 'pitch_stdev', 'f1_mean', 'f2_mean', 'f3_mean', 'intensity_mean'];
-  const rows = stats.map(s => [
-    s.tier,
-    `"${s.label.replace(/"/g, '""')}"`,
-    s.start.toFixed(4),
-    s.end.toFixed(4),
-    s.duration.toFixed(4),
-    s.pitchMean?.toFixed(1) ?? '',
-    s.pitchStdev?.toFixed(1) ?? '',
-    s.f1Mean?.toFixed(0) ?? '',
-    s.f2Mean?.toFixed(0) ?? '',
-    s.f3Mean?.toFixed(0) ?? '',
-    s.intensityMean?.toFixed(1) ?? '',
-  ].join(','));
-
-  return [headers.join(','), ...rows].join('\n');
-}
