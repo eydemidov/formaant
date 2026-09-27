@@ -20,11 +20,9 @@ Together, F1 and F2 can be plotted in a **vowel space**. This lets you compare y
 
 Record yourself, compare your result with the target, adjust your pronunciation, and try again.
 
-Formants are simply a way to turn pronunciation into **visual feedback**, they are not a substitute for common sense.
+Formants are simply a way to turn pronunciation into **visual feedback**.
 
-Don't take the numbers literally, especially when they make no sense.
-
-If you are trying to produce a really deep sound but it shows a very high F2, it means the formant was not detected correctly. Look at the spectrogram yourself or try to fiddle with the settings.
+Don't take the numbers literally though, especially when they look absurd - if you are trying to produce a really deep sound but it shows a very high F2, it means the formant was not detected correctly. Look at the spectrogram yourself or try to fiddle with the settings.
 
 ### Useful links
 
