@@ -4,6 +4,9 @@ A standalone browser app for language learning - specifically pronunciation and 
 
 Originally based on [Web Praat](https://justinchuby.github.io/web-praat/), [Praat](https://www.fon.hum.uva.nl/praat/)'s browser port.
 
+<img width="2936" height="1672" alt="image" src="https://github.com/user-attachments/assets/a477349d-c63d-4386-af4d-32ca96b7a462" />
+
+
 ## How to Train Your Pronunciation with Formants
 
 When you pronounce a vowel, the shape of your mouth changes the sound. These changes can be measured using **formants**.
