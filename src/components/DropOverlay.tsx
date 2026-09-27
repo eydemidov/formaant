@@ -1,4 +1,4 @@
-export type DropFileType = 'audio' | 'textgrid' | 'unsupported';
+export type DropFileType = 'audio' | 'unsupported';
 
 interface DropOverlayProps {
   visible: boolean;
@@ -8,7 +8,6 @@ interface DropOverlayProps {
 export function DropOverlay({ visible, fileType }: DropOverlayProps) {
   const config = {
     audio: { icon: '🎵', text: 'Drop to open audio', color: 'var(--accent, #4a9eff)' },
-    textgrid: { icon: '📝', text: 'Drop to import TextGrid', color: 'var(--accent, #4a9eff)' },
     unsupported: { icon: '⚠️', text: 'Unsupported file type', color: '#e74c3c' },
   }[fileType];
 
@@ -44,7 +43,7 @@ export function DropOverlay({ visible, fileType }: DropOverlayProps) {
           {config.text}
         </span>
         <span style={{ fontSize: 13, color: '#888' }}>
-          .wav, .mp3, .flac, .ogg, .TextGrid
+          .wav, .mp3, .flac, .ogg
         </span>
       </div>
     </div>

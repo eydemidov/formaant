@@ -19,22 +19,16 @@ interface MenuBarProps {
   canUndo: boolean;
   canRedo: boolean;
   onLoadFile: (file: File) => void;
-  onImportTextGrid: (file: File) => void;
-  onExportTextGrid: () => void;
   onExportFullWav: () => void;
   onExportSelectionWav: () => void;
   onExportPitchCsv: () => void;
   onExportFormantCsv: () => void;
   onExportIntensityCsv: () => void;
   onExportHarmonicityCsv: () => void;
-  onExportIntervalStats?: () => void;
   onExportFigure?: () => void;
-  onCheckSpelling?: () => void;
   onGenerateTone?: () => void;
   onBatchProcess?: () => void;
   onAnalyzeSelection?: () => void;
-  onAutoSegment?: () => void;
-  onWhisperTranscribe?: () => void;
   onUndo: () => void;
   onRedo: () => void;
   onCut: () => void;
@@ -72,7 +66,6 @@ interface MenuBarProps {
   onOpenNoteTranscription?: () => void;
   onOpenScriptEditor?: () => void;
   onOpenPlugins?: () => void;
-  onOpenControlledVocabulary?: () => void;
   onOpenCommandPalette?: () => void;
   themeSetting?: ThemeSetting;
   onThemeChange?: (theme: ThemeSetting) => void;
@@ -119,7 +112,7 @@ function FileInput({ accept, onFile, children }: { accept: string; onFile: (f: F
 export function MenuBar(props: MenuBarProps) {
   const {
     hasAudio, selection, canUndo, canRedo,
-    onLoadFile, onImportTextGrid, onExportTextGrid, onExportFullWav, onExportSelectionWav,
+    onLoadFile, onExportFullWav, onExportSelectionWav,
     onExportPitchCsv, onExportFormantCsv, onExportIntensityCsv, onExportHarmonicityCsv,
     onUndo, onRedo, onCut, onCopy, onPaste, onDelete,
     onZoomIn, onZoomOut, onFitToWindow, onZoomToSelection,
@@ -127,7 +120,7 @@ export function MenuBar(props: MenuBarProps) {
     showPitch, showFormants, showIntensity, showIpa, showIpaFormants,
     onOpenManipulation, onOpenPitchTier, onOpenFormantGrid,
     onOpenDurationTier, onOpenAmplitudeTier, onOpenVocalTract,
-    onOpenSpectrumEditor, onOpenExperiment, onOpenSpeechSynthesizer, onOpenPitchSonification, onOpenNoteTranscription, onOpenScriptEditor, onOpenPlugins, onOpenControlledVocabulary,
+    onOpenSpectrumEditor, onOpenExperiment, onOpenSpeechSynthesizer, onOpenPitchSonification, onOpenNoteTranscription, onOpenScriptEditor, onOpenPlugins,
     onOpenCommandPalette,
     themeSetting, onThemeChange,
   } = props;
@@ -142,19 +135,14 @@ export function MenuBar(props: MenuBarProps) {
         <MenubarTrigger>File</MenubarTrigger>
         <MenubarContent>
           <FileInput accept="audio/*" onFile={onLoadFile}>Open Audio…</FileInput>
-          <FileInput accept=".TextGrid,.textgrid,text/plain" onFile={onImportTextGrid}>Import TextGrid…</FileInput>
           <MenubarSeparator />
           <MenubarItem disabled={!hasAudio} onClick={onExportFullWav}>Export WAV</MenubarItem>
           <MenubarItem disabled={!selection} onClick={onExportSelectionWav}>Export Selection WAV</MenubarItem>
-          <MenubarItem disabled={!hasAudio} onClick={onExportTextGrid}>Export TextGrid</MenubarItem>
           <MenubarSeparator />
           <MenubarItem disabled={!hasAudio} onClick={onExportPitchCsv}>Export Pitch CSV</MenubarItem>
           <MenubarItem disabled={!hasAudio} onClick={onExportFormantCsv}>Export Formant CSV</MenubarItem>
           <MenubarItem disabled={!hasAudio} onClick={onExportIntensityCsv}>Export Intensity CSV</MenubarItem>
           <MenubarItem disabled={!hasAudio} onClick={onExportHarmonicityCsv}>Export HNR CSV</MenubarItem>
-          {props.onExportIntervalStats && (
-            <MenubarItem disabled={!hasAudio} onClick={props.onExportIntervalStats}>Export Interval Statistics CSV</MenubarItem>
-          )}
           {props.onExportFigure && (
             <MenubarItem disabled={!hasAudio} onClick={props.onExportFigure}>Export Figure (PNG)</MenubarItem>
           )}
@@ -245,14 +233,9 @@ export function MenuBar(props: MenuBarProps) {
           <MenubarItem onClick={onOpenScriptEditor}>Script Editor</MenubarItem>
           <MenubarItem onClick={onOpenPlugins}>🧩 Plugins</MenubarItem>
           <MenubarSeparator />
-          <MenubarItem onClick={onOpenControlledVocabulary}>Controlled Vocabulary</MenubarItem>
-          <MenubarSeparator />
-          {props.onCheckSpelling && <MenubarItem disabled={!hasAudio} onClick={props.onCheckSpelling}>Label Report (TextGrid)</MenubarItem>}
           {props.onGenerateTone && <MenubarItem onClick={props.onGenerateTone}>Generate Tone…</MenubarItem>}
           <MenubarSeparator />
           {props.onBatchProcess && <MenubarItem onClick={props.onBatchProcess}>Batch Process…</MenubarItem>}
-          {props.onAutoSegment && <MenubarItem disabled={!hasAudio} onClick={props.onAutoSegment}>Auto-Segment (Silence Detection)</MenubarItem>}
-          {props.onWhisperTranscribe && <MenubarItem disabled={!hasAudio} onClick={props.onWhisperTranscribe}>AI Transcribe</MenubarItem>}
         </MenubarContent>
       </MenubarMenu>
 

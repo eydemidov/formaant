@@ -1,9 +1,9 @@
 /**
  * Export publication-quality figure as PNG.
- * Renders waveform + spectrogram + pitch/formants + TextGrid annotations
+ * Renders waveform + spectrogram + pitch/formants
  * at high DPI for academic papers.
  */
-import type { AnalysisResult, ViewRange, TextGrid } from '../types';
+import type { AnalysisResult, ViewRange } from '../types';
 import { getColormap } from '../utils/colormap';
 import { pitchToY } from '../utils/view';
 
@@ -15,7 +15,6 @@ export interface FigureExportOptions {
   showFormants?: boolean;
   showIntensity?: boolean;
   viewRange?: ViewRange;
-  textGrid?: TextGrid | null;
   fontSize?: number;    // base font size in px
 }
 
@@ -30,7 +29,6 @@ export function exportFigurePng(
     showFormants = true,
 
     viewRange = { start: 0, end: analysis.duration },
-    textGrid = null,
     fontSize = 14,
   } = options;
 
@@ -42,10 +40,8 @@ export function exportFigurePng(
   // Layout
   const margin = { top: 20, right: 20, bottom: 40, left: 60 };
   const plotW = width - margin.left - margin.right;
-  const hasTextGrid = textGrid && textGrid.tiers.length > 0;
-  const textGridHeight = hasTextGrid ? Math.min(textGrid!.tiers.length * 40, 120) : 0;
-  const waveH = Math.round((height - margin.top - margin.bottom - textGridHeight) * 0.25);
-  const specH = height - margin.top - margin.bottom - waveH - textGridHeight;
+  const waveH = Math.round((height - margin.top - margin.bottom) * 0.25);
+  const specH = height - margin.top - margin.bottom - waveH;
 
   // Background
   ctx.fillStyle = '#ffffff';
@@ -232,69 +228,10 @@ export function exportFigurePng(
   ctx.textAlign = 'center';
   ctx.fillText('Time (s)', margin.left + plotW / 2, height - 8);
 
-  // ─── TextGrid ───────────────────────────────────────────────────────────────
-  if (hasTextGrid) {
-    const tgTop = margin.top + waveH + specH;
-    const tierH = textGridHeight / textGrid!.tiers.length;
-
-    textGrid!.tiers.forEach((tier, ti) => {
-      const y = tgTop + ti * tierH;
-      ctx.strokeStyle = '#999999';
-      ctx.lineWidth = 0.5;
-      ctx.beginPath();
-      ctx.moveTo(margin.left, y);
-      ctx.lineTo(margin.left + plotW, y);
-      ctx.stroke();
-
-      // Tier name
-      ctx.fillStyle = '#666666';
-      ctx.font = `${fontSize - 2}px sans-serif`;
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(tier.name, margin.left - 8, y + tierH / 2);
-
-      if (tier.kind === 'interval') {
-        ctx.fillStyle = '#000000';
-        ctx.font = `${fontSize}px sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        for (const interval of tier.intervals) {
-          if (interval.end < viewRange.start || interval.start > viewRange.end) continue;
-          const x1 = margin.left + Math.max(0, (interval.start - viewRange.start) / duration * plotW);
-          const x2 = margin.left + Math.min(plotW, (interval.end - viewRange.start) / duration * plotW);
-          // Boundary line
-          if (interval.start > viewRange.start) {
-            ctx.strokeStyle = '#333333';
-            ctx.beginPath();
-            ctx.moveTo(x1, y);
-            ctx.lineTo(x1, y + tierH);
-            ctx.stroke();
-          }
-          // Label
-          if (interval.label) {
-            ctx.fillText(interval.label, (x1 + x2) / 2, y + tierH / 2, x2 - x1 - 4);
-          }
-        }
-      } else {
-        ctx.fillStyle = '#000000';
-        ctx.font = `${fontSize}px sans-serif`;
-        ctx.textAlign = 'center';
-        for (const point of tier.points) {
-          if (point.time < viewRange.start || point.time > viewRange.end) continue;
-          const x = margin.left + (point.time - viewRange.start) / duration * plotW;
-          ctx.beginPath();
-          ctx.arc(x, y + tierH / 2, 3, 0, Math.PI * 2);
-          ctx.fill();
-          if (point.label) ctx.fillText(point.label, x, y + tierH - 4);
-        }
-      }
-    });
-  }
-
   // ─── Border ─────────────────────────────────────────────────────────────────
   ctx.strokeStyle = '#000000';
   ctx.lineWidth = 1;
-  ctx.strokeRect(margin.left, margin.top, plotW, waveH + specH + textGridHeight);
+  ctx.strokeRect(margin.left, margin.top, plotW, waveH + specH);
 
   // ─── Download ───────────────────────────────────────────────────────────────
   canvas.toBlob((blob) => {

@@ -1,11 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import {
-  AudioWaveform, Mic, Activity, Drum, Ear, Video, BookOpen, Settings, Code, BarChart3, Layers, Circle,
+  AudioWaveform, Mic, Activity, Ear, Video, Settings, Code, BarChart3, Layers, Circle,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
-type Tab = 'spectrum' | 'ltas' | 'mfcc' | 'voice' | 'hnr' | 'rhythm' | 'excitation' | 'video' | 'vocabulary' | 'settings' | 'script' | 'vowels';
+type Tab = 'spectrum' | 'ltas' | 'mfcc' | 'voice' | 'hnr' | 'excitation' | 'video' | 'settings' | 'script' | 'vowels';
 
 interface RightSidebarProps {
   children: {
@@ -14,10 +14,8 @@ interface RightSidebarProps {
     mfcc: ReactNode;
     voice: ReactNode;
     hnr: ReactNode;
-    rhythm: ReactNode;
     excitation: ReactNode;
     video: ReactNode;
-    vocabulary: ReactNode;
     settings: ReactNode;
     script: ReactNode;
     vowels: ReactNode;
@@ -30,10 +28,8 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: 'mfcc', label: 'MFCC', icon: Layers },
   { id: 'voice', label: 'Voice Quality', icon: Mic },
   { id: 'hnr', label: 'HNR', icon: Activity },
-  { id: 'rhythm', label: 'Rhythm', icon: Drum },
   { id: 'excitation', label: 'Excitation', icon: Ear },
   { id: 'video', label: 'Video', icon: Video },
-  { id: 'vocabulary', label: 'Vocabulary', icon: BookOpen },
   { id: 'settings', label: 'Settings', icon: Settings },
   { id: 'script', label: 'Script Editor', icon: Code },
   { id: 'vowels', label: 'Vowel Space', icon: Circle },

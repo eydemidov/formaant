@@ -6,17 +6,14 @@ import { useAnalysisWorker } from './hooks/useAnalysisWorker';
 import { useIsMobile } from './hooks/useIsMobile';
 import { useTheme } from './hooks/useTheme';
 import { BottomSheet } from './components/BottomSheet';
-import { createEmptyTextGrid } from './audio/defaults';
 import { AudioEditorHistory, ReplaceRangeCommand } from './audio/editor';
 import { applyBiquadFilter } from './audio/filters';
-import { computeRhythmMetrics } from './audio/rhythm';
 import { loadAudioFile } from './audio/recorder';
 import { computeSpectrumSlice } from './audio/spectrum';
 import { KeyboardShortcutsDialog } from './components/KeyboardShortcutsDialog';
 import { AboutDialog } from "./components/AboutDialog";
 import { MenuBar } from './components/MenuBar';
 import { CommandPalette, Command } from './components/CommandPalette';
-import { RhythmPanel } from './components/RhythmPanel';
 import { RightSidebar } from './components/RightSidebar';
 import { SettingsPanel } from './components/SettingsPanel';
 import { Spectrogram } from './components/Spectrogram';
@@ -25,7 +22,6 @@ import { LtasPanel } from './components/LtasPanel';
 import { MfccPanel } from './components/MfccPanel';
 import { ExcitationPattern } from './components/ExcitationPattern';
 import { StatusBar } from './components/StatusBar';
-import { TextGridEditor } from './components/TextGridEditor';
 import { TimeRuler } from './components/TimeRuler';
 import { Toolbar } from './components/Toolbar';
 import { HarmonicityPanel } from './components/HarmonicityPanel';
@@ -41,15 +37,12 @@ import { ExperimentMFC } from './components/ExperimentMFC';
 import { ScriptEditor } from './components/ScriptEditor';
 import { PluginManager } from './components/PluginManager';
 import { BatchProcess } from './components/BatchProcess';
-import { WhisperDialog } from './components/WhisperDialog';
 import { VowelSpace } from './components/VowelSpace';
 import { VoiceReportDialog } from './components/VoiceReportDialog';
 import SpeechSynthesizerPanel from './components/SpeechSynthesizerPanel';
 import PitchSonificationPanel from './components/PitchSonificationPanel';
 import NoteTranscriptionPanel from './components/NoteTranscriptionPanel';
 import { VideoSync } from './components/VideoSync';
-import { ControlledVocabularyEditor } from './components/ControlledVocabularyEditor';
-import type { ControlledVocabulary, TierVocabularyBinding } from './textgrid/vocabulary';
 import { VoiceQualityPanel } from './components/VoiceQualityPanel';
 import { Waveform } from './components/Waveform';
 import { DropOverlay, DropFileType } from './components/DropOverlay';
@@ -57,12 +50,9 @@ import { Minimap } from './components/Minimap';
 import { FilterPanel } from './components/FilterPanel';
 import { ListingPanel, type ListingData } from './components/ListingPanel';
 import { SelectionStats } from './components/SelectionStats';
-import { computeIntervalStats, intervalStatsToCsv } from './audio/intervalStats';
 import { exportFigurePng } from './export/figure';
 import { normalize as soundNormalize } from './audio/soundManipulation';
 import { removeSilence } from './audio/soundEnhance';
-import { autoSegment } from './audio/transcribe';
-import { whisperTranscribe } from './audio/whisperTranscribe';
 import { generateSineWave } from './audio/psola';
 import {
   downloadBinaryFile,
@@ -72,14 +62,11 @@ import {
   exportIntensityCsv,
   exportPitchCsv,
   exportSelectedRegionWav,
-  exportTextGrid,
 } from './export';
-import { addPointToTier, addTier, deleteBoundary, deletePoint, moveBoundary, movePoint, moveTier, parseTextGrid, removeTier, renameTier, splitIntervalTierBoundary, updateTextGridLabel } from './textgrid/parser';
 import type {
   AnalysisResult,
   AnalysisSettings,
   FilterSettings,
-  TextGrid,
   TimeSelection,
 } from './types';
 import { fitToWindow, panViewRange, selectionToView, zoomAroundPoint } from './utils/view';
@@ -123,16 +110,11 @@ export default function App() {
   const [showNoteTranscription, setShowNoteTranscription] = useState(false);
   const [showPlugins, setShowPlugins] = useState(false);
   const [showBatch, setShowBatch] = useState(false);
-  const [showWhisper, setShowWhisper] = useState(false);
   const [showVoiceReport, setShowVoiceReport] = useState(false);
   const [experimentConfig, setExperimentConfig] = useState<{ config: any; audioMap: Record<string, string> } | null>(null);
   const [settings, setSettings] = useState<AnalysisSettings>(initialPreferences.settings);
   const [filterSettings, setFilterSettings] = useState<FilterSettings>(initialPreferences.filterSettings);
   const [vowelProfile, setVowelProfile] = useState(initialPreferences.vowelProfile);
-  const [textGrid, setTextGrid] = useState<TextGrid>(createEmptyTextGrid(1));
-  const [vocabularies, setVocabularies] = useState<ControlledVocabulary[]>([]);
-  const [vocabBindings, setVocabBindings] = useState<TierVocabularyBinding[]>([]);
-  const [activeTierId, setActiveTierId] = useState<string | null>(null);
   const [listingData, setListingData] = useState<ListingData | null>(null);
   const [viewStart, setViewStart] = useState(0);
   const [viewEnd, setViewEnd] = useState(1);
@@ -170,8 +152,6 @@ export default function App() {
   const originalSamplesRef = useRef<Float32Array | null>(null);
   const currentSamplesRef = useRef<Float32Array | null>(null);
   const audioFileInputRef = useRef<HTMLInputElement>(null);
-  const textGridFileInputRef = useRef<HTMLInputElement>(null);
-  const textGridRef = useRef<TextGrid>(createEmptyTextGrid(1));
 
   const viewRange = useMemo(() => ({ start: viewStart, end: viewEnd }), [viewStart, viewEnd]);
 
@@ -221,13 +201,6 @@ export default function App() {
         setAnalysis(nextAnalysis);
         setSelection(null);
         setCurrentTime(0);
-        const nextGrid =
-          textGridRef.current.xmax > 0 && textGridRef.current.xmax !== 1 && !resetEditor
-            ? { ...textGridRef.current, xmax: nextAnalysis.duration }
-            : createEmptyTextGrid(nextAnalysis.duration);
-        textGridRef.current = nextGrid;
-        setTextGrid(nextGrid);
-        setActiveTierId(nextGrid.tiers[0]?.id ?? null);
         const fitted = fitToWindow(nextAnalysis.duration);
         setViewStart(fitted.start);
         setViewEnd(fitted.end);
@@ -276,10 +249,6 @@ export default function App() {
         };
         setAnalysis(emptyAnalysis);
         setAnalyzing(false);
-        const nextGrid = createEmptyTextGrid(duration);
-        textGridRef.current = nextGrid;
-        setTextGrid(nextGrid);
-        setActiveTierId(nextGrid.tiers[0]?.id ?? null);
         setViewStart(0);
         setViewEnd(Math.min(30, duration)); // Show first 30s
         return;
@@ -299,13 +268,9 @@ export default function App() {
     processSamples(currentSamplesRef.current, sampleRate, false);
   }, [processSamples, sampleRate, settings]);
 
-  useEffect(() => {
-    textGridRef.current = textGrid;
-  }, [textGrid]);
-
   const handleLoadFile = useCallback(async (file: File) => {
     if (analysis) {
-      const ok = confirm('Loading a new file will replace the current audio and annotations. Continue?');
+      const ok = confirm('Loading a new file will replace the current audio and analysis. Continue?');
       if (!ok) return;
     }
     try {
@@ -325,32 +290,6 @@ export default function App() {
       alert(`Failed to load audio: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   }, [processAudioBuffer, analysis]);
-
-  const handleImportTextGrid = useCallback(async (file: File) => {
-    try {
-      const content = await file.text();
-      const parsed = parseTextGrid(content);
-      if (textGridRef.current.tiers.length > 0) {
-        const choice = confirm('Add imported tiers to existing TextGrid?\n\nOK = Add tiers\nCancel = Replace all');
-        if (choice) {
-          const merged = {
-            ...textGridRef.current,
-            xmax: Math.max(textGridRef.current.xmax, parsed.xmax),
-            tiers: [...textGridRef.current.tiers, ...parsed.tiers],
-          };
-          textGridRef.current = merged;
-          setTextGrid(merged);
-          setActiveTierId(parsed.tiers[0]?.id ?? null);
-          return;
-        }
-      }
-      textGridRef.current = parsed;
-      setTextGrid(parsed);
-      setActiveTierId(parsed.tiers[0]?.id ?? null);
-    } catch (err) {
-      alert(`Failed to import TextGrid: ${err instanceof Error ? err.message : 'Invalid format'}`);
-    }
-  }, []);
 
   const handleRecord = useCallback(async () => {
     if (analysis) {
@@ -544,14 +483,6 @@ export default function App() {
     setAnalysis({ ...analysis, spectrumSlice: slice });
   }, [analysis, sampleRate, settings]);
 
-  const intervalDurations = useMemo(() => {
-    const tier = textGrid.tiers.find((item) => item.id === activeTierId && item.kind === 'interval');
-    return tier && tier.kind === 'interval'
-      ? tier.intervals.map((interval) => interval.end - interval.start).filter((duration) => duration > 0)
-      : [];
-  }, [activeTierId, textGrid.tiers]);
-  const rhythmMetrics = useMemo(() => computeRhythmMetrics(intervalDurations), [intervalDurations]);
-
   const [isDragOver, setIsDragOver] = useState(false);
   const [dragFileType, setDragFileType] = useState<DropFileType>('audio');
   const dragCounterRef = useRef(0);
@@ -591,9 +522,7 @@ export default function App() {
       setIsDragOver(false);
       const file = event.dataTransfer?.files[0];
       if (!file) return;
-      if (file.name.endsWith('.TextGrid')) {
-        void handleImportTextGrid(file);
-      } else if (file.type.startsWith('audio/') || /\.(wav|mp3|flac|ogg)$/i.test(file.name)) {
+      if (file.type.startsWith('audio/') || /\.(wav|mp3|flac|ogg)$/i.test(file.name)) {
         void handleLoadFile(file);
       }
     };
@@ -608,7 +537,7 @@ export default function App() {
       document.removeEventListener('drop', handleDrop);
       document.removeEventListener('dragover', prevent);
     };
-  }, [handleImportTextGrid, handleLoadFile, detectFileType]);
+  }, [handleLoadFile, detectFileType]);
 
   useEffect(() => () => {
     cancelAnimationFrame(animFrameRef.current);
@@ -704,7 +633,6 @@ export default function App() {
 
   const paletteCommands: Command[] = useMemo(() => [
     { id: 'file.open-audio', label: 'Open Audio', category: 'File', action: () => audioFileInputRef.current?.click() },
-    { id: 'file.import-textgrid', label: 'Import TextGrid', category: 'File', action: () => textGridFileInputRef.current?.click() },
     { id: 'file.export-wav', label: 'Export WAV', category: 'File', action: () => { if (currentSamplesRef.current) downloadBinaryFile('audio.wav', exportSelectedRegionWav(currentSamplesRef.current, sampleRate)); } },
     { id: 'file.export-pitch-csv', label: 'Export Pitch CSV', category: 'File', action: () => { if (analysis) downloadTextFile('pitch.csv', exportPitchCsv(analysis.pitch), 'text/csv'); } },
     { id: 'file.export-formant-csv', label: 'Export Formant CSV', category: 'File', action: () => { if (analysis) downloadTextFile('formants.csv', exportFormantCsv(analysis.formants), 'text/csv'); } },
@@ -740,17 +668,14 @@ export default function App() {
     { id: 'tools.script-editor', label: 'Script Editor', category: 'Tools', action: () => document.dispatchEvent(new CustomEvent('open-sidebar-tab', { detail: 'script' })) },
     { id: 'tools.plugins', label: 'Plugins', category: 'Tools', action: () => setShowPlugins(true) },
     { id: 'tools.batch-process', label: 'Batch Process', category: 'Tools', action: () => setShowBatch(true) },
-    { id: 'tools.whisper-transcribe', label: 'Transcribe (Whisper AI)', category: 'Tools', action: () => { if (currentSamplesRef.current) setShowWhisper(true); } },
-    { id: 'tools.auto-segment', label: 'Auto-Segment (Silence)', category: 'Tools', action: () => { if (currentSamplesRef.current && analysis) { const grid = autoSegment(currentSamplesRef.current, sampleRate); textGridRef.current = grid; setTextGrid(grid); setActiveTierId(grid.tiers[0]?.id ?? null); } } },
     { id: 'tools.generate-tone', label: 'Generate Tone', category: 'Tools', action: () => { const f = prompt('Frequency (Hz):', '440'); if (f) { const dur = Number(prompt('Duration (s):', '1')) || 1; processSamples(generateSineWave(Number(f), dur, 44100), 44100); } } },
     { id: 'edit.reverse', label: 'Reverse', category: 'Edit', action: () => { if (currentSamplesRef.current) { const r = new Float32Array(currentSamplesRef.current.length); for (let i = 0; i < r.length; i++) r[i] = currentSamplesRef.current[r.length - 1 - i]; applyEffect(r); } } },
     { id: 'edit.normalize', label: 'Normalize', category: 'Edit', action: () => { if (currentSamplesRef.current) applyEffect(soundNormalize(currentSamplesRef.current)); } },
     { id: 'edit.reduce-noise', label: 'Reduce Noise', category: 'Edit', action: () => { /* triggers via menu */ } },
-    { id: 'file.export-figure', label: 'Export Figure (PNG)', category: 'File', action: () => { if (analysis) exportFigurePng(analysis, { showPitch, showFormants, viewRange, textGrid: textGrid ?? null }); } },
+    { id: 'file.export-figure', label: 'Export Figure (PNG)', category: 'File', action: () => { if (analysis) exportFigurePng(analysis, { showPitch, showFormants, viewRange }); } },
     { id: 'view.vowel-space', label: 'Vowel Space', category: 'View', action: () => document.dispatchEvent(new CustomEvent('open-sidebar-tab', { detail: 'vowels' })) },
     { id: 'view.analyze-region', label: 'Analyze Visible Region', category: 'View', action: () => { if (currentSamplesRef.current) { const s = Math.floor(viewStart * sampleRate); const e = Math.min(Math.floor(viewEnd * sampleRate), currentSamplesRef.current.length); if (e - s > 100) processSamples(currentSamplesRef.current.slice(s, e), sampleRate, false); } } },
     { id: 'analysis.compute-hnr', label: 'Compute HNR', category: 'Analysis', action: () => {} },
-    { id: 'analysis.compute-rhythm', label: 'Compute Rhythm', category: 'Analysis', action: () => {} },
     { id: 'analysis.voice-quality', label: 'Voice Quality', category: 'Analysis', action: () => {} },
     { id: 'recording.start-stop', label: 'Start/Stop Recording', category: 'Recording', shortcut: 'R', action: () => { isRecording ? handleStopRecord() : handleRecord(); } },
   ], [analysis, handleUndo, handleRedo, handleCut, handleCopy, handlePaste, handleDelete, handleZoomIn, handleZoomOut, handleFitToWindow, isRecording, handleRecord, handleStopRecord, sampleRate, mod, shift]);
@@ -759,15 +684,12 @@ export default function App() {
     <div className="app-layout">
       <DropOverlay visible={isDragOver} fileType={dragFileType} />
       <input ref={audioFileInputRef} type="file" accept="audio/*" hidden onChange={(e) => e.target.files?.[0] && handleLoadFile(e.target.files[0])} />
-      <input ref={textGridFileInputRef} type="file" accept=".TextGrid,.textgrid,text/plain" hidden onChange={(e) => e.target.files?.[0] && handleImportTextGrid(e.target.files[0])} />
       <MenuBar
         hasAudio={!!analysis}
         selection={selection}
         canUndo={canUndo}
         canRedo={canRedo}
         onLoadFile={handleLoadFile}
-        onImportTextGrid={handleImportTextGrid}
-        onExportTextGrid={() => downloadTextFile('annotations.TextGrid', exportTextGrid(textGrid))}
         onExportFullWav={() => {
           if (!currentSamplesRef.current) return;
           downloadBinaryFile('audio.wav', exportSelectedRegionWav(currentSamplesRef.current, sampleRate));
@@ -782,39 +704,13 @@ export default function App() {
         onExportFormantCsv={() => analysis && downloadTextFile('formants.csv', exportFormantCsv(analysis.formants), 'text/csv')}
         onExportIntensityCsv={() => analysis && downloadTextFile('intensity.csv', exportIntensityCsv(analysis.intensity), 'text/csv')}
         onExportHarmonicityCsv={() => analysis && downloadTextFile('harmonicity.csv', exportHarmonicityCsv(analysis.harmonicity), 'text/csv')}
-        onExportIntervalStats={() => {
-          if (analysis && textGrid) {
-            const stats = computeIntervalStats(analysis, textGrid);
-            downloadTextFile('interval_stats.csv', intervalStatsToCsv(stats), 'text/csv');
-          }
-        }}
         onExportFigure={() => {
           if (analysis) {
             exportFigurePng(analysis, {
               showPitch,
               showFormants,
               viewRange,
-              textGrid: textGrid ?? null,
             });
-          }
-        }}
-        onCheckSpelling={() => {
-          if (textGrid) {
-            const emptyLabels: string[] = [];
-            const labelCounts = new Map<string, number>();
-            for (const tier of textGrid.tiers) {
-              if (tier.kind !== 'interval') continue;
-              for (const interval of tier.intervals) {
-                if (interval.label.trim()) {
-                  labelCounts.set(interval.label, (labelCounts.get(interval.label) || 0) + 1);
-                } else if (interval.end - interval.start > 0.01) {
-                  emptyLabels.push(`${interval.start.toFixed(3)}-${interval.end.toFixed(3)}`);
-                }
-              }
-            }
-            const report = [`TextGrid Label Report:`, `Unique labels: ${labelCounts.size}`, `Unlabeled intervals: ${emptyLabels.length}`];
-            if (emptyLabels.length > 0) report.push(`First unlabeled: ${emptyLabels.slice(0, 5).join(', ')}`);
-            alert(report.join('\n'));
           }
         }}
         onGenerateTone={() => {
@@ -829,17 +725,6 @@ export default function App() {
           processSamples(tone, sr);
         }}
         onBatchProcess={() => setShowBatch(true)}
-        onAutoSegment={() => {
-          if (!currentSamplesRef.current || !analysis) return;
-          const grid = autoSegment(currentSamplesRef.current, sampleRate);
-          textGridRef.current = grid;
-          setTextGrid(grid);
-          setActiveTierId(grid.tiers[0]?.id ?? null);
-        }}
-        onWhisperTranscribe={() => {
-          if (!currentSamplesRef.current) return;
-          setShowWhisper(true);
-        }}
         onAnalyzeSelection={() => {
           if (!currentSamplesRef.current) return;
           const startSample = Math.floor(viewStart * sampleRate);
@@ -1045,8 +930,8 @@ export default function App() {
           {!analysis && !streaming.isStreaming && (
             <div className="empty-state">
               <div className="empty-icon">🎙️</div>
-              <p>Drop audio or a TextGrid here, or start recording.</p>
-              <p className="empty-hint">Waveform, spectrogram, pitch, formants, intensity, TextGrid, editing, filters, and exports are all live in this view.</p>
+              <p>Drop audio here, or start recording.</p>
+              <p className="empty-hint">Waveform, spectrogram, pitch, formants, intensity, editing, filters, and exports are all live in this view.</p>
             </div>
           )}
 
@@ -1161,29 +1046,6 @@ export default function App() {
                 }}
               />
               </div>
-              <TextGridEditor
-                textGrid={textGrid}
-                viewRange={viewRange}
-                selection={selection}
-                activeTierId={activeTierId}
-                onActiveTierChange={setActiveTierId}
-                onAddBoundary={(tierId, time) => setTextGrid((current) => splitIntervalTierBoundary(current, tierId, time))}
-                onAddPoint={(tierId, time) => setTextGrid((current) => addPointToTier(current, tierId, time))}
-                onMoveBoundary={(tierId, boundaryIndex, time) => setTextGrid((current) => moveBoundary(current, tierId, boundaryIndex, time))}
-                onMovePoint={(tierId, pointId, time) => setTextGrid((current) => movePoint(current, tierId, pointId, time))}
-                onEditLabel={(tierId, itemId, currentLabel) => {
-                  const nextLabel = window.prompt('Edit label', currentLabel);
-                  if (nextLabel === null) return;
-                  setTextGrid((current) => updateTextGridLabel(current, tierId, itemId, nextLabel));
-                }}
-                onAddTier={(name, kind) => setTextGrid((current) => addTier(current, name, kind))}
-                onRemoveTier={(tierId) => setTextGrid((current) => removeTier(current, tierId))}
-                onRenameTier={(tierId, name) => setTextGrid((current) => renameTier(current, tierId, name))}
-                onDeleteBoundary={(tierId, boundaryIndex) => setTextGrid((current) => deleteBoundary(current, tierId, boundaryIndex))}
-                onDeletePoint={(tierId, pointId) => setTextGrid((current) => deletePoint(current, tierId, pointId))}
-                onMoveTier={(tierId, direction) => setTextGrid((current) => moveTier(current, tierId, direction))}
-                onTranscribe={() => { if (currentSamplesRef.current) setShowWhisper(true); }}
-              />
             </>
           )}
         </div>
@@ -1201,9 +1063,7 @@ export default function App() {
               excitation: analysis ? <ExcitationPattern samples={currentSamplesRef.current} sampleRate={sampleRate} /> : <div className="empty-panel">Load audio to see excitation pattern</div>,
               voice: analysis ? <VoiceQualityPanel metrics={analysis.voiceQuality} /> : <div className="empty-panel">Load audio for voice quality</div>,
               hnr: analysis ? <HarmonicityPanel data={analysis.harmonicity} viewStart={viewStart} viewEnd={viewEnd} /> : <div className="empty-panel">Load audio for HNR</div>,
-              rhythm: <RhythmPanel metrics={rhythmMetrics} />,
               video: <VideoSync currentTime={currentTime} isPlaying={isPlaying} onAudioExtracted={(samples, sr) => { currentSamplesRef.current = samples; setSampleRate(sr); }} onSeek={(t) => setCurrentTime(t)} />,
-              vocabulary: <ControlledVocabularyEditor textGrid={textGrid} vocabularies={vocabularies} bindings={vocabBindings} onVocabulariesChange={setVocabularies} onBindingsChange={setVocabBindings} />,
               settings: (
                 <>
                   <SettingsPanel settings={settings} onChange={setSettings} />
@@ -1350,43 +1210,6 @@ export default function App() {
 
       {showPlugins && <PluginManager onClose={() => setShowPlugins(false)} samples={currentSamplesRef.current ?? undefined} sampleRate={sampleRate} />}
       {showBatch && <BatchProcess onClose={() => setShowBatch(false)} />}
-      {showWhisper && (
-        <WhisperDialog
-          onClose={() => setShowWhisper(false)}
-          onStart={async (model, language) => {
-            setShowWhisper(false);
-            if (!currentSamplesRef.current) return;
-            setIsProcessing(true);
-            try {
-              const grid = await whisperTranscribe(
-                currentSamplesRef.current,
-                sampleRate,
-                {
-                  model,
-                  language,
-                  onProgress: (p) => { document.title = `Whisper: ${p.status}${p.progress ? ` ${Math.round(p.progress)}%` : ''}`; },
-                }
-              );
-              // Add transcription as new tier(s) instead of replacing existing TextGrid
-              const existingGrid = textGridRef.current;
-              const mergedGrid = {
-                xmin: existingGrid.xmin,
-                xmax: Math.max(existingGrid.xmax, grid.xmax),
-                tiers: [...existingGrid.tiers, ...grid.tiers],
-              };
-              textGridRef.current = mergedGrid;
-              setTextGrid(mergedGrid);
-              setActiveTierId(grid.tiers[0]?.id ?? null);
-            } catch (err) {
-              alert(`Transcription failed: ${err instanceof Error ? err.message : err}`);
-            } finally {
-              setIsProcessing(false);
-              document.title = 'web-praat';
-            }
-          }}
-        />
-      )}
-
       <VoiceReportDialog
         open={showVoiceReport}
         onClose={() => setShowVoiceReport(false)}
