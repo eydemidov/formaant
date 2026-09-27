@@ -18,66 +18,29 @@ The two most useful for pronunciation are **F1** and **F2**:
 
 Together, F1 and F2 can be plotted in a **vowel space**. This lets you compare your pronunciation with a target vowel and adjust your tongue position.
 
-### What about pitch?
+Record yourself, compare your result with the target, adjust your pronunciation, and try again.
 
-**F0** represents pitch.
+Formants are simply a way to turn pronunciation into **visual feedback**, they are not a substitute for common sense.
 
-It is useful for practicing:
+Don't take the numbers literally, especially when they make no sense.
 
-- intonation
-- lexical tone
-- stress
-- sentence melody
-
-In short:
-
-**F1 → vowel height**  
-**F2 → vowel front/back position**  
-**F0 → pitch**
-
-You do not need to memorize the numbers. Record yourself, compare your result with the target, adjust your pronunciation, and try again.
-
-Formants are simply a way to turn pronunciation into **visual feedback**.
+If you are trying to produce a really deep sound but it shows a very high F2, it means the formant was not detected correctly. Look at the spectrogram yourself or try to fiddle with the settings.
 
 ### Useful links
 
-- [International Phonetic Alphabet (IPA)](https://en.wikipedia.org/wiki/International_Phonetic_Alphabet) - symbols used to represent speech sounds.
 - [IPA chart](https://en.wikipedia.org/wiki/International_Phonetic_Alphabet_chart) - overview of IPA vowels, consonants, stress, and tone symbols.
 - [Vowel diagram / vowel space](https://en.wikipedia.org/wiki/Vowel_diagram) — how vowels are organized by height and frontness/backness, including their relationship to F1 and F2.
-- [Formants](https://en.wikipedia.org/wiki/Formant) - what F1, F2, F3, etc. represent acoustically.
-- [Fundamental frequency (F0)](https://en.wikipedia.org/wiki/Fundamental_frequency) - the acoustic measurement closely related to perceived pitch.
 
 ## Features
 
-### Pronunciation Analysis
-- Pitch (F0) tracking
-- Formant analysis (F1, F2, F3)
-- Wideband and narrowband spectrograms
-- Intensity visualization
-
-### Vowel Training
-- F1 × F2 vowel-space visualization
-- Vowel trajectories over time
-- IPA vowel labels
-- Selectable reference profiles for Modern RP, American English, Mandarin Chinese, French, Japanese, and Serbian
-- Custom voice profiles: copy any profile, edit its vowels and F1/F2 values or ranges, and save or delete it locally
-- Separate reference data for women and men
-- Visual comparison between the learner’s vowels and target vowels
-
-### Recording & Playback
-- Record pronunciation directly in the app
-- Select and replay parts of a recording
-- Loop playback for repeated practice
-
-### Practice
-- Record a word, vowel, or sentence
-- Inspect pitch and vowel formants
-- Compare pronunciation with a selected target profile
-- Repeat and adjust pronunciation based on the visual feedback
+- Record or load audio; view its waveform, spectrogram, pitch, formants, and intensity.
+- Automatic IPA labels and F1/F2 vowel-space comparison.
+- Male and female profiles for British/American English, Mandarin, French, Japanese, and Serbian.
+- Create custom vowel profiles.
 
 ## Voice profiles
 
-Reference vowel profiles (male and female F1/F2) are available for:
+Reference vowel profiles are available for:
 
 - [**British English (RP)**](https://www.cambridge.org/core/journals/english-language-and-linguistics/article/abs/vowels-of-contemporary-rp-vowel-formant-measurements-for-bbc-newsreaders1/3109BF90B3630215DAABD95111C3DD9C)
 - [**American English**](https://pubmed.ncbi.nlm.nih.gov/7759650/)
