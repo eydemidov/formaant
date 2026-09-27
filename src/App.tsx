@@ -486,7 +486,6 @@ export default function App() {
 
   const paletteCommands: Command[] = useMemo(() => [
     { id: 'file.open-audio', label: 'Open Audio', category: 'File', action: () => audioFileInputRef.current?.click() },
-    { id: 'edit.reverse', label: 'Reverse', category: 'Edit', action: () => { if (currentSamplesRef.current) { const r = new Float32Array(currentSamplesRef.current.length); for (let i = 0; i < r.length; i++) r[i] = currentSamplesRef.current[r.length - 1 - i]; applyEffect(r); } } },
     { id: 'edit.normalize', label: 'Normalize', category: 'Edit', action: () => { if (currentSamplesRef.current) applyEffect(soundNormalize(currentSamplesRef.current)); } },
     { id: 'recording.start-stop', label: 'Start/Stop Recording', category: 'Recording', shortcut: 'R', action: () => { isRecording ? handleStopRecord() : handleRecord(); } },
   ], [isRecording, handleRecord, handleStopRecord, applyEffect]);

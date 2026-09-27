@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import {
   extractPart,
   concatenate,
-  reverse,
   fadeIn,
   fadeOut,
   scaleAmplitude,
@@ -83,20 +82,6 @@ describe('concatenate', () => {
 
   it('throws on empty input', () => {
     expect(() => concatenate([])).toThrow();
-  });
-});
-
-describe('reverse', () => {
-  it('reverses entire buffer', () => {
-    const buf = makeBuf(5, 1, (i) => i + 1); // [1,2,3,4,5]
-    const result = reverse(buf);
-    expect(Array.from(result.samples)).toEqual([5, 4, 3, 2, 1]);
-  });
-
-  it('reverses a sub-region', () => {
-    const buf = makeBuf(5, 1, (i) => i + 1); // [1,2,3,4,5]
-    const result = reverse(buf, 1, 4); // reverse indices 1..3
-    expect(Array.from(result.samples)).toEqual([1, 4, 3, 2, 5]);
   });
 });
 

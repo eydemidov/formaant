@@ -1,5 +1,5 @@
 /**
- * Sound manipulation utilities: extract, concatenate, reverse, scale, fade.
+ * Sound manipulation utilities: extract, concatenate, scale, fade.
  */
 
 export interface SoundBuffer {
@@ -75,26 +75,6 @@ export function concatenate(parts: SoundBuffer[], overlapSeconds = 0): SoundBuff
   }
 
   return { samples: result, sampleRate };
-}
-
-/**
- * Reverse a buffer (or a sub-region by sample indices).
- */
-export function reverse(buf: SoundBuffer, startIdx?: number, endIdx?: number): SoundBuffer {
-  const samples = Float32Array.from(buf.samples);
-  const s = startIdx ?? 0;
-  const e = endIdx ?? samples.length;
-  // Reverse in-place between s and e (exclusive)
-  let left = s;
-  let right = e - 1;
-  while (left < right) {
-    const tmp = samples[left];
-    samples[left] = samples[right];
-    samples[right] = tmp;
-    left++;
-    right--;
-  }
-  return { samples, sampleRate: buf.sampleRate };
 }
 
 /**
