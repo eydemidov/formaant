@@ -1,50 +1,23 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import {
-  Settings, Circle,
-} from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 type Tab = 'settings' | 'vowels';
 
 interface RightSidebarProps {
+  activeTab: Tab | null;
   children: {
     settings: ReactNode;
     vowels: ReactNode;
   };
 }
 
-const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
-  { id: 'settings', label: 'Settings', icon: Settings },
-  { id: 'vowels', label: 'Vowel Space', icon: Circle },
-];
-
 const FALLBACK_WIDTH = 320;
 
-export function RightSidebar({ children }: RightSidebarProps) {
-  const [activeTab, setActiveTab] = useState<Tab | null>(null);
+export function RightSidebar({ activeTab, children }: RightSidebarProps) {
   const [width, setWidth] = useState(FALLBACK_WIDTH);
   const resizing = useRef(false);
   const startX = useRef(0);
   const startWidth = useRef(0);
-
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const tab = (e as CustomEvent).detail as Tab;
-      setActiveTab(tab);
-      setWidth(FALLBACK_WIDTH);
-    };
-    document.addEventListener('open-sidebar-tab', handler);
-    return () => document.removeEventListener('open-sidebar-tab', handler);
-  }, []);
-
-  const handleTabClick = (tab: Tab) => {
-    setActiveTab((current) => {
-      if (current === tab) return null;
-      setWidth(FALLBACK_WIDTH);
-      return tab;
-    });
-  };
 
   const handleResizeStart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -73,24 +46,6 @@ export function RightSidebar({ children }: RightSidebarProps) {
       {isOpen && (
         <div className="right-sidebar-resize" onMouseDown={handleResizeStart} />
       )}
-      <div className="right-sidebar-header">
-        {tabs.map(({ id, label, icon: Icon }) => (
-          <TooltipProvider key={id} delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  className={`right-sidebar-tab ${activeTab === id ? 'active' : ''}`}
-                  onClick={() => handleTabClick(id)}
-                  aria-label={label}
-                >
-                  <Icon size={16} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">{label}</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ))}
-      </div>
       {isOpen && (
         <div className="right-sidebar-content">
           {children[activeTab!]}

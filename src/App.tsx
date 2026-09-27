@@ -458,6 +458,7 @@ export default function App() {
   useKeyboardShortcuts(shortcutHandlers, true);
 
   const [helpOpen, setHelpOpen] = useState(false);
+  const [activePanel, setActivePanel] = useState<'settings' | 'vowels' | null>(null);
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -489,6 +490,9 @@ export default function App() {
         onPlay={handlePlay}
         onPause={handlePause}
         onHelp={() => setHelpOpen(true)}
+        activePanel={activePanel}
+        onToggleSettings={() => setActivePanel((panel) => panel === 'settings' ? null : 'settings')}
+        onToggleVowelSpace={() => setActivePanel((panel) => panel === 'vowels' ? null : 'vowels')}
         showPitch={showPitch}
         showFormants={showFormants}
         showIntensity={showIntensity}
@@ -619,7 +623,7 @@ export default function App() {
         </main>
 
         {!isMobile && (
-          <RightSidebar>
+          <RightSidebar activeTab={activePanel}>
             {{
               settings: (
                 <>
@@ -634,7 +638,10 @@ export default function App() {
       </div>
 
       {isMobile && (
-        <BottomSheet trigger="⚙️">
+        <BottomSheet open={activePanel !== null} title={activePanel === 'vowels' ? 'Vowel Space' : 'Settings'} onClose={() => setActivePanel(null)}>
+          {activePanel === 'vowels' ? (
+            <VowelSpace analysis={analysis} selection={selection} currentTime={currentTime} profile={vowelProfile} onProfileChange={setVowelProfile} />
+          ) : (
           <div className="bottom-sheet-content">
             <div className="sidebar-section">
               <h3>Overlays</h3>
@@ -677,6 +684,7 @@ export default function App() {
               </div>
             )}
           </div>
+          )}
         </BottomSheet>
       )}
 

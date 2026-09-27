@@ -1,27 +1,23 @@
-import { useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 interface BottomSheetProps {
   children: ReactNode;
-  trigger?: ReactNode;
+  open: boolean;
+  title: string;
+  onClose: () => void;
 }
 
-export function BottomSheet({ children, trigger }: BottomSheetProps) {
-  const [open, setOpen] = useState(false);
+export function BottomSheet({ children, open, title, onClose }: BottomSheetProps) {
+  if (!open) return null;
 
   return (
     <>
-      <button className="mobile-fab" onClick={() => setOpen(true)} aria-label="Open settings">
-        {trigger ?? '⚙️'}
-      </button>
-      {open && (
-        <>
-          <div className="bottom-sheet-overlay" onClick={() => setOpen(false)} />
-          <div className="bottom-sheet" role="dialog" aria-label="Settings panel">
-            <div className="bottom-sheet-handle" />
-            {children}
-          </div>
-        </>
-      )}
+      <div className="bottom-sheet-overlay" onClick={onClose} />
+      <div className="bottom-sheet" role="dialog" aria-modal="true" aria-label={`${title} panel`}>
+        <div className="bottom-sheet-handle" />
+        <button className="bottom-sheet-close" onClick={onClose} aria-label="Close panel">×</button>
+        {children}
+      </div>
     </>
   );
 }
