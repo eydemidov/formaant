@@ -61,4 +61,8 @@ describe('app preferences', () => {
     expect(parseAppPreferences(JSON.stringify({ vowelProfile: 'toString' })).vowelProfile).toBe('modern-rp-male');
     expect(parseAppPreferences(JSON.stringify({ vowelProfile: 'french-male', targetVowel: 'iː' })).targetVowel).toBe('i');
   });
+
+  it('restores an empty target vowel across profiles', () => {
+    expect(parseAppPreferences(JSON.stringify({ vowelProfile: 'french-male', targetVowel: '' })).targetVowel).toBe('');
+  });
 });

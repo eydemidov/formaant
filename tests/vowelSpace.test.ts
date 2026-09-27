@@ -99,4 +99,15 @@ describe('vowel space trace and marker', () => {
     expect(markup).toContain('<td>1829 Hz</td>');
     expect(markup).toContain('value="ɪ" selected=""');
   });
+
+  it('allows no target while keeping the selection readings visible', () => {
+    const markup = renderVowelSpace(null, 2, analysis, 'modern-rp-male', '');
+
+    expect(markup).toContain('<option value="" selected="">None</option>');
+    expect(markup).toContain('<td>500 Hz</td>');
+    expect(markup).toContain('<td>1900 Hz</td>');
+    expect(markup.match(/<td>—<\/td>/g)).toHaveLength(4);
+    expect(markup).not.toContain('vowel-target-close');
+    expect(markup).not.toContain('vowel-target-far');
+  });
 });

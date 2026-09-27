@@ -78,7 +78,7 @@ export default function App() {
 
   const handleVowelProfileChange = useCallback((nextProfile: VowelProfile) => {
     setVowelProfile(nextProfile);
-    setTargetVowel((current) => vowelProfiles[nextProfile].some((vowel) => vowel.symbol === current)
+    setTargetVowel((current) => current === '' || vowelProfiles[nextProfile].some((vowel) => vowel.symbol === current)
       ? current
       : vowelProfiles[nextProfile][0].symbol);
   }, []);

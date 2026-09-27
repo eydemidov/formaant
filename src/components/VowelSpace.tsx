@@ -24,7 +24,7 @@ interface VowelPoint {
 export function VowelSpace({ analysis, selection, currentTime, profile, onProfileChange, targetVowel, onTargetVowelChange }: VowelSpaceProps) {
   const hasRange = selection !== null && selection.end > selection.start;
   const references = vowelProfiles[profile];
-  const target = references.find((vowel) => vowel.symbol === targetVowel) ?? references[0];
+  const target = targetVowel ? references.find((vowel) => vowel.symbol === targetVowel) ?? references[0] : undefined;
   const f1Min = Math.floor(Math.min(...references.map((vowel) => (vowel.f1Min ?? vowel.f1) * (1 - VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
   const f1Max = Math.ceil(Math.max(...references.map((vowel) => (vowel.f1Max ?? vowel.f1) * (1 + VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
   const f2Min = Math.floor(Math.min(...references.map((vowel) => (vowel.f2Min ?? vowel.f2) * (1 - VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
@@ -87,8 +87,8 @@ export function VowelSpace({ analysis, selection, currentTime, profile, onProfil
 
   const marker = hasRange ? selectionAverage : nearestPoint;
   const comparisonRows = [
-    { label: 'F1', target: target.f1, measured: marker?.f1 },
-    { label: 'F2', target: target.f2, measured: marker?.f2 },
+    { label: 'F1', target: target?.f1, measured: marker?.f1 },
+    { label: 'F2', target: target?.f2, measured: marker?.f2 },
   ];
 
   // Plot dimensions
@@ -216,7 +216,8 @@ export function VowelSpace({ analysis, selection, currentTime, profile, onProfil
       <div className="vowel-target">
         <label className="vowel-target-control">
           Target vowel
-          <select aria-label="Target vowel" value={target.symbol} onChange={(event) => onTargetVowelChange(event.target.value)}>
+          <select aria-label="Target vowel" value={target?.symbol ?? ''} onChange={(event) => onTargetVowelChange(event.target.value)}>
+            <option value="">None</option>
             {references.map((vowel) => (
               <option key={vowel.symbol} value={vowel.symbol}>{vowel.symbol} — {vowel.description}</option>
             ))}
@@ -233,18 +234,18 @@ export function VowelSpace({ analysis, selection, currentTime, profile, onProfil
           </thead>
           <tbody>
             {comparisonRows.map((row) => {
-              const isClose = row.measured !== undefined && Math.abs(hzToBark(row.measured) - hzToBark(row.target)) <= CLOSE_TARGET_BARK;
+              const isClose = row.measured !== undefined && row.target !== undefined && Math.abs(hzToBark(row.measured) - hzToBark(row.target)) <= CLOSE_TARGET_BARK;
               return (
                 <tr key={row.label}>
                   <th scope="row">{row.label}</th>
-                  <td>{row.target} Hz</td>
+                  <td>{row.target === undefined ? '—' : `${row.target} Hz`}</td>
                   <td
-                    className={row.measured === undefined ? undefined : isClose ? 'vowel-target-close' : 'vowel-target-far'}
-                    aria-label={row.measured === undefined ? undefined : `${row.label} selection ${row.measured.toFixed(0)} Hz, ${isClose ? 'close to' : 'far from'} target`}
+                    className={row.measured === undefined || row.target === undefined ? undefined : isClose ? 'vowel-target-close' : 'vowel-target-far'}
+                    aria-label={row.measured === undefined || row.target === undefined ? undefined : `${row.label} selection ${row.measured.toFixed(0)} Hz, ${isClose ? 'close to' : 'far from'} target`}
                   >
                     {row.measured === undefined ? '—' : `${row.measured.toFixed(0)} Hz`}
                   </td>
-                  <td>{row.measured === undefined ? '—' : `${Math.abs(row.measured - row.target).toFixed(0)} Hz`}</td>
+                  <td>{row.measured === undefined || row.target === undefined ? '—' : `${Math.abs(row.measured - row.target).toFixed(0)} Hz`}</td>
                 </tr>
               );
             })}

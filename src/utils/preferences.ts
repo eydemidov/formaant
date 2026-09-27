@@ -85,7 +85,7 @@ export function parseAppPreferences(raw: string | null): AppPreferences {
       settings: { spectrogram, pitch, formant },
       filterSettings,
       vowelProfile,
-      targetVowel: typeof saved.targetVowel === 'string' && vowelProfiles[vowelProfile].some((vowel) => vowel.symbol === saved.targetVowel)
+      targetVowel: typeof saved.targetVowel === 'string' && (saved.targetVowel === '' || vowelProfiles[vowelProfile].some((vowel) => vowel.symbol === saved.targetVowel))
         ? saved.targetVowel
         : vowelProfiles[vowelProfile][0].symbol,
       filterConsonants: typeof saved.filterConsonants === 'boolean' ? saved.filterConsonants : defaults.filterConsonants,
