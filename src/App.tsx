@@ -497,7 +497,10 @@ export default function App() {
     else handlePlay();
   }, [isPlaying, handlePause, handlePlay]);
 
+  const handleOpenAudio = useCallback(() => audioFileInputRef.current?.click(), []);
+
   const shortcutHandlers = useMemo(() => ({
+    onOpenAudio: handleOpenAudio,
     onPlayPause: handlePlayPause,
     onSelectAll: handleSelectAll,
     onMoveSelectionLeft: handleMoveSelectionLeft,
@@ -505,7 +508,7 @@ export default function App() {
     onZoomIn: handleZoomIn,
     onZoomOut: handleZoomOut,
     onFitToWindow: handleFitToWindow,
-  }), [handlePlayPause, handleSelectAll, handleMoveSelectionLeft, handleMoveSelectionRight, handleZoomIn, handleZoomOut, handleFitToWindow]);
+  }), [handleOpenAudio, handlePlayPause, handleSelectAll, handleMoveSelectionLeft, handleMoveSelectionRight, handleZoomIn, handleZoomOut, handleFitToWindow]);
 
   useKeyboardShortcuts(shortcutHandlers, true);
 
@@ -536,7 +539,7 @@ export default function App() {
         hasAudio={!!analysis}
         isPlaying={isPlaying}
         isRecording={isRecording}
-        onOpenAudio={() => audioFileInputRef.current?.click()}
+        onOpenAudio={handleOpenAudio}
         onRecord={handleRecord}
         onStopRecord={handleStopRecord}
         onPlay={handlePlay}

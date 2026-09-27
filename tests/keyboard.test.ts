@@ -1,35 +1,30 @@
 /**
  * @vitest-environment jsdom
  */
+import { act, createElement } from 'react';
+import { createRoot } from 'react-dom/client';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { useKeyboardShortcuts, KeyboardShortcutHandlers } from '../src/hooks/useKeyboardShortcuts';
+import { useKeyboardShortcuts, type KeyboardShortcutHandlers } from '../src/hooks/useKeyboardShortcuts';
 
-// Minimal hook runner without @testing-library/react-hooks
+function ShortcutHook({ handlers, enabled }: { handlers: KeyboardShortcutHandlers; enabled: boolean }) {
+  useKeyboardShortcuts(handlers, enabled);
+  return null;
+}
+
 function mountHook(handlers: KeyboardShortcutHandlers, enabled: boolean) {
-  // Simulate what the hook does: register event listener
-  const cleanup: (() => void)[] = [];
-  // We'll just call the effect manually since it only adds a document listener
-  const handleKeyDown = (e: KeyboardEvent) => {
-    const target = e.target as HTMLElement;
-    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || (target as any).isContentEditable) return;
-    const mod = e.metaKey || e.ctrlKey;
-    if (e.code === 'Space') { e.preventDefault(); handlers.onPlayPause(); return; }
-    if (mod && e.key.toLowerCase() === 'a') { e.preventDefault(); handlers.onSelectAll(); return; }
-    if (e.key === 'ArrowLeft') { e.preventDefault(); handlers.onMoveSelectionLeft(); return; }
-    if (e.key === 'ArrowRight') { e.preventDefault(); handlers.onMoveSelectionRight(); return; }
-    if (mod && (e.key === '=' || e.key === '+')) { e.preventDefault(); handlers.onZoomIn(); return; }
-    if (mod && e.key === '-') { e.preventDefault(); handlers.onZoomOut(); return; }
-    if (mod && e.key === '0') { e.preventDefault(); handlers.onFitToWindow(); return; }
-  };
-  if (enabled) {
-    document.addEventListener('keydown', handleKeyDown);
-    cleanup.push(() => document.removeEventListener('keydown', handleKeyDown));
-  }
-  return () => cleanup.forEach(fn => fn());
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  act(() => root.render(createElement(ShortcutHook, { handlers, enabled })));
+  return () => act(() => {
+    root.unmount();
+    container.remove();
+  });
 }
 
 function makeHandlers(): KeyboardShortcutHandlers {
   return {
+    onOpenAudio: vi.fn(),
     onPlayPause: vi.fn(),
     onSelectAll: vi.fn(),
     onMoveSelectionLeft: vi.fn(),
@@ -49,6 +44,27 @@ describe('useKeyboardShortcuts', () => {
   let unmount: () => void;
 
   afterEach(() => unmount?.());
+
+  it('O opens audio, regardless of letter case', () => {
+    const handlers = makeHandlers();
+    unmount = mountHook(handlers, true);
+    fire('o');
+    fire('O', { shiftKey: true });
+    expect(handlers.onOpenAudio).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not open audio while typing or using modifiers', () => {
+    const handlers = makeHandlers();
+    unmount = mountHook(handlers, true);
+    fire('o', { metaKey: true });
+    fire('o', { ctrlKey: true });
+    fire('o', { altKey: true });
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'o', bubbles: true }));
+    input.remove();
+    expect(handlers.onOpenAudio).not.toHaveBeenCalled();
+  });
 
   it('Space triggers play/pause', () => {
     const h = makeHandlers();

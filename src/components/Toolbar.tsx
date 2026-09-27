@@ -84,7 +84,7 @@ export function Toolbar(props: ToolbarProps) {
   return (
     <div className="toolbar" role="toolbar" aria-label="Tools">
       <div className="toolbar-group">
-        <IconBtn icon={FolderOpen} label="Open Audio" onClick={onOpenAudio} />
+        <IconBtn icon={FolderOpen} label="Open Audio (O)" onClick={onOpenAudio} />
         <IconBtn
           icon={isRecording ? Square : Circle}
           label={isRecording ? 'Stop Recording' : 'Record'}

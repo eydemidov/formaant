@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 export interface KeyboardShortcutHandlers {
+  onOpenAudio: () => void;
   onPlayPause: () => void;
   onSelectAll: () => void;
   onMoveSelectionLeft: () => void;
@@ -13,6 +14,7 @@ export interface KeyboardShortcutHandlers {
 /**
  * Global keyboard shortcuts for the audio editor.
  *
+ * O = open audio
  * Space = play/pause
  * Cmd/Ctrl+A = select all
  * ArrowLeft = move selection left
@@ -28,11 +30,17 @@ export function useKeyboardShortcuts(handlers: KeyboardShortcutHandlers, enabled
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't intercept when typing in inputs/textareas
       const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable) {
         return;
       }
 
       const mod = e.metaKey || e.ctrlKey;
+
+      if (!mod && !e.altKey && e.key.toLowerCase() === 'o') {
+        e.preventDefault();
+        handlers.onOpenAudio();
+        return;
+      }
 
       if (e.code === 'Space') {
         e.preventDefault();
