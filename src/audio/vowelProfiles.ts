@@ -1,4 +1,5 @@
 export type VowelProfile = 'modern-rp-male' | 'modern-rp-female' | 'american-male' | 'american-female' | 'mandarin-male' | 'mandarin-female' | 'french-male' | 'french-female' | 'japanese-male' | 'japanese-female' | 'serbian-male' | 'serbian-female';
+export type VowelProfileId = VowelProfile | `custom:${string}`;
 
 export interface ProfileVowel {
   symbol: string;
@@ -9,6 +10,12 @@ export interface ProfileVowel {
   f2Min?: number | null;
   f2Max?: number | null;
   description: string;
+}
+
+export interface CustomVowelProfile {
+  id: `custom:${string}`;
+  name: string;
+  vowels: ProfileVowel[];
 }
 
 export const VOWEL_RANGE_ALLOWANCE = 0.05;
@@ -169,6 +176,55 @@ export const vowelProfiles: Record<VowelProfile, ProfileVowel[]> = {
     { symbol: 'u', f1: 378, f1Min: 271, f1Max: 505, f2: 801, f2Min: 540, f2Max: 1193, description: 'close back rounded' },
   ],
 };
+
+export function isBuiltInVowelProfile(value: unknown): value is VowelProfile {
+  return typeof value === 'string' && Object.prototype.hasOwnProperty.call(vowelProfiles, value);
+}
+
+export function getProfileVowels(profile: VowelProfileId, customProfiles: CustomVowelProfile[]): ProfileVowel[] {
+  if (isBuiltInVowelProfile(profile)) return vowelProfiles[profile];
+  return customProfiles.find((custom) => custom.id === profile)?.vowels ?? vowelProfiles['modern-rp-male'];
+}
+
+function isPositiveNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0;
+}
+
+export function parseCustomVowelProfile(value: unknown): CustomVowelProfile | null {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return null;
+  const saved = value as Record<string, unknown>;
+  if (typeof saved.id !== 'string' || !/^custom:[a-zA-Z0-9-]+$/.test(saved.id) ||
+    typeof saved.name !== 'string' || !saved.name.trim() || !Array.isArray(saved.vowels) || saved.vowels.length === 0) return null;
+
+  const vowels: ProfileVowel[] = [];
+  const symbols = new Set<string>();
+  for (const item of saved.vowels) {
+    if (typeof item !== 'object' || item === null || Array.isArray(item)) return null;
+    const vowel = item as Record<string, unknown>;
+    if (typeof vowel.symbol !== 'string' || !vowel.symbol.trim() || symbols.has(vowel.symbol.trim()) ||
+      typeof vowel.description !== 'string' || !isPositiveNumber(vowel.f1) || !isPositiveNumber(vowel.f2)) return null;
+
+    for (const key of ['f1Min', 'f1Max', 'f2Min', 'f2Max'] as const) {
+      if (vowel[key] != null && !isPositiveNumber(vowel[key])) return null;
+    }
+    if (isPositiveNumber(vowel.f1Min) && isPositiveNumber(vowel.f1Max) && vowel.f1Min > vowel.f1Max) return null;
+    if (isPositiveNumber(vowel.f2Min) && isPositiveNumber(vowel.f2Max) && vowel.f2Min > vowel.f2Max) return null;
+
+    symbols.add(vowel.symbol.trim());
+    vowels.push({
+      symbol: vowel.symbol.trim(),
+      f1: vowel.f1,
+      f2: vowel.f2,
+      f1Min: vowel.f1Min as number | null | undefined,
+      f1Max: vowel.f1Max as number | null | undefined,
+      f2Min: vowel.f2Min as number | null | undefined,
+      f2Max: vowel.f2Max as number | null | undefined,
+      description: vowel.description.trim(),
+    });
+  }
+
+  return { id: saved.id as CustomVowelProfile['id'], name: saved.name.trim(), vowels };
+}
 
 export function isWithinProfileRange(f1: number, f2: number, reference: ProfileVowel): boolean {
   return (reference.f1Min == null || f1 >= reference.f1Min * (1 - VOWEL_RANGE_ALLOWANCE)) &&

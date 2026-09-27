@@ -1,6 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { Pencil, Plus } from 'lucide-react';
 import { hzToBark } from '../audio/ipaMapper';
-import { vowelProfiles, VOWEL_RANGE_ALLOWANCE, type VowelProfile } from '../audio/vowelProfiles';
+import { getProfileVowels, VOWEL_RANGE_ALLOWANCE, type CustomVowelProfile, type VowelProfileId } from '../audio/vowelProfiles';
+import { CustomProfileDialog } from './CustomProfileDialog';
 import type { AnalysisResult, TimeSelection } from '../types';
 
 const CLOSE_TARGET_BARK = 1;
@@ -9,8 +11,11 @@ interface VowelSpaceProps {
   analysis: AnalysisResult | null;
   selection: TimeSelection | null;
   currentTime: number;
-  profile: VowelProfile;
-  onProfileChange: (profile: VowelProfile) => void;
+  profile: VowelProfileId;
+  customProfiles: CustomVowelProfile[];
+  onProfileChange: (profile: VowelProfileId) => void;
+  onSaveCustomProfile: (profile: CustomVowelProfile) => void;
+  onDeleteCustomProfile: (id: CustomVowelProfile['id']) => void;
   targetVowel: string;
   onTargetVowelChange: (symbol: string) => void;
 }
@@ -21,10 +26,39 @@ interface VowelPoint {
   time: number;
 }
 
-export function VowelSpace({ analysis, selection, currentTime, profile, onProfileChange, targetVowel, onTargetVowelChange }: VowelSpaceProps) {
+const builtInProfiles = [
+  { id: 'modern-rp-male', name: 'Modern RP male' },
+  { id: 'modern-rp-female', name: 'Modern RP female' },
+  { id: 'american-male', name: 'American male' },
+  { id: 'american-female', name: 'American female' },
+  { id: 'mandarin-male', name: 'Mandarin male' },
+  { id: 'mandarin-female', name: 'Mandarin female' },
+  { id: 'french-male', name: 'French male' },
+  { id: 'french-female', name: 'French female' },
+  { id: 'japanese-male', name: 'Japanese male' },
+  { id: 'japanese-female', name: 'Japanese female' },
+  { id: 'serbian-male', name: 'Serbian male' },
+  { id: 'serbian-female', name: 'Serbian female' },
+] as const;
+
+export function VowelSpace({ analysis, selection, currentTime, profile, customProfiles, onProfileChange, onSaveCustomProfile, onDeleteCustomProfile, targetVowel, onTargetVowelChange }: VowelSpaceProps) {
+  const [editor, setEditor] = useState<{ profile: CustomVowelProfile; editing: boolean } | null>(null);
   const hasRange = selection !== null && selection.end > selection.start;
-  const references = vowelProfiles[profile];
+  const references = getProfileVowels(profile, customProfiles);
+  const selectedCustomProfile = customProfiles.find((custom) => custom.id === profile);
   const target = targetVowel ? references.find((vowel) => vowel.symbol === targetVowel) ?? references[0] : undefined;
+
+  const addProfile = () => {
+    const sourceName = selectedCustomProfile?.name ?? builtInProfiles.find((item) => item.id === profile)?.name ?? 'Voice profile';
+    setEditor({
+      profile: { id: `custom:${crypto.randomUUID()}`, name: `${sourceName} copy`, vowels: references.map((vowel) => ({ ...vowel })) },
+      editing: false,
+    });
+  };
+
+  const editProfile = () => {
+    if (selectedCustomProfile) setEditor({ profile: selectedCustomProfile, editing: true });
+  };
   const f1Min = Math.floor(Math.min(...references.map((vowel) => (vowel.f1Min ?? vowel.f1) * (1 - VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
   const f1Max = Math.ceil(Math.max(...references.map((vowel) => (vowel.f1Max ?? vowel.f1) * (1 + VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
   const f2Min = Math.floor(Math.min(...references.map((vowel) => (vowel.f2Min ?? vowel.f2) * (1 - VOWEL_RANGE_ALLOWANCE))) / 100) * 100;
@@ -105,26 +139,20 @@ export function VowelSpace({ analysis, selection, currentTime, profile, onProfil
   return (
     <div className="vowel-space-panel">
       <div className="vowel-space-header">
-        Vowel Space
-        <select
-          value={profile}
-          onChange={(e) => onProfileChange(e.target.value as VowelProfile)}
-          className="vowel-space-select"
-          aria-label="Vowel matching profile"
-        >
-          <option value="modern-rp-male">Modern RP male</option>
-          <option value="modern-rp-female">Modern RP female</option>
-          <option value="american-male">American male</option>
-          <option value="american-female">American female</option>
-          <option value="mandarin-male">Mandarin male</option>
-          <option value="mandarin-female">Mandarin female</option>
-          <option value="french-male">French male</option>
-          <option value="french-female">French female</option>
-          <option value="japanese-male">Japanese male</option>
-          <option value="japanese-female">Japanese female</option>
-          <option value="serbian-male">Serbian male</option>
-          <option value="serbian-female">Serbian female</option>
-        </select>
+        <span>Vowel Space</span>
+        <div className="vowel-profile-controls">
+          <select
+            value={profile}
+            onChange={(event) => onProfileChange(event.target.value as VowelProfileId)}
+            className="vowel-space-select"
+            aria-label="Vowel matching profile"
+          >
+            {builtInProfiles.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+            {customProfiles.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+          </select>
+          <button type="button" aria-label="Add voice profile" title="Add voice profile" onClick={addProfile}><Plus size={15} /></button>
+          {selectedCustomProfile && <button type="button" aria-label="Edit voice profile" title="Edit voice profile" onClick={editProfile}><Pencil size={14} /></button>}
+        </div>
       </div>
       <svg width={width} height={height} className="vowel-space-svg">
         {/* Background */}
@@ -252,6 +280,7 @@ export function VowelSpace({ analysis, selection, currentTime, profile, onProfil
           </tbody>
         </table>
       </div>
+      {editor && <CustomProfileDialog initialProfile={editor.profile} editing={editor.editing} onSave={onSaveCustomProfile} onDelete={onDeleteCustomProfile} onClose={() => setEditor(null)} />}
     </div>
   );
 }

@@ -24,6 +24,14 @@ describe('IPA Vowel Classification', () => {
     expect(classifyVowel(845, 1663, 'modern-rp-female').symbol).toBe('a');
   });
 
+  it('classifies against custom vowel references and their ranges', () => {
+    const references = [{ symbol: 'ɒ', f1: 620, f2: 980, f1Min: 590, f1Max: 650, f2Min: 900, f2Max: 1050, description: 'practice vowel' }];
+
+    expect(classifyVowel(620, 980, undefined, references)).toMatchObject({ symbol: 'ɒ', confidence: 1 });
+    expect(classifyVowel(700, 980, undefined, references).symbol).toBe('?');
+    expect(generateIpaAnnotations([0], [620], [980], undefined, { references })[0].symbol).toBe('ɒ');
+  });
+
   it('allows five percent beyond each profile range bound', () => {
     expect(classifyVowel(262, 2364, 'modern-rp-male').symbol).toBe('iː');
     expect(classifyVowel(256, 2364, 'modern-rp-male').symbol).toBe('?');

@@ -22,7 +22,7 @@ import { FilterPanel } from './components/FilterPanel';
 import { normalize as soundNormalize } from './audio/soundManipulation';
 import { findHighEnergyRegions } from './audio/quickSelect';
 import { createPlaybackWav } from './audio/playbackWav';
-import { vowelProfiles, type VowelProfile } from './audio/vowelProfiles';
+import { getProfileVowels, type CustomVowelProfile, type VowelProfileId } from './audio/vowelProfiles';
 import type {
   AnalysisResult,
   AnalysisSettings,
@@ -53,7 +53,9 @@ export default function App() {
   const [settings, setSettings] = useState<AnalysisSettings>(initialPreferences.settings);
   const [filterSettings, setFilterSettings] = useState<FilterSettings>(initialPreferences.filterSettings);
   const [vowelProfile, setVowelProfile] = useState(initialPreferences.vowelProfile);
+  const [customProfiles, setCustomProfiles] = useState(initialPreferences.customProfiles);
   const [targetVowel, setTargetVowel] = useState(initialPreferences.targetVowel);
+  const vowelReferences = useMemo(() => getProfileVowels(vowelProfile, customProfiles), [vowelProfile, customProfiles]);
   const [viewStart, setViewStart] = useState(0);
   const [viewEnd, setViewEnd] = useState(1);
   const [sampleRate, setSampleRate] = useState(44100);
@@ -64,6 +66,7 @@ export default function App() {
       settings,
       filterSettings,
       vowelProfile,
+      customProfiles,
       targetVowel,
       filterConsonants,
       overlays: {
@@ -74,14 +77,30 @@ export default function App() {
         ipaFormants: showIpaFormants,
       },
     });
-  }, [settings, filterSettings, vowelProfile, targetVowel, filterConsonants, showPitch, showFormants, showIntensity, showIpa, showIpaFormants]);
+  }, [settings, filterSettings, vowelProfile, customProfiles, targetVowel, filterConsonants, showPitch, showFormants, showIntensity, showIpa, showIpaFormants]);
 
-  const handleVowelProfileChange = useCallback((nextProfile: VowelProfile) => {
+  const handleVowelProfileChange = useCallback((nextProfile: VowelProfileId) => {
+    const references = getProfileVowels(nextProfile, customProfiles);
     setVowelProfile(nextProfile);
-    setTargetVowel((current) => current === '' || vowelProfiles[nextProfile].some((vowel) => vowel.symbol === current)
+    setTargetVowel((current) => current === '' || references.some((vowel) => vowel.symbol === current)
       ? current
-      : vowelProfiles[nextProfile][0].symbol);
+      : references[0].symbol);
+  }, [customProfiles]);
+
+  const handleSaveCustomProfile = useCallback((profile: CustomVowelProfile) => {
+    setCustomProfiles((current) => current.some((saved) => saved.id === profile.id)
+      ? current.map((saved) => saved.id === profile.id ? profile : saved)
+      : [...current, profile]);
+    setVowelProfile(profile.id);
+    setTargetVowel((current) => current === '' || profile.vowels.some((vowel) => vowel.symbol === current)
+      ? current
+      : profile.vowels[0].symbol);
   }, []);
+
+  const handleDeleteCustomProfile = useCallback((id: CustomVowelProfile['id']) => {
+    setCustomProfiles((current) => current.filter((profile) => profile.id !== id));
+    handleVowelProfileChange('modern-rp-male');
+  }, [handleVowelProfileChange]);
 
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
@@ -610,7 +629,7 @@ export default function App() {
                     showIpa={showIpa}
                     showIpaFormants={showIpaFormants}
                     filterConsonants={filterConsonants}
-                    vowelProfile={vowelProfile}
+                    vowelReferences={vowelReferences}
                     quickSelectEnabled={false}
                     onWheelZoom={() => {}}
                     onPan={() => {}}
@@ -670,7 +689,7 @@ export default function App() {
                 showIpa={showIpa}
                 showIpaFormants={showIpaFormants}
                 filterConsonants={filterConsonants}
-                vowelProfile={vowelProfile}
+                vowelReferences={vowelReferences}
                 onWheelZoom={handleWheelZoom}
                 onPan={handlePan}
                 onZoomSelection={handleZoomSelection}
@@ -694,7 +713,7 @@ export default function App() {
                   <FilterPanel settings={filterSettings} onChange={setFilterSettings} onApply={handleApplyFilter} onReset={handleResetFilter} />
                 </>
               ),
-              vowels: <VowelSpace analysis={analysis} selection={selection} currentTime={currentTime} profile={vowelProfile} onProfileChange={handleVowelProfileChange} targetVowel={targetVowel} onTargetVowelChange={setTargetVowel} />,
+              vowels: <VowelSpace analysis={analysis} selection={selection} currentTime={currentTime} profile={vowelProfile} customProfiles={customProfiles} onProfileChange={handleVowelProfileChange} onSaveCustomProfile={handleSaveCustomProfile} onDeleteCustomProfile={handleDeleteCustomProfile} targetVowel={targetVowel} onTargetVowelChange={setTargetVowel} />,
             }}
           </RightSidebar>
         )}
@@ -703,7 +722,7 @@ export default function App() {
       {isMobile && (
         <BottomSheet open={activePanel !== null} title={activePanel === 'vowels' ? 'Vowel Space' : 'Settings'} onClose={() => setActivePanel(null)}>
           {activePanel === 'vowels' ? (
-            <VowelSpace analysis={analysis} selection={selection} currentTime={currentTime} profile={vowelProfile} onProfileChange={handleVowelProfileChange} targetVowel={targetVowel} onTargetVowelChange={setTargetVowel} />
+            <VowelSpace analysis={analysis} selection={selection} currentTime={currentTime} profile={vowelProfile} customProfiles={customProfiles} onProfileChange={handleVowelProfileChange} onSaveCustomProfile={handleSaveCustomProfile} onDeleteCustomProfile={handleDeleteCustomProfile} targetVowel={targetVowel} onTargetVowelChange={setTargetVowel} />
           ) : (
           <div className="bottom-sheet-content">
             <div className="sidebar-section">

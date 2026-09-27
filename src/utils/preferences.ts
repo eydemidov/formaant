@@ -1,5 +1,5 @@
 import { defaultAnalysisSettings, defaultFilterSettings } from '../audio/defaults';
-import { vowelProfiles, type VowelProfile } from '../audio/vowelProfiles';
+import { getProfileVowels, isBuiltInVowelProfile, parseCustomVowelProfile, vowelProfiles, type CustomVowelProfile, type VowelProfileId } from '../audio/vowelProfiles';
 import type { AnalysisSettings, FilterSettings } from '../types';
 
 const STORAGE_KEY = 'web-praat-preferences';
@@ -7,7 +7,8 @@ const STORAGE_KEY = 'web-praat-preferences';
 export interface AppPreferences {
   settings: AnalysisSettings;
   filterSettings: FilterSettings;
-  vowelProfile: VowelProfile;
+  vowelProfile: VowelProfileId;
+  customProfiles: CustomVowelProfile[];
   targetVowel: string;
   filterConsonants: boolean;
   overlays: {
@@ -23,6 +24,7 @@ const defaults: AppPreferences = {
   settings: defaultAnalysisSettings,
   filterSettings: defaultFilterSettings,
   vowelProfile: 'modern-rp-male',
+  customProfiles: [],
   targetVowel: vowelProfiles['modern-rp-male'][0].symbol,
   filterConsonants: true,
   overlays: {
@@ -36,10 +38,6 @@ const defaults: AppPreferences = {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function isVowelProfile(value: unknown): value is VowelProfile {
-  return typeof value === 'string' && Object.prototype.hasOwnProperty.call(vowelProfiles, value);
 }
 
 function mergeSection<T extends object>(fallback: T, saved: unknown): T {
@@ -79,15 +77,23 @@ export function parseAppPreferences(raw: string | null): AppPreferences {
       filterSettings.type = defaultFilterSettings.type;
     }
 
-    const vowelProfile = isVowelProfile(saved.vowelProfile) ? saved.vowelProfile : defaults.vowelProfile;
+    const customProfiles = Array.isArray(saved.customProfiles)
+      ? saved.customProfiles.map(parseCustomVowelProfile).filter((profile): profile is CustomVowelProfile => profile !== null)
+      : [];
+    const uniqueProfiles = customProfiles.filter((profile, index) => customProfiles.findIndex((candidate) => candidate.id === profile.id) === index);
+    const vowelProfile = isBuiltInVowelProfile(saved.vowelProfile) ||
+      (typeof saved.vowelProfile === 'string' && uniqueProfiles.some((profile) => profile.id === saved.vowelProfile))
+      ? saved.vowelProfile as VowelProfileId : defaults.vowelProfile;
+    const references = getProfileVowels(vowelProfile, uniqueProfiles);
 
     return {
       settings: { spectrogram, pitch, formant },
       filterSettings,
       vowelProfile,
-      targetVowel: typeof saved.targetVowel === 'string' && (saved.targetVowel === '' || vowelProfiles[vowelProfile].some((vowel) => vowel.symbol === saved.targetVowel))
+      customProfiles: uniqueProfiles,
+      targetVowel: typeof saved.targetVowel === 'string' && (saved.targetVowel === '' || references.some((vowel) => vowel.symbol === saved.targetVowel))
         ? saved.targetVowel
-        : vowelProfiles[vowelProfile][0].symbol,
+        : references[0].symbol,
       filterConsonants: typeof saved.filterConsonants === 'boolean' ? saved.filterConsonants : defaults.filterConsonants,
       overlays: mergeSection(defaults.overlays, saved.overlays),
     };

@@ -82,12 +82,12 @@ function vowelDistance(f1a: number, f2a: number, f1b: number, f2b: number): numb
 /**
  * Find the closest IPA vowel for given F1/F2 values.
  */
-export function classifyVowel(f1: number, f2: number, profile?: VowelProfile): { symbol: string; confidence: number } {
+export function classifyVowel(f1: number, f2: number, profile?: VowelProfile, references?: ProfileVowel[]): { symbol: string; confidence: number } {
   let minDist = Infinity;
   let bestSymbol = '?';
 
-  for (const ref of profile ? vowelProfiles[profile] : vowelReferences) {
-    if (profile && !isWithinProfileRange(f1, f2, ref as ProfileVowel)) continue;
+  for (const ref of references ?? (profile ? vowelProfiles[profile] : vowelReferences)) {
+    if ((profile || references) && !isWithinProfileRange(f1, f2, ref)) continue;
     const dist = vowelDistance(f1, f2, ref.f1, ref.f2);
     if (dist < minDist) {
       minDist = dist;
@@ -109,6 +109,7 @@ export interface IpaAnnotationOptions {
   minIntensityDb: number;
   filterConsonants: boolean;
   profile?: VowelProfile;
+  references?: ProfileVowel[];
 }
 
 const defaultOptions: IpaAnnotationOptions = {
@@ -218,12 +219,12 @@ export function generateIpaAnnotations(
     }
 
     // Skip if F1/F2 values are implausible
-    if (!opts.profile && (f1Val < 150 || f1Val > 1000 || f2Val < 500 || f2Val > 3000)) continue;
+    if (!opts.profile && !opts.references && (f1Val < 150 || f1Val > 1000 || f2Val < 500 || f2Val > 3000)) continue;
 
     // Enforce minimum time gap
     if (times[i] - lastAnnotationTime < opts.minTimeGap) continue;
 
-    const { symbol, confidence } = classifyVowel(f1Val, f2Val, opts.profile);
+    const { symbol, confidence } = classifyVowel(f1Val, f2Val, opts.profile, opts.references);
     if (symbol !== '?' && confidence >= opts.minConfidence) {
       annotations.push({ time: times[i], symbol, f1: f1Val, f2: f2Val, averageF1: f1Val, averageF2: f2Val, confidence });
       annotationIndices.push(i);
@@ -243,9 +244,9 @@ export function generateIpaAnnotations(
       const frameF2 = f2[frameIndex];
       if (frameF1 == null || frameF2 == null ||
         (supportedFrames && !supportedFrames[frameIndex]) ||
-        (!opts.profile && (frameF1 < 150 || frameF1 > 1000 || frameF2 < 500 || frameF2 > 3000)) ||
+        (!opts.profile && !opts.references && (frameF1 < 150 || frameF1 > 1000 || frameF2 < 500 || frameF2 > 3000)) ||
         (intensityValues?.[frameIndex] !== undefined && intensityValues[frameIndex] < opts.minIntensityDb) ||
-        classifyVowel(frameF1, frameF2, opts.profile).symbol !== annotation.symbol) break;
+        classifyVowel(frameF1, frameF2, opts.profile, opts.references).symbol !== annotation.symbol) break;
       totalF1 += frameF1;
       totalF2 += frameF2;
       count++;

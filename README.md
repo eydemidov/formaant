@@ -60,6 +60,7 @@ Formants are simply a way to turn pronunciation into **visual feedback**.
 - Vowel trajectories over time
 - IPA vowel labels
 - Selectable reference profiles for Modern RP, American English, Mandarin Chinese, French, Japanese, and Serbian
+- Custom voice profiles: copy any profile, edit its vowels and F1/F2 values or ranges, and save or delete it locally
 - Separate reference data for women and men
 - Visual comparison between the learner’s vowels and target vowels
 

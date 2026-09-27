@@ -5,7 +5,7 @@ import { useZoomPan } from '../hooks/useZoomPan';
 import { pitchToY, timeToX, xToTime } from '../utils/view';
 import { generateIpaAnnotations } from '../audio/ipaVowels';
 import { findHighEnergyRegions } from '../audio/quickSelect';
-import type { VowelProfile } from '../audio/vowelProfiles';
+import type { ProfileVowel } from '../audio/vowelProfiles';
 
 interface SpectrogramProps {
   analysis: AnalysisResult | null;
@@ -18,7 +18,7 @@ interface SpectrogramProps {
   showIpa: boolean;
   showIpaFormants: boolean;
   filterConsonants: boolean;
-  vowelProfile: VowelProfile;
+  vowelReferences: ProfileVowel[];
   quickSelectEnabled?: boolean;
   onWheelZoom: (pivotTime: number, zoomFactor: number) => void;
   onPan: (deltaTime: number) => void;
@@ -40,7 +40,7 @@ export const Spectrogram = React.memo(function Spectrogram({
   showIpa,
   showIpaFormants,
   filterConsonants,
-  vowelProfile,
+  vowelReferences,
   quickSelectEnabled = true,
   onWheelZoom,
   onPan,
@@ -366,10 +366,10 @@ export const Spectrogram = React.memo(function Spectrogram({
       analysis.formants.tracked[0] ?? [],
       analysis.formants.tracked[1] ?? [],
       analysis.intensity.values,
-      { minTimeGap: 0.08, minConfidence: 0.35, profile: vowelProfile, filterConsonants },
+      { minTimeGap: 0.08, minConfidence: 0.35, references: vowelReferences, filterConsonants },
       { pitch: analysis.pitch, spectrogram: analysis.spectrogram }
     );
-  }, [showIpa, showFormants, analysis, vowelProfile, filterConsonants]);
+  }, [showIpa, showFormants, analysis, vowelReferences, filterConsonants]);
 
   const quickSelectRegions = useMemo(() => {
     if (!quickSelectEnabled || !analysis || analysis.spectrogram.magnitudes.length === 0) return [];

@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { VowelSpace } from '../src/components/VowelSpace';
-import { vowelProfiles, type VowelProfile } from '../src/audio/vowelProfiles';
+import { vowelProfiles, type CustomVowelProfile, type VowelProfileId } from '../src/audio/vowelProfiles';
 import type { AnalysisResult, TimeSelection } from '../src/types';
 
 const analysis = {
@@ -16,15 +16,19 @@ function renderVowelSpace(
   selection: TimeSelection | null,
   currentTime = 2,
   source = analysis,
-  profile: VowelProfile = 'modern-rp-male',
-  targetVowel = vowelProfiles[profile][0].symbol
+  profile: VowelProfileId = 'modern-rp-male',
+  targetVowel = vowelProfiles['modern-rp-male'][0].symbol,
+  customProfiles: CustomVowelProfile[] = []
 ): string {
   return renderToStaticMarkup(createElement(VowelSpace, {
     analysis: source,
     selection,
     currentTime,
     profile,
+    customProfiles,
     onProfileChange: () => {},
+    onSaveCustomProfile: () => {},
+    onDeleteCustomProfile: () => {},
     targetVowel,
     onTargetVowelChange: () => {},
   }));
@@ -112,5 +116,21 @@ describe('vowel space trace and marker', () => {
     expect(markup).not.toContain('fill="#ffffff"');
     expect(markup).not.toContain('vowel-target-close');
     expect(markup).not.toContain('vowel-target-far');
+  });
+
+  it('shows custom vowels and an edit button only for a selected custom profile', () => {
+    const customProfiles: CustomVowelProfile[] = [{
+      id: 'custom:test', name: 'Practice', vowels: [{ symbol: 'ɒ', f1: 620, f2: 980, description: 'practice vowel' }],
+    }];
+    const customMarkup = renderVowelSpace(null, 2, analysis, 'custom:test', 'ɒ', customProfiles);
+    const builtInMarkup = renderVowelSpace(null);
+
+    expect(customMarkup).toContain('value="custom:test" selected=""');
+    expect(customMarkup).toContain('aria-label="Edit voice profile"');
+    expect(customMarkup).toContain('ɒ — practice vowel');
+    expect(customMarkup).toContain('<td>620 Hz</td>');
+    expect(customMarkup).toContain('<td>980 Hz</td>');
+    expect(builtInMarkup).toContain('aria-label="Add voice profile"');
+    expect(builtInMarkup).not.toContain('aria-label="Edit voice profile"');
   });
 });

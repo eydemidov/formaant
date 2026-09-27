@@ -16,6 +16,7 @@ describe('app preferences', () => {
     expect(preferences.overlays.ipaFormants).toBe(true);
     expect(preferences.filterConsonants).toBe(true);
     expect(preferences.vowelProfile).toBe('modern-rp-male');
+    expect(preferences.customProfiles).toEqual([]);
     expect(preferences.targetVowel).toBe('iː');
   });
 
@@ -64,5 +65,28 @@ describe('app preferences', () => {
 
   it('restores an empty target vowel across profiles', () => {
     expect(parseAppPreferences(JSON.stringify({ vowelProfile: 'french-male', targetVowel: '' })).targetVowel).toBe('');
+  });
+
+  it('restores a selected custom profile and its vowels', () => {
+    const customProfiles = [{ id: 'custom:practice', name: 'Practice', vowels: [
+      { symbol: 'ɒ', f1: 620, f2: 980, f1Min: 590, f1Max: 650, description: 'practice vowel' },
+    ] }];
+    const preferences = parseAppPreferences(JSON.stringify({ customProfiles, vowelProfile: 'custom:practice', targetVowel: 'ɒ' }));
+
+    expect(preferences.customProfiles[0]).toMatchObject(customProfiles[0]);
+    expect(preferences.vowelProfile).toBe('custom:practice');
+    expect(preferences.targetVowel).toBe('ɒ');
+  });
+
+  it('rejects malformed custom profiles and falls back when the selected one is missing', () => {
+    const preferences = parseAppPreferences(JSON.stringify({
+      customProfiles: [{ id: 'custom:bad', name: 'Bad', vowels: [{ symbol: 'i', f1: -1, f2: 2000, description: '' }] }],
+      vowelProfile: 'custom:bad',
+      targetVowel: 'i',
+    }));
+
+    expect(preferences.customProfiles).toEqual([]);
+    expect(preferences.vowelProfile).toBe('modern-rp-male');
+    expect(preferences.targetVowel).toBe('iː');
   });
 });
