@@ -155,18 +155,3 @@ export interface FilterSettings {
   cutoffHz: number;
   q: number;
 }
-
-export interface PitchTierPoint {
-  time: number;
-  frequency: number;
-}
-
-export interface DurationTierPoint {
-  time: number;
-  factor: number;
-}
-
-export interface ManipulationData {
-  pitchTier: PitchTierPoint[];
-  durationTier: DurationTierPoint[];
-}

@@ -19,7 +19,6 @@ interface MenuBarProps {
   canUndo: boolean;
   canRedo: boolean;
   onLoadFile: (file: File) => void;
-  onGenerateTone?: () => void;
   onAnalyzeSelection?: () => void;
   onUndo: () => void;
   onRedo: () => void;
@@ -35,10 +34,6 @@ interface MenuBarProps {
   onZoomOut: () => void;
   onFitToWindow: () => void;
   onZoomToSelection: () => void;
-  onOpenExperiment?: () => void;
-  onOpenSpeechSynthesizer?: () => void;
-  onOpenPitchSonification?: () => void;
-  onOpenNoteTranscription?: () => void;
   onOpenCommandPalette?: () => void;
   themeSetting?: ThemeSetting;
   onThemeChange?: (theme: ThemeSetting) => void;
@@ -84,7 +79,6 @@ export function MenuBar(props: MenuBarProps) {
     onLoadFile,
     onUndo, onRedo, onCut, onCopy, onPaste, onDelete,
     onZoomIn, onZoomOut, onFitToWindow, onZoomToSelection,
-    onOpenExperiment, onOpenSpeechSynthesizer, onOpenPitchSonification, onOpenNoteTranscription,
     onOpenCommandPalette,
     themeSetting, onThemeChange,
   } = props;
@@ -141,18 +135,6 @@ export function MenuBar(props: MenuBarProps) {
               ))}
             </MenubarSubContent>
           </MenubarSub>
-        </MenubarContent>
-      </MenubarMenu>
-
-      {/* Tools */}
-      <MenubarMenu>
-        <MenubarTrigger>Tools</MenubarTrigger>
-        <MenubarContent>
-          <MenubarItem onClick={onOpenExperiment}>Experiment (MFC)</MenubarItem>
-          <MenubarItem onClick={onOpenSpeechSynthesizer}>SpeechSynthesizer (TTS)</MenubarItem>
-          <MenubarItem onClick={onOpenPitchSonification}>Pitch Sonification</MenubarItem>
-          <MenubarItem onClick={onOpenNoteTranscription}>Note Transcription</MenubarItem>
-          {props.onGenerateTone && <MenubarItem onClick={props.onGenerateTone}>Generate Tone…</MenubarItem>}
         </MenubarContent>
       </MenubarMenu>
 

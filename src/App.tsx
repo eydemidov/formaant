@@ -19,12 +19,7 @@ import { Spectrogram } from './components/Spectrogram';
 import { StatusBar } from './components/StatusBar';
 import { TimeRuler } from './components/TimeRuler';
 import { Toolbar } from './components/Toolbar';
-import { ExperimentDesigner } from './components/ExperimentDesigner';
-import { ExperimentMFC } from './components/ExperimentMFC';
 import { VowelSpace } from './components/VowelSpace';
-import SpeechSynthesizerPanel from './components/SpeechSynthesizerPanel';
-import PitchSonificationPanel from './components/PitchSonificationPanel';
-import NoteTranscriptionPanel from './components/NoteTranscriptionPanel';
 import { Waveform } from './components/Waveform';
 import { DropOverlay, DropFileType } from './components/DropOverlay';
 import { Minimap } from './components/Minimap';
@@ -32,7 +27,6 @@ import { FilterPanel } from './components/FilterPanel';
 import { ListingPanel, type ListingData } from './components/ListingPanel';
 import { normalize as soundNormalize } from './audio/soundManipulation';
 import { removeSilence } from './audio/soundEnhance';
-import { generateSineWave } from './audio/psola';
 import type {
   AnalysisResult,
   AnalysisSettings,
@@ -66,11 +60,6 @@ export default function App() {
   const [showIntensity, setShowIntensity] = useState(initialPreferences.overlays.intensity);
   const [showIpa, setShowIpa] = useState(initialPreferences.overlays.ipa);
   const [showIpaFormants, setShowIpaFormants] = useState(initialPreferences.overlays.ipaFormants);
-  const [showExperiment, setShowExperiment] = useState(false);
-  const [showSpeechSynthesizer, setShowSpeechSynthesizer] = useState(false);
-  const [showPitchSonification, setShowPitchSonification] = useState(false);
-  const [showNoteTranscription, setShowNoteTranscription] = useState(false);
-  const [experimentConfig, setExperimentConfig] = useState<{ config: any; audioMap: Record<string, string> } | null>(null);
   const [settings, setSettings] = useState<AnalysisSettings>(initialPreferences.settings);
   const [filterSettings, setFilterSettings] = useState<FilterSettings>(initialPreferences.filterSettings);
   const [vowelProfile, setVowelProfile] = useState(initialPreferences.vowelProfile);
@@ -600,11 +589,6 @@ export default function App() {
     { id: 'view.theme-light', label: 'Theme: Light', category: 'View', action: () => setThemeSetting('light') },
     { id: 'view.theme-hc-dark', label: 'Theme: HC Dark', category: 'View', action: () => setThemeSetting('hc-dark') },
     { id: 'view.theme-hc-light', label: 'Theme: HC Light', category: 'View', action: () => setThemeSetting('hc-light') },
-    { id: 'tools.experiment', label: 'Experiment', category: 'Tools', action: () => setShowExperiment(true) },
-    { id: 'tools.speechSynthesizer', label: 'SpeechSynthesizer (TTS)', category: 'Tools', action: () => setShowSpeechSynthesizer(true) },
-    { id: 'tools.pitchSonification', label: 'Pitch Sonification', category: 'Tools', action: () => setShowPitchSonification(true) },
-    { id: 'tools.noteTranscription', label: 'Note Transcription', category: 'Tools', action: () => setShowNoteTranscription(true) },
-    { id: 'tools.generate-tone', label: 'Generate Tone', category: 'Tools', action: () => { const f = prompt('Frequency (Hz):', '440'); if (f) { const dur = Number(prompt('Duration (s):', '1')) || 1; processSamples(generateSineWave(Number(f), dur, 44100), 44100); } } },
     { id: 'edit.reverse', label: 'Reverse', category: 'Edit', action: () => { if (currentSamplesRef.current) { const r = new Float32Array(currentSamplesRef.current.length); for (let i = 0; i < r.length; i++) r[i] = currentSamplesRef.current[r.length - 1 - i]; applyEffect(r); } } },
     { id: 'edit.normalize', label: 'Normalize', category: 'Edit', action: () => { if (currentSamplesRef.current) applyEffect(soundNormalize(currentSamplesRef.current)); } },
     { id: 'edit.reduce-noise', label: 'Reduce Noise', category: 'Edit', action: () => { /* triggers via menu */ } },
@@ -623,17 +607,6 @@ export default function App() {
         canUndo={canUndo}
         canRedo={canRedo}
         onLoadFile={handleLoadFile}
-        onGenerateTone={() => {
-          const freqStr = prompt('Frequency (Hz):', '440');
-          if (!freqStr) return;
-          const freq = Number(freqStr);
-          if (!freq || freq <= 0) return;
-          const durStr = prompt('Duration (seconds):', '1');
-          const dur = Number(durStr) || 1;
-          const sr = 44100;
-          const tone = generateSineWave(freq, dur, sr);
-          processSamples(tone, sr);
-        }}
         onAnalyzeSelection={() => {
           if (!currentSamplesRef.current) return;
           const startSample = Math.floor(viewStart * sampleRate);
@@ -696,10 +669,6 @@ export default function App() {
         onZoomOut={handleZoomOut}
         onFitToWindow={handleFitToWindow}
         onZoomToSelection={() => handleZoomSelection()}
-        onOpenExperiment={() => setShowExperiment(true)}
-        onOpenSpeechSynthesizer={() => setShowSpeechSynthesizer(true)}
-        onOpenPitchSonification={() => setShowPitchSonification(true)}
-        onOpenNoteTranscription={() => setShowNoteTranscription(true)}
         themeSetting={themeSetting}
         onThemeChange={setThemeSetting}
         onOpenCommandPalette={() => setCommandPaletteOpen(true)}
@@ -1008,48 +977,6 @@ export default function App() {
       <KeyboardShortcutsDialog />
       <AboutDialog />
 
-      {/* Tool Panels */}
-      {showExperiment && !experimentConfig && (
-        <div className="modal-overlay" onClick={() => setShowExperiment(false)}>
-          <div className="modal-panel" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" aria-label="Close" onClick={() => setShowExperiment(false)}>✕</button>
-            <ExperimentDesigner onStart={(config, audioMap) => setExperimentConfig({ config, audioMap })} />
-          </div>
-        </div>
-      )}
-      {showExperiment && experimentConfig && (
-        <div className="modal-overlay" onClick={() => { setShowExperiment(false); setExperimentConfig(null); }}>
-          <div className="modal-panel" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" aria-label="Close" onClick={() => { setShowExperiment(false); setExperimentConfig(null); }}>✕</button>
-            <ExperimentMFC config={experimentConfig.config} audioMap={experimentConfig.audioMap} onComplete={() => { setShowExperiment(false); setExperimentConfig(null); }} />
-          </div>
-        </div>
-      )}
-
-      {showSpeechSynthesizer && (
-        <div className="modal-overlay" onClick={() => setShowSpeechSynthesizer(false)}>
-          <div className="modal-panel" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" aria-label="Close" onClick={() => setShowSpeechSynthesizer(false)}>✕</button>
-            <SpeechSynthesizerPanel onClose={() => setShowSpeechSynthesizer(false)} />
-          </div>
-        </div>
-      )}
-      {showPitchSonification && (
-        <div className="modal-overlay" onClick={() => setShowPitchSonification(false)}>
-          <div className="modal-panel" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" aria-label="Close" onClick={() => setShowPitchSonification(false)}>✕</button>
-            <PitchSonificationPanel pitch={analysis?.pitch ?? null} onClose={() => setShowPitchSonification(false)} />
-          </div>
-        </div>
-      )}
-      {showNoteTranscription && (
-        <div className="modal-overlay" onClick={() => setShowNoteTranscription(false)}>
-          <div className="modal-panel" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" aria-label="Close" onClick={() => setShowNoteTranscription(false)}>✕</button>
-            <NoteTranscriptionPanel pitch={analysis?.pitch ?? null} onClose={() => setShowNoteTranscription(false)} />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

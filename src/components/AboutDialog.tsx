@@ -25,8 +25,6 @@ export function AboutDialog() {
         <ul style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.8' }}>
           <li>Pitch, Formant, Intensity, Harmonicity analysis</li>
           <li>Spectrogram</li>
-          <li>PSOLA manipulation</li>
-          <li>Perception experiments (MFC)</li>
         </ul>
         <p style={{ marginTop: '16px', color: 'var(--text-tertiary)', fontSize: '12px' }}>
           GPL-3.0 · github.com/justinchuby/web-praat
