@@ -6,7 +6,6 @@ import { useAnalysisWorker } from './hooks/useAnalysisWorker';
 import { useIsMobile } from './hooks/useIsMobile';
 import { useTheme } from './hooks/useTheme';
 import { BottomSheet } from './components/BottomSheet';
-import { AudioEditorHistory, ReplaceRangeCommand } from './audio/editor';
 import { applyBiquadFilter } from './audio/filters';
 import { loadAudioFile } from './audio/recorder';
 import { KeyboardShortcutsDialog } from './components/KeyboardShortcutsDialog';
@@ -64,8 +63,6 @@ export default function App() {
   const [viewStart, setViewStart] = useState(0);
   const [viewEnd, setViewEnd] = useState(1);
   const [sampleRate, setSampleRate] = useState(44100);
-  const [canUndo, setCanUndo] = useState(false);
-  const [canRedo, setCanRedo] = useState(false);
 
   useEffect(() => {
     saveAppPreferences({
@@ -92,7 +89,6 @@ export default function App() {
   const sourceRef = useRef<AudioBufferSourceNode | null>(null);
   const animFrameRef = useRef<number>(0);
   const playStartRef = useRef(0);
-  const editorRef = useRef(new AudioEditorHistory(new Float32Array(0)));
   const originalSamplesRef = useRef<Float32Array | null>(null);
   const currentSamplesRef = useRef<Float32Array | null>(null);
   const audioFileInputRef = useRef<HTMLInputElement>(null);
@@ -123,16 +119,11 @@ export default function App() {
     return { f1: f.f1[bestIdx], f2: f.f2[bestIdx] };
   }, [analysis, currentTime]);
 
-  const syncHistoryFlags = useCallback(() => {
-    setCanUndo(editorRef.current.canUndo());
-    setCanRedo(editorRef.current.canRedo());
-  }, []);
-
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
 
   const processSamples = useCallback(
-    (samples: Float32Array, nextSampleRate: number, resetEditor = false) => {
+    (samples: Float32Array, nextSampleRate: number) => {
       currentSamplesRef.current = Float32Array.from(samples);
       setSampleRate(nextSampleRate);
       setAnalyzing(true);
@@ -148,34 +139,24 @@ export default function App() {
         const fitted = fitToWindow(nextAnalysis.duration);
         setViewStart(fitted.start);
         setViewEnd(fitted.end);
-        if (resetEditor) {
-          editorRef.current.setSamples(samples);
-          syncHistoryFlags();
-        }
       }).catch((err) => {
         setAnalyzing(false);
         setProgress(0);
         console.error('Analysis failed:', err);
       });
     },
-    [syncHistoryFlags, analyzeInWorker]
+    [analyzeInWorker]
   );
 
   const processAudioBuffer = useCallback(
-    (buffer: AudioBuffer, resetEditor = true) => {
+    (buffer: AudioBuffer) => {
       const samples = Float32Array.from(buffer.getChannelData(0));
-      if (resetEditor) {
-        originalSamplesRef.current = Float32Array.from(samples);
-      }
+      originalSamplesRef.current = Float32Array.from(samples);
       // For long audio (>5 min), show waveform immediately without full analysis
       const LONG_THRESHOLD = 300; // seconds
       if (buffer.duration > LONG_THRESHOLD) {
         currentSamplesRef.current = samples;
         setSampleRate(buffer.sampleRate);
-        if (resetEditor) {
-          editorRef.current.setSamples(samples);
-          syncHistoryFlags();
-        }
         const duration = buffer.duration;
         // Create minimal analysis with just waveform data
         const emptyAnalysis: AnalysisResult = {
@@ -196,9 +177,9 @@ export default function App() {
         setViewEnd(Math.min(30, duration)); // Show first 30s
         return;
       }
-      processSamples(samples, buffer.sampleRate, resetEditor);
+      processSamples(samples, buffer.sampleRate);
     },
-    [processSamples, syncHistoryFlags]
+    [processSamples]
   );
 
   // Preload WebGPU device at mount to avoid first-analysis delay
@@ -208,7 +189,7 @@ export default function App() {
 
   useEffect(() => {
     if (!currentSamplesRef.current) return;
-    processSamples(currentSamplesRef.current, sampleRate, false);
+    processSamples(currentSamplesRef.current, sampleRate);
   }, [processSamples, sampleRate, settings]);
 
   const handleLoadFile = useCallback(async (file: File) => {
@@ -228,7 +209,7 @@ export default function App() {
         );
         if (!proceed) return;
       }
-      processAudioBuffer(buffer, true);
+      processAudioBuffer(buffer);
     } catch (err) {
       alert(`Failed to load audio: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
@@ -248,8 +229,7 @@ export default function App() {
     setIsRecording(false);
     if (samples.length > 0) {
       originalSamplesRef.current = Float32Array.from(samples);
-      editorRef.current.setSamples(samples);
-      processSamples(samples, sr, true);
+      processSamples(samples, sr);
     }
   }, [streaming, processSamples]);
 
@@ -307,69 +287,9 @@ export default function App() {
     setIsPlaying(false);
   }, []);
 
-  const commitSamples = useCallback((samples: Float32Array) => {
-    processSamples(samples, sampleRate, false);
-    syncHistoryFlags();
-  }, [processSamples, sampleRate, syncHistoryFlags]);
-
-  /** Record a full-buffer transformation in undo history, then apply */
   const applyEffect = useCallback((newSamples: Float32Array) => {
-    const len = currentSamplesRef.current?.length ?? 0;
-    const state = editorRef.current.execute(new ReplaceRangeCommand(0, len, newSamples));
-    commitSamples(state.samples);
-  }, [commitSamples]);
-
-  const selectionToSampleRange = useCallback(() => {
-    if (!selection || !currentSamplesRef.current) return null;
-    return {
-      start: Math.floor(selection.start * sampleRate),
-      end: Math.ceil(selection.end * sampleRate),
-    };
-  }, [sampleRate, selection]);
-
-  const handleCut = useCallback(() => {
-    const range = selectionToSampleRange();
-    if (!range) return;
-    editorRef.current.copy(range.start, range.end);
-    const state = editorRef.current.execute(new ReplaceRangeCommand(range.start, range.end, new Float32Array(0)));
-    commitSamples(state.samples);
-    setSelection(null);
-  }, [commitSamples, selectionToSampleRange]);
-
-  const handleCopy = useCallback(() => {
-    const range = selectionToSampleRange();
-    if (!range) return;
-    editorRef.current.copy(range.start, range.end);
-  }, [selectionToSampleRange]);
-
-  const handlePaste = useCallback(() => {
-    const state = editorRef.current.getState();
-    const clipboard = state.clipboard;
-    if (!clipboard) return;
-    const insertAt = selection ? Math.floor(selection.start * sampleRate) : state.samples.length;
-    const nextState = editorRef.current.execute(new ReplaceRangeCommand(insertAt, insertAt, clipboard));
-    commitSamples(nextState.samples);
-  }, [commitSamples, sampleRate, selection]);
-
-  const handleDelete = useCallback(() => {
-    const range = selectionToSampleRange();
-    if (!range) return;
-    const state = editorRef.current.execute(new ReplaceRangeCommand(range.start, range.end, new Float32Array(0)));
-    commitSamples(state.samples);
-    setSelection(null);
-  }, [commitSamples, selectionToSampleRange]);
-
-  const handleUndo = useCallback(() => {
-    const state = editorRef.current.undo();
-    if (!state) return;
-    commitSamples(state.samples);
-  }, [commitSamples]);
-
-  const handleRedo = useCallback(() => {
-    const state = editorRef.current.redo();
-    if (!state) return;
-    commitSamples(state.samples);
-  }, [commitSamples]);
+    processSamples(newSamples, sampleRate);
+  }, [processSamples, sampleRate]);
 
   const handleApplyFilter = useCallback(() => {
     if (!currentSamplesRef.current) return;
@@ -379,8 +299,7 @@ export default function App() {
 
   const handleResetFilter = useCallback(() => {
     if (!originalSamplesRef.current) return;
-    editorRef.current.setSamples(originalSamplesRef.current);
-    processSamples(originalSamplesRef.current, sampleRate, true);
+    processSamples(originalSamplesRef.current, sampleRate);
   }, [processSamples, sampleRate]);
 
   const handleWheelZoom = useCallback((pivotTime: number, zoomFactor: number) => {
@@ -533,19 +452,13 @@ export default function App() {
 
   const shortcutHandlers = useMemo(() => ({
     onPlayPause: handlePlayPause,
-    onUndo: handleUndo,
-    onRedo: handleRedo,
-    onCut: handleCut,
-    onCopy: handleCopy,
-    onPaste: handlePaste,
-    onDelete: handleDelete,
     onSelectAll: handleSelectAll,
     onMoveSelectionLeft: handleMoveSelectionLeft,
     onMoveSelectionRight: handleMoveSelectionRight,
     onZoomIn: handleZoomIn,
     onZoomOut: handleZoomOut,
     onFitToWindow: handleFitToWindow,
-  }), [handlePlayPause, handleUndo, handleRedo, handleCut, handleCopy, handlePaste, handleDelete, handleSelectAll, handleMoveSelectionLeft, handleMoveSelectionRight, handleZoomIn, handleZoomOut, handleFitToWindow]);
+  }), [handlePlayPause, handleSelectAll, handleMoveSelectionLeft, handleMoveSelectionRight, handleZoomIn, handleZoomOut, handleFitToWindow]);
 
   useKeyboardShortcuts(shortcutHandlers, true);
 
@@ -564,16 +477,9 @@ export default function App() {
 
   const isMac = typeof navigator !== 'undefined' && /Mac/.test(navigator.platform);
   const mod = isMac ? '\u2318' : 'Ctrl+';
-  const shift = isMac ? '\u21e7' : 'Shift+';
 
   const paletteCommands: Command[] = useMemo(() => [
     { id: 'file.open-audio', label: 'Open Audio', category: 'File', action: () => audioFileInputRef.current?.click() },
-    { id: 'edit.undo', label: 'Undo', category: 'Edit', shortcut: `${mod}Z`, action: handleUndo },
-    { id: 'edit.redo', label: 'Redo', category: 'Edit', shortcut: `${mod}${shift}Z`, action: handleRedo },
-    { id: 'edit.cut', label: 'Cut', category: 'Edit', shortcut: `${mod}X`, action: handleCut },
-    { id: 'edit.copy', label: 'Copy', category: 'Edit', shortcut: `${mod}C`, action: handleCopy },
-    { id: 'edit.paste', label: 'Paste', category: 'Edit', shortcut: `${mod}V`, action: handlePaste },
-    { id: 'edit.delete', label: 'Delete', category: 'Edit', shortcut: 'Del', action: handleDelete },
     { id: 'view.zoom-in', label: 'Zoom In', category: 'View', shortcut: `${mod}+`, action: handleZoomIn },
     { id: 'view.zoom-out', label: 'Zoom Out', category: 'View', shortcut: `${mod}\u2212`, action: handleZoomOut },
     { id: 'view.fit-to-window', label: 'Fit to Window', category: 'View', shortcut: `${mod}0`, action: handleFitToWindow },
@@ -590,9 +496,9 @@ export default function App() {
     { id: 'edit.normalize', label: 'Normalize', category: 'Edit', action: () => { if (currentSamplesRef.current) applyEffect(soundNormalize(currentSamplesRef.current)); } },
     { id: 'edit.reduce-noise', label: 'Reduce Noise', category: 'Edit', action: () => { /* triggers via menu */ } },
     { id: 'view.vowel-space', label: 'Vowel Space', category: 'View', action: () => document.dispatchEvent(new CustomEvent('open-sidebar-tab', { detail: 'vowels' })) },
-    { id: 'view.analyze-region', label: 'Analyze Visible Region', category: 'View', action: () => { if (currentSamplesRef.current) { const s = Math.floor(viewStart * sampleRate); const e = Math.min(Math.floor(viewEnd * sampleRate), currentSamplesRef.current.length); if (e - s > 100) processSamples(currentSamplesRef.current.slice(s, e), sampleRate, false); } } },
+    { id: 'view.analyze-region', label: 'Analyze Visible Region', category: 'View', action: () => { if (currentSamplesRef.current) { const s = Math.floor(viewStart * sampleRate); const e = Math.min(Math.floor(viewEnd * sampleRate), currentSamplesRef.current.length); if (e - s > 100) processSamples(currentSamplesRef.current.slice(s, e), sampleRate); } } },
     { id: 'recording.start-stop', label: 'Start/Stop Recording', category: 'Recording', shortcut: 'R', action: () => { isRecording ? handleStopRecord() : handleRecord(); } },
-  ], [analysis, handleUndo, handleRedo, handleCut, handleCopy, handlePaste, handleDelete, handleZoomIn, handleZoomOut, handleFitToWindow, isRecording, handleRecord, handleStopRecord, sampleRate, mod, shift]);
+  ], [analysis, handleZoomIn, handleZoomOut, handleFitToWindow, isRecording, handleRecord, handleStopRecord, sampleRate, mod]);
 
   return (
     <div className="app-layout">
@@ -601,8 +507,6 @@ export default function App() {
       <MenuBar
         hasAudio={!!analysis}
         selection={selection}
-        canUndo={canUndo}
-        canRedo={canRedo}
         onLoadFile={handleLoadFile}
         onAnalyzeSelection={() => {
           if (!currentSamplesRef.current) return;
@@ -610,14 +514,8 @@ export default function App() {
           const endSample = Math.min(Math.floor(viewEnd * sampleRate), currentSamplesRef.current.length);
           if (endSample - startSample < 100) return;
           const region = currentSamplesRef.current.slice(startSample, endSample);
-          processSamples(region, sampleRate, false);
+          processSamples(region, sampleRate);
         }}
-        onUndo={handleUndo}
-        onRedo={handleRedo}
-        onCut={handleCut}
-        onCopy={handleCopy}
-        onPaste={handlePaste}
-        onDelete={handleDelete}
         onReverse={() => {
           if (currentSamplesRef.current) {
             const samples = currentSamplesRef.current;
@@ -677,19 +575,10 @@ export default function App() {
         hasAudio={!!analysis}
         isPlaying={isPlaying}
         isRecording={isRecording}
-        selection={selection}
-        canUndo={canUndo}
-        canRedo={canRedo}
         onRecord={handleRecord}
         onStopRecord={handleStopRecord}
         onPlay={handlePlay}
         onPause={handlePause}
-        onUndo={handleUndo}
-        onRedo={handleRedo}
-        onCut={handleCut}
-        onCopy={handleCopy}
-        onPaste={handlePaste}
-        onDelete={handleDelete}
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onFitToWindow={handleFitToWindow}
@@ -821,7 +710,7 @@ export default function App() {
                   const endSample = Math.min(Math.floor(viewEnd * sampleRate), currentSamplesRef.current.length);
                   if (endSample - startSample < 100) return;
                   const region = currentSamplesRef.current.slice(startSample, endSample);
-                  processSamples(region, sampleRate, false);
+                  processSamples(region, sampleRate);
                 }}
               />
               </div>

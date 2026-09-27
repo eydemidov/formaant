@@ -2,12 +2,6 @@ import { useEffect } from 'react';
 
 export interface KeyboardShortcutHandlers {
   onPlayPause: () => void;
-  onUndo: () => void;
-  onRedo: () => void;
-  onCut: () => void;
-  onCopy: () => void;
-  onPaste: () => void;
-  onDelete: () => void;
   onSelectAll: () => void;
   onMoveSelectionLeft: () => void;
   onMoveSelectionRight: () => void;
@@ -20,12 +14,6 @@ export interface KeyboardShortcutHandlers {
  * Global keyboard shortcuts for the audio editor.
  *
  * Space = play/pause
- * Cmd/Ctrl+Z = undo
- * Cmd/Ctrl+Shift+Z = redo
- * Cmd/Ctrl+X = cut
- * Cmd/Ctrl+C = copy
- * Cmd/Ctrl+V = paste
- * Delete/Backspace = delete selection
  * Cmd/Ctrl+A = select all
  * ArrowLeft = move selection left
  * ArrowRight = move selection right
@@ -52,45 +40,9 @@ export function useKeyboardShortcuts(handlers: KeyboardShortcutHandlers, enabled
         return;
       }
 
-      if (mod && e.shiftKey && e.key.toLowerCase() === 'z') {
-        e.preventDefault();
-        handlers.onRedo();
-        return;
-      }
-
-      if (mod && e.key.toLowerCase() === 'z') {
-        e.preventDefault();
-        handlers.onUndo();
-        return;
-      }
-
-      if (mod && e.key.toLowerCase() === 'x') {
-        e.preventDefault();
-        handlers.onCut();
-        return;
-      }
-
-      if (mod && e.key.toLowerCase() === 'c') {
-        e.preventDefault();
-        handlers.onCopy();
-        return;
-      }
-
-      if (mod && e.key.toLowerCase() === 'v') {
-        e.preventDefault();
-        handlers.onPaste();
-        return;
-      }
-
       if (mod && e.key.toLowerCase() === 'a') {
         e.preventDefault();
         handlers.onSelectAll();
-        return;
-      }
-
-      if (e.key === 'Delete' || e.key === 'Backspace') {
-        e.preventDefault();
-        handlers.onDelete();
         return;
       }
 

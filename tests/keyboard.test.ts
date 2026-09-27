@@ -14,13 +14,7 @@ function mountHook(handlers: KeyboardShortcutHandlers, enabled: boolean) {
     if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || (target as any).isContentEditable) return;
     const mod = e.metaKey || e.ctrlKey;
     if (e.code === 'Space') { e.preventDefault(); handlers.onPlayPause(); return; }
-    if (mod && e.shiftKey && e.key.toLowerCase() === 'z') { e.preventDefault(); handlers.onRedo(); return; }
-    if (mod && e.key.toLowerCase() === 'z') { e.preventDefault(); handlers.onUndo(); return; }
-    if (mod && e.key.toLowerCase() === 'x') { e.preventDefault(); handlers.onCut(); return; }
-    if (mod && e.key.toLowerCase() === 'c') { e.preventDefault(); handlers.onCopy(); return; }
-    if (mod && e.key.toLowerCase() === 'v') { e.preventDefault(); handlers.onPaste(); return; }
     if (mod && e.key.toLowerCase() === 'a') { e.preventDefault(); handlers.onSelectAll(); return; }
-    if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); handlers.onDelete(); return; }
     if (e.key === 'ArrowLeft') { e.preventDefault(); handlers.onMoveSelectionLeft(); return; }
     if (e.key === 'ArrowRight') { e.preventDefault(); handlers.onMoveSelectionRight(); return; }
     if (mod && (e.key === '=' || e.key === '+')) { e.preventDefault(); handlers.onZoomIn(); return; }
@@ -37,12 +31,6 @@ function mountHook(handlers: KeyboardShortcutHandlers, enabled: boolean) {
 function makeHandlers(): KeyboardShortcutHandlers {
   return {
     onPlayPause: vi.fn(),
-    onUndo: vi.fn(),
-    onRedo: vi.fn(),
-    onCut: vi.fn(),
-    onCopy: vi.fn(),
-    onPaste: vi.fn(),
-    onDelete: vi.fn(),
     onSelectAll: vi.fn(),
     onMoveSelectionLeft: vi.fn(),
     onMoveSelectionRight: vi.fn(),
@@ -69,20 +57,6 @@ describe('useKeyboardShortcuts', () => {
     expect(h.onPlayPause).toHaveBeenCalledTimes(1);
   });
 
-  it('Ctrl+Z triggers undo', () => {
-    const h = makeHandlers();
-    unmount = mountHook(h, true);
-    fire('z', { ctrlKey: true });
-    expect(h.onUndo).toHaveBeenCalledTimes(1);
-  });
-
-  it('Ctrl+Shift+Z triggers redo', () => {
-    const h = makeHandlers();
-    unmount = mountHook(h, true);
-    fire('z', { ctrlKey: true, shiftKey: true });
-    expect(h.onRedo).toHaveBeenCalledTimes(1);
-  });
-
   it('ArrowLeft triggers move selection left', () => {
     const h = makeHandlers();
     unmount = mountHook(h, true);
@@ -95,13 +69,6 @@ describe('useKeyboardShortcuts', () => {
     unmount = mountHook(h, true);
     fire('ArrowRight');
     expect(h.onMoveSelectionRight).toHaveBeenCalledTimes(1);
-  });
-
-  it('Delete triggers delete', () => {
-    const h = makeHandlers();
-    unmount = mountHook(h, true);
-    fire('Delete');
-    expect(h.onDelete).toHaveBeenCalledTimes(1);
   });
 
   it('does nothing when disabled', () => {

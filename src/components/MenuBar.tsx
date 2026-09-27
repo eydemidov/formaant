@@ -16,16 +16,8 @@ import { themeLabels } from '../themes';
 interface MenuBarProps {
   hasAudio: boolean;
   selection: { start: number; end: number } | null;
-  canUndo: boolean;
-  canRedo: boolean;
   onLoadFile: (file: File) => void;
   onAnalyzeSelection?: () => void;
-  onUndo: () => void;
-  onRedo: () => void;
-  onCut: () => void;
-  onCopy: () => void;
-  onPaste: () => void;
-  onDelete: () => void;
   onReverse?: () => void;
   onNormalize?: () => void;
   onReduceNoise?: () => void;
@@ -63,9 +55,8 @@ function FileInput({ accept, onFile, children }: { accept: string; onFile: (f: F
 
 export function MenuBar(props: MenuBarProps) {
   const {
-    hasAudio, selection, canUndo, canRedo,
+    hasAudio, selection,
     onLoadFile,
-    onUndo, onRedo, onCut, onCopy, onPaste, onDelete,
     onZoomIn, onZoomOut, onFitToWindow, onZoomToSelection,
     onOpenCommandPalette,
     themeSetting, onThemeChange,
@@ -88,14 +79,6 @@ export function MenuBar(props: MenuBarProps) {
       <MenubarMenu>
         <MenubarTrigger>Edit</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem disabled={!canUndo} onClick={onUndo}>Undo <span className="menu-shortcut">⌘Z</span></MenubarItem>
-          <MenubarItem disabled={!canRedo} onClick={onRedo}>Redo <span className="menu-shortcut">⇧⌘Z</span></MenubarItem>
-          <MenubarSeparator />
-          <MenubarItem disabled={!selection} onClick={onCut}>Cut <span className="menu-shortcut">⌘X</span></MenubarItem>
-          <MenubarItem disabled={!selection} onClick={onCopy}>Copy <span className="menu-shortcut">⌘C</span></MenubarItem>
-          <MenubarItem disabled={!hasAudio} onClick={onPaste}>Paste <span className="menu-shortcut">⌘V</span></MenubarItem>
-          <MenubarItem disabled={!selection} onClick={onDelete}>Delete <span className="menu-shortcut">⌫</span></MenubarItem>
-          <MenubarSeparator />
           {props.onReverse && <MenubarItem disabled={!hasAudio} onClick={props.onReverse}>Reverse</MenubarItem>}
           {props.onNormalize && <MenubarItem disabled={!hasAudio} onClick={props.onNormalize}>Normalize</MenubarItem>}
           {props.onReduceNoise && <MenubarItem disabled={!hasAudio} onClick={props.onReduceNoise}>Reduce Noise</MenubarItem>}

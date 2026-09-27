@@ -7,12 +7,6 @@ interface ShortcutEntry {
 
 const shortcuts: ShortcutEntry[] = [
   { keys: 'Space', description: 'Play / Pause' },
-  { keys: '⌘/Ctrl + Z', description: 'Undo' },
-  { keys: '⌘/Ctrl + Shift + Z', description: 'Redo' },
-  { keys: '⌘/Ctrl + X', description: 'Cut selection' },
-  { keys: '⌘/Ctrl + C', description: 'Copy selection' },
-  { keys: '⌘/Ctrl + V', description: 'Paste' },
-  { keys: 'Delete / Backspace', description: 'Delete selection' },
   { keys: '⌘/Ctrl + A', description: 'Select all' },
   { keys: '← / →', description: 'Move selection / pan' },
   { keys: '+ / =', description: 'Zoom in' },
