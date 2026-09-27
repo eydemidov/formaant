@@ -10,7 +10,7 @@ interface StatusBarProps {
   streamDuration?: number;
   cursorTime?: number;
   pitchAtCursor?: number | null;
-  formantsAtCursor?: { f1: number | null; f2: number | null; f3: number | null };
+  formantsAtCursor?: { f1: number | null; f2: number | null };
 }
 
 export function StatusBar({ hasAudio, analysis, duration, selection, isRecording, streamDuration, cursorTime, pitchAtCursor, formantsAtCursor }: StatusBarProps) {
@@ -27,18 +27,23 @@ export function StatusBar({ hasAudio, analysis, duration, selection, isRecording
       {hasAudio && (
         <>
           <span className="statusbar-item">Duration: {fmt(duration)}</span>
+          <SelectionStats analysis={analysis} selection={selection} />
+          {cursorTime != null && !hasSelection && (
+            <>
+              <span className="statusbar-item statusbar-cursor-info statusbar-reading statusbar-reading-pitch">
+                {pitchAtCursor != null && pitchAtCursor > 0 ? `Pitch: ${pitchAtCursor.toFixed(1)} Hz` : 'Pitch: —'}
+              </span>
+              <span className="statusbar-item statusbar-cursor-info statusbar-reading">
+                F1: {formantsAtCursor?.f1 != null && formantsAtCursor.f1 > 0 ? Math.round(formantsAtCursor.f1) : '—'}
+              </span>
+              <span className="statusbar-item statusbar-cursor-info statusbar-reading">
+                F2: {formantsAtCursor?.f2 != null && formantsAtCursor.f2 > 0 ? Math.round(formantsAtCursor.f2) : '—'}
+              </span>
+            </>
+          )}
           {selection && (
             <span className="statusbar-item">
               Selection: {fmt(selection.start)} – {fmt(selection.end)} ({((selection.end - selection.start) * 1000).toFixed(0)} ms)
-            </span>
-          )}
-          <SelectionStats analysis={analysis} selection={selection} />
-          {cursorTime != null && !hasSelection && (
-            <span className="statusbar-item statusbar-cursor-info">
-              {pitchAtCursor != null && pitchAtCursor > 0 ? `F0: ${pitchAtCursor.toFixed(1)} Hz` : 'F0: —'}
-              {formantsAtCursor && (
-                <> · F1: {formantsAtCursor.f1 != null && formantsAtCursor.f1 > 0 ? Math.round(formantsAtCursor.f1) : '—'} · F2: {formantsAtCursor.f2 != null && formantsAtCursor.f2 > 0 ? Math.round(formantsAtCursor.f2) : '—'}</>
-              )}
             </span>
           )}
         </>

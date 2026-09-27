@@ -150,7 +150,7 @@ export default function App() {
       const d = Math.abs(f.times[i] - currentTime);
       if (d < bestDist) { bestDist = d; bestIdx = i; }
     }
-    return { f1: f.f1[bestIdx], f2: f.f2[bestIdx], f3: f.f3[bestIdx] };
+    return { f1: f.f1[bestIdx], f2: f.f2[bestIdx] };
   }, [analysis, currentTime]);
 
   const syncHistoryFlags = useCallback(() => {

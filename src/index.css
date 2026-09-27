@@ -713,6 +713,18 @@ select:focus-visible {
   opacity: 0.9;
 }
 
+.statusbar-reading {
+  flex: 0 0 9ch;
+}
+
+.statusbar-reading + .statusbar-reading {
+  margin-left: -8px;
+}
+
+.statusbar-reading-pitch {
+  flex-basis: 15ch;
+}
+
 /* ========== Mobile Responsive ========== */
 @media (max-width: 768px) {
   :root {
