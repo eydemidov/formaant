@@ -1,7 +1,7 @@
 import {
   Play, Pause, Square, Circle, ZoomIn, ZoomOut, Maximize,
   Scissors, Copy, ClipboardPaste, Trash2, Undo2, Redo2,
-  AudioLines, Waves, Activity, Languages, Hash, Ear,
+  AudioLines, Waves, Activity, Languages, Hash,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
@@ -31,14 +31,12 @@ interface ToolbarProps {
   showIntensity: boolean;
   showIpa: boolean;
   showIpaFormants: boolean;
-  showCochleagram: boolean;
   showPulses: boolean;
   onTogglePitch: () => void;
   onToggleFormants: () => void;
   onToggleIntensity: () => void;
   onToggleIpa: () => void;
   onToggleIpaFormants: () => void;
-  onToggleCochleagram: () => void;
   onTogglePulses: () => void;
 }
 
@@ -77,8 +75,8 @@ export function Toolbar(props: ToolbarProps) {
     onRecord, onStopRecord, onPlay, onPause,
     onUndo, onRedo, onCut, onCopy, onPaste, onDelete,
     onZoomIn, onZoomOut, onFitToWindow,
-    showPitch, showFormants, showIntensity, showIpa, showIpaFormants, showCochleagram, showPulses: _showPulses,
-    onTogglePitch, onToggleFormants, onToggleIntensity, onToggleIpa, onToggleIpaFormants, onToggleCochleagram, onTogglePulses: _onTogglePulses,
+    showPitch, showFormants, showIntensity, showIpa, showIpaFormants, showPulses: _showPulses,
+    onTogglePitch, onToggleFormants, onToggleIntensity, onToggleIpa, onToggleIpaFormants, onTogglePulses: _onTogglePulses,
   } = props;
 
   return (
@@ -131,7 +129,6 @@ export function Toolbar(props: ToolbarProps) {
         <IconBtn icon={Activity} label="Intensity" onClick={onToggleIntensity} active={showIntensity} color="#a6e3a1" />
         <IconBtn icon={Languages} label="IPA Vowels" onClick={onToggleIpa} active={showIpa} color="#fab387" />
         <IconBtn icon={Hash} label="Vowel F1/F2" onClick={onToggleIpaFormants} active={showIpaFormants} color="#fab387" />
-        <IconBtn icon={Ear} label="Cochleagram" onClick={onToggleCochleagram} active={showCochleagram} color="#94e2d5" />
       </div>
     </div>
   );

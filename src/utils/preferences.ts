@@ -14,7 +14,6 @@ export interface AppPreferences {
     intensity: boolean;
     ipa: boolean;
     ipaFormants: boolean;
-    cochleagram: boolean;
     pulses: boolean;
   };
 }
@@ -29,7 +28,6 @@ const defaults: AppPreferences = {
     intensity: true,
     ipa: true,
     ipaFormants: true,
-    cochleagram: false,
     pulses: false,
   },
 };

@@ -54,13 +54,11 @@ interface MenuBarProps {
   onToggleIntensity: () => void;
   onToggleIpa: () => void;
   onToggleIpaFormants: () => void;
-  onToggleCochleagram: () => void;
   showPitch: boolean;
   showFormants: boolean;
   showIntensity: boolean;
   showIpa: boolean;
   showIpaFormants: boolean;
-  showCochleagram: boolean;
   onOpenManipulation?: () => void;
   onOpenPitchTier?: () => void;
   onOpenFormantGrid?: () => void;
@@ -125,8 +123,8 @@ export function MenuBar(props: MenuBarProps) {
     onExportPitchCsv, onExportFormantCsv, onExportIntensityCsv, onExportHarmonicityCsv,
     onUndo, onRedo, onCut, onCopy, onPaste, onDelete,
     onZoomIn, onZoomOut, onFitToWindow, onZoomToSelection,
-    onTogglePitch, onToggleFormants, onToggleIntensity, onToggleIpa, onToggleIpaFormants, onToggleCochleagram,
-    showPitch, showFormants, showIntensity, showIpa, showIpaFormants, showCochleagram,
+    onTogglePitch, onToggleFormants, onToggleIntensity, onToggleIpa, onToggleIpaFormants,
+    showPitch, showFormants, showIntensity, showIpa, showIpaFormants,
     onOpenManipulation, onOpenPitchTier, onOpenFormantGrid,
     onOpenDurationTier, onOpenAmplitudeTier, onOpenVocalTract,
     onOpenSpectrumEditor, onOpenExperiment, onOpenSpeechSynthesizer, onOpenPitchSonification, onOpenNoteTranscription, onOpenScriptEditor, onOpenPlugins, onOpenControlledVocabulary,
@@ -223,9 +221,6 @@ export function MenuBar(props: MenuBarProps) {
           </MenubarItem>
           <MenubarItem onClick={onToggleIpaFormants}>
             {showIpaFormants ? '✓ ' : ''}Vowel F1/F2 Values
-          </MenubarItem>
-          <MenubarItem onClick={onToggleCochleagram}>
-            {showCochleagram ? '✓ ' : ''}Cochleagram (Bark)
           </MenubarItem>
         </MenubarContent>
       </MenubarMenu>

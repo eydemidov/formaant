@@ -20,7 +20,6 @@ import { RhythmPanel } from './components/RhythmPanel';
 import { RightSidebar } from './components/RightSidebar';
 import { SettingsPanel } from './components/SettingsPanel';
 import { Spectrogram } from './components/Spectrogram';
-import { Cochleagram } from './components/Cochleagram';
 import { SpectrumSlice } from './components/SpectrumSlice';
 import { LtasPanel } from './components/LtasPanel';
 import { MfccPanel } from './components/MfccPanel';
@@ -110,7 +109,6 @@ export default function App() {
   const [showIntensity, setShowIntensity] = useState(initialPreferences.overlays.intensity);
   const [showIpa, setShowIpa] = useState(initialPreferences.overlays.ipa);
   const [showIpaFormants, setShowIpaFormants] = useState(initialPreferences.overlays.ipaFormants);
-  const [showCochleagram, setShowCochleagram] = useState(initialPreferences.overlays.cochleagram);
   const [showPulses, setShowPulses] = useState(initialPreferences.overlays.pulses);
   const [showManipulation, setShowManipulation] = useState(false);
   const [showPitchTier, setShowPitchTier] = useState(false);
@@ -153,11 +151,10 @@ export default function App() {
         intensity: showIntensity,
         ipa: showIpa,
         ipaFormants: showIpaFormants,
-        cochleagram: showCochleagram,
         pulses: showPulses,
       },
     });
-  }, [settings, filterSettings, vowelProfile, showPitch, showFormants, showIntensity, showIpa, showIpaFormants, showCochleagram, showPulses]);
+  }, [settings, filterSettings, vowelProfile, showPitch, showFormants, showIntensity, showIpa, showIpaFormants, showPulses]);
 
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
@@ -723,7 +720,6 @@ export default function App() {
     { id: 'view.toggle-pitch', label: 'Toggle Pitch', category: 'View', action: () => setShowPitch((v) => !v) },
     { id: 'view.toggle-formants', label: 'Toggle Formants', category: 'View', action: () => setShowFormants((v) => !v) },
     { id: 'view.toggle-intensity', label: 'Toggle Intensity', category: 'View', action: () => setShowIntensity((v) => !v) },
-    { id: 'view.toggle-cochleagram', label: 'Toggle Cochleagram', category: 'View', action: () => setShowCochleagram((v) => !v) },
     { id: 'view.toggle-ipa', label: 'Toggle IPA', category: 'View', action: () => setShowIpa((v) => !v) },
     { id: 'view.toggle-ipa-formants', label: 'Toggle Vowel F1/F2', category: 'View', action: () => setShowIpaFormants((v) => !v) },
     { id: 'view.theme-dark', label: 'Theme: Dark', category: 'View', action: () => setThemeSetting('dark') },
@@ -916,8 +912,6 @@ export default function App() {
         showIntensity={showIntensity}
         showIpa={showIpa}
         showIpaFormants={showIpaFormants}
-        showCochleagram={showCochleagram}
-        onToggleCochleagram={() => setShowCochleagram((v) => !v)}
         onOpenManipulation={() => setShowManipulation(true)}
         onOpenPitchTier={() => setShowPitchTier(true)}
         onOpenFormantGrid={() => setShowFormantGrid(true)}
@@ -1036,14 +1030,12 @@ export default function App() {
         showIntensity={showIntensity}
         showIpa={showIpa}
         showIpaFormants={showIpaFormants}
-        showCochleagram={showCochleagram}
         showPulses={showPulses}
         onTogglePitch={() => setShowPitch((v) => !v)}
         onToggleFormants={() => setShowFormants((v) => !v)}
         onToggleIntensity={() => setShowIntensity((v) => !v)}
         onToggleIpa={() => setShowIpa((v) => !v)}
         onToggleIpaFormants={() => setShowIpaFormants((v) => !v)}
-        onToggleCochleagram={() => setShowCochleagram((v) => !v)}
         onTogglePulses={() => setShowPulses((v) => !v)}
       />
 
@@ -1143,38 +1135,31 @@ export default function App() {
                 selection={selection}
                 onViewRangeChange={handleViewRangeChange}
               />
-              {showCochleagram ? (
-                <Cochleagram
-                  analysis={analysis}
-                  viewRange={viewRange}
-                />
-              ) : (
-                <Spectrogram
-                  analysis={analysis}
-                  selection={selection}
-                  currentTime={currentTime}
-                  viewRange={viewRange}
-                  showPitch={showPitch}
-                  showFormants={showFormants}
-                  showIntensity={showIntensity}
-                  showIpa={showIpa}
-                  showIpaFormants={showIpaFormants}
-                  vowelProfile={vowelProfile}
-                  onWheelZoom={handleWheelZoom}
-                  onPan={handlePan}
-                  onZoomSelection={handleZoomSelection}
-                  onSelectionChange={setSelection}
-                  onSpectrumSliceSelect={handleSpectrumSliceSelect}
-                  onAnalyzeRegion={() => {
-                    if (!currentSamplesRef.current) return;
-                    const startSample = Math.floor(viewStart * sampleRate);
-                    const endSample = Math.min(Math.floor(viewEnd * sampleRate), currentSamplesRef.current.length);
-                    if (endSample - startSample < 100) return;
-                    const region = currentSamplesRef.current.slice(startSample, endSample);
-                    processSamples(region, sampleRate, false);
-                  }}
-                />
-              )}
+              <Spectrogram
+                analysis={analysis}
+                selection={selection}
+                currentTime={currentTime}
+                viewRange={viewRange}
+                showPitch={showPitch}
+                showFormants={showFormants}
+                showIntensity={showIntensity}
+                showIpa={showIpa}
+                showIpaFormants={showIpaFormants}
+                vowelProfile={vowelProfile}
+                onWheelZoom={handleWheelZoom}
+                onPan={handlePan}
+                onZoomSelection={handleZoomSelection}
+                onSelectionChange={setSelection}
+                onSpectrumSliceSelect={handleSpectrumSliceSelect}
+                onAnalyzeRegion={() => {
+                  if (!currentSamplesRef.current) return;
+                  const startSample = Math.floor(viewStart * sampleRate);
+                  const endSample = Math.min(Math.floor(viewEnd * sampleRate), currentSamplesRef.current.length);
+                  if (endSample - startSample < 100) return;
+                  const region = currentSamplesRef.current.slice(startSample, endSample);
+                  processSamples(region, sampleRate, false);
+                }}
+              />
               </div>
               <TextGridEditor
                 textGrid={textGrid}
@@ -1261,11 +1246,6 @@ export default function App() {
                 <input type="checkbox" checked={showIpaFormants} onChange={() => setShowIpaFormants((v) => !v)} />
                 <span className="toggle-indicator ipa" />
                 Vowel F1/F2
-              </label>
-              <label className="toggle-label">
-                <input type="checkbox" checked={showCochleagram} onChange={() => setShowCochleagram((v) => !v)} />
-                <span className="toggle-indicator" style={{ backgroundColor: '#94e2d5' }} />
-                Cochleagram
               </label>
             </div>
             {analysis && (

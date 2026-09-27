@@ -24,7 +24,7 @@ export function AboutDialog() {
         </p>
         <ul style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.8' }}>
           <li>Pitch, Formant, Intensity, Harmonicity analysis</li>
-          <li>Spectrogram, Cochleagram, LTAS</li>
+          <li>Spectrogram, LTAS</li>
           <li>TextGrid annotation</li>
           <li>PSOLA manipulation</li>
           <li>Praat Script + JavaScript scripting</li>
